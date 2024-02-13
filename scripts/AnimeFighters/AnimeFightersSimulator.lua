@@ -6,7 +6,8 @@
 		local HttpService = game:GetService('HttpService')
 		local request = http_request or request or HttpPost or syn.request or http.request
 		------
-		local repo = 'https://raw.githubusercontent.com/wally-rblx/LinoriaLib/main/'
+		--local repo = 'https://raw.githubusercontent.com/wally-rblx/LinoriaLib/main/'
+		local repo = 'https://raw.githubusercontent.com/TrapstarKSSKSKSKKS/LinoriaLib/main/' -- TRAP HUB
 		local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 		local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 
