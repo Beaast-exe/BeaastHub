@@ -1753,8 +1753,8 @@
 		})
 
 		local OtherScripts = Tabs['UI Settings']:AddLeftGroupbox('Other Scripts')
-		OtherScripts:AddButton('Banana Hub', function()
-			task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/diepedyt/bui/main/temporynewkeysystem.lua', true)))
+		OtherScripts:AddButton('Another Script, function()
+			task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/Binintrozza/yutv2e/main/afss', true)))
 		end)
 
 		OtherScripts:AddButton('Simple Spy', function()
