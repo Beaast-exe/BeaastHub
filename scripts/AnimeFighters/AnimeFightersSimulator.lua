@@ -859,8 +859,8 @@
 				if n1 ~= n2 then
 					local Number = 1
 
-					while settings['Misc']['DailyGifts']do
-						if Number > 16 then Number = 1 end
+					while settings['Misc']['DailyGifts'] do
+						if Number > 21 then Number = 1 end
 
 						game:GetService("ReplicatedStorage").Remote.ClaimGift:FireServer(Number)
 						Number = Number + 1
