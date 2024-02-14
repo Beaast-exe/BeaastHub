@@ -308,6 +308,7 @@
 			["Viking Star"] = "VinlandEgg",
 			["Mercenary Star"] = "AkameGaKillEgg",
 			["Ball Star"] = "BlueLockEgg",
+			["Snow Star"] = "Christmas2Egg"
 		}
 
 		local enemiesRange = 150
@@ -472,7 +473,8 @@
 				[51] = "Devil Star",
 				[52] = "Viking Star",
 				[53] = "Mercenary Star",
-				[54] = "Ball Star"
+				[54] = "Ball Star",
+				[55] = "Snow Star"
 			}
 
 			for k, v in ipairs(orderedEggs) do
