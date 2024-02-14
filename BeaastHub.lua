@@ -27,3 +27,7 @@ elseif placeID == 14433762945 then -- [[ ANIME CHAMPIONS SIMULATOR ]] --
 elseif placeID == 15367026228 then
 	execute('AnimeSouls/AnimeSoulsX_Protected.lua')
 end
+
+if _G.IY then
+	task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source')))
+end
