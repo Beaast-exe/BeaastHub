@@ -853,7 +853,7 @@
 		})
 
 		coroutine.resume(coroutine.create(function()
-			while task.wait(5) do
+			while task.wait(5) and not Library.Unloaded do
 				local claimedText = tostring(PlayerGui.MainGui.FreeGifts.ClaimedText.Text)
 				local s1, s2 = claimedText:match("(%d+)/(%d+)")
 				local n1, n2 = tonumber(s1), tonumber(s2)
@@ -921,7 +921,7 @@
 		})
 
 		coroutine.resume(coroutine.create(function()
-			while task.wait(1) do
+			while task.wait(1) and not Library.Unloaded do
 				if Library.Unloaded then return end
 				
 				if settings['Misc']['DailyTicket'] then
