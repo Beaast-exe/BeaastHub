@@ -1759,6 +1759,10 @@
 			task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/Binintrozza/yutv2e/main/afss', true)))
 		end)
 
+		OtherScripts:AddButton('Infinite Yield', function()
+			task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source', true)))
+		end)
+
 		OtherScripts:AddButton('Simple Spy', function()
 			task.spawn(loadstring(game:HttpGet('https://github.com/exxtremestuffs/SimpleSpySource/raw/master/SimpleSpy.lua', true)))
 		end)
