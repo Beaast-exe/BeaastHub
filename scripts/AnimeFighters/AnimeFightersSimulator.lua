@@ -1753,7 +1753,7 @@
 		})
 
 		local OtherScripts = Tabs['UI Settings']:AddLeftGroupbox('Other Scripts')
-		OtherScripts:AddButton('Another Script', function()
+		OtherScripts:AddButton('YUTO HUB', function()
 			task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/Binintrozza/yutv2e/main/afss', true)))
 		end)
 
