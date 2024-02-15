@@ -1051,11 +1051,21 @@
 				SaveConfig()
 			end
 		})
+		
+		local disabledTimeTeam = false
 
 		task.spawn(function()
-			while task.wait() and not Library.Unloaded do
+			while task.wait(1) and not Library.Unloaded do
 				if settings['Teams']['EnableTimeTeam'] then
-					if player.World.Value == 'TimeChamber' then
+					
+					if player.World.Value ~= 'TimeChamber' then
+						if currentlyEquippedTeam == settings['Teams']['TimeChamber'] and disabledTimeTeam == false then
+							disabledTimeTeam = true
+							currentlyEquippedTeam = ''
+						end
+					else
+						disabledTimeTeam = false
+						
 						for teamName, teamButton in pairs(playerTeams) do
 							if teamName == settings['Teams']['TimeChamber'] then
 								for i, button in pairs(getconnections(teamButton.Activated)) do
