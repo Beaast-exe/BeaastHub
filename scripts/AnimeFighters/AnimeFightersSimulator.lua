@@ -57,6 +57,8 @@
 				['AutoFarmChests'] = 1,
 				['RaidInside'] = 1,
 				['RaidAfter'] = 1,
+				['TimeChamber'] = 1,
+				['EnableFarmTeam'] = false,
 				['EnableChestTeam'] = false,
 				['EnableFarmTeam'] = false
 			},
@@ -135,7 +137,7 @@
 
 		--local data = store.getStoreProxy('GameData')
 		local IGNORED_RARITIES = {'Mythical', 'Secret', 'Raid', 'Divine'}
-		local IGNORED_WORLDS = {'Raid', 'Tower', 'Titan', 'Christmas'}
+		local IGNORED_WORLDS = {'Raid', 'Tower', 'Titan', 'Christmas', 'InfinityTower'}
 		local IGNORED_METEOR_FARM_WORLDS = {'Tower', 'Raid'}
 		local TEMP_METEOR_FARM_IGNORE = {}
 
@@ -216,7 +218,7 @@
 			character.HumanoidRootPart.CFrame = Workspace.Worlds.Tower.Spawns.SpawnLocation.CFrame
 			Workspace.Worlds.Tower.Water.CanCollide = true
 
-			task.wait(3)
+			task.wait(1)
 
 			REMOTE.AttemptTravel:InvokeServer(WORLD)
 			character.HumanoidRootPart.CFrame = playerPos
@@ -308,7 +310,7 @@
 			["Viking Star"] = "VinlandEgg",
 			["Mercenary Star"] = "AkameGaKillEgg",
 			["Ball Star"] = "BlueLockEgg",
-			["Snow Star"] = "Christmas2Egg"
+			["Snow Star (Winter 2023)"] = "Christmas2Egg"
 		}
 
 		local enemiesRange = 150
@@ -474,7 +476,7 @@
 				[52] = "Viking Star",
 				[53] = "Mercenary Star",
 				[54] = "Ball Star",
-				[55] = "Snow Star"
+				[55] = "Snow Star (Winter 2023)"
 			}
 
 			for k, v in ipairs(orderedEggs) do
@@ -572,15 +574,15 @@
 
 		function Initialize()
 			ResetPlayerTeams()
-			task.wait(0.5)
+			task.wait(0.15)
 			unequipAllButton.MouseButton1Click:Connect(function()
 				unequipPets()
 			end)
-			task.wait(0.5)
-			InitializeTrial()
-			task.wait(0.5)
+			--task.wait(0.15)
+			--InitializeTrial()
+			task.wait(0.15)
 			GenEggStats()
-			task.wait(0.5)
+			task.wait(0.15)
 			Library:Notify(string.format('Script Loaded in %.2f second(s)!', tick() - StartTick), 5)
 		end
 
@@ -765,10 +767,23 @@
 			end
 		})
 
+		local timeChamberTeamDrop = Teams:AddDropdown('timeChamberTeam', {
+			Values = playerTeamsNames,
+			Default = settings['Teams']['TimeChamber'],
+			Multi = false,
+
+			Text = 'Equip Team on Time Chamber',
+
+			Callback = function(value)
+				settings['Teams']['TimeChamber'] = value
+				SaveConfig()
+			end
+		})
+
 		Teams:AddToggle('equipTeamsOnChests', {
 			Text = 'Equip Team on AutoFarm Chest',
 			Default = settings['Teams']['EnableChestTeam'],
-			Tooltip = 'Auto Equip Teams on Auto Farm All Target Chest',
+			Tooltip = 'Auto Equip Team on Auto Farm All Target Chest',
 
 			Callback = function(value)
 				settings['Teams']['EnableChestTeam'] = value
@@ -776,10 +791,21 @@
 			end
 		})
 
+		Teams:AddToggle('equipTeamsOnTimeChamber', {
+			Text = 'Equip Team on Time Chamber',
+			Default = settings['Teams']['EnableTimeTeam'],
+			Tooltip = 'Auto Equip Team on Time Chamber',
+
+			Callback = function(value)
+				settings['Teams']['EnableTimeTeam'] = value
+				SaveConfig()
+			end
+		})
+
 		Teams:AddToggle('equipTeamsOnFarm', {
 			Text = 'Equip Team on AutoFarm All',
 			Default = settings['Teams']['EnableFarmTeam'],
-			Tooltip = 'Auto Equip Teams on Auto Farm All Target Enemy',
+			Tooltip = 'Auto Equip Team on Auto Farm All Target Enemy',
 
 			Callback = function(value)
 				settings['Teams']['EnableFarmTeam'] = value
@@ -795,6 +821,7 @@
 				raidTeamDrop2:SetValues(playerTeamsNames)
 				autoFarmAllTeamDrop:SetValues(playerTeamsNames)
 				autoFarmChestsTeamDrop:SetValues(playerTeamsNames)
+				timeChamberTeamDrop:SetValues(playerTeamsNames)
 			end,
 			DoubleClick = false
 		})
@@ -1024,6 +1051,27 @@
 				SaveConfig()
 			end
 		})
+
+		task.spawn(function()
+			while task.wait() and not Library.Unloaded do
+				if settings['Teams']['EnableTimeTeam'] then
+					if player.World.Value == 'TimeChamber' then
+						for teamName, teamButton in pairs(playerTeams) do
+							if teamName == settings['Teams']['TimeChamber'] then
+								for i, button in pairs(getconnections(teamButton.Activated)) do
+									if i == 1 then
+										if currentlyEquippedTeam ~= settings['Teams']['TimeChamber'] then
+											currentlyEquippedTeam = settings['Teams']['TimeChamber']
+											button:Fire()
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end)
 
 		do
 			-- // INFO UPDATES
