@@ -1051,21 +1051,12 @@
 				SaveConfig()
 			end
 		})
-		
-		local disabledTimeTeam = false
 
 		task.spawn(function()
-			while task.wait(1) and not Library.Unloaded do
+			while task.wait() and not Library.Unloaded do
 				if settings['Teams']['EnableTimeTeam'] then
 					
-					if player.World.Value ~= 'TimeChamber' then
-						if currentlyEquippedTeam == settings['Teams']['TimeChamber'] and disabledTimeTeam == false then
-							disabledTimeTeam = true
-							currentlyEquippedTeam = ''
-						end
-					else
-						disabledTimeTeam = false
-						
+					if player.World.Value == 'TimeChamber' then						
 						for teamName, teamButton in pairs(playerTeams) do
 							if teamName == settings['Teams']['TimeChamber'] then
 								for i, button in pairs(getconnections(teamButton.Activated)) do
@@ -1582,7 +1573,7 @@
 			task.spawn(function()
 				while task.wait(0.05) and not Library.Unloaded do
 					if settings['AutoFarm']['AttackAll'] then
-						if settings['Teams']['EnableChestTeam'] or settings['Teams']['EnableFarmTeam'] then
+						if settings['Teams']['EnableChestTeam'] or settings['Teams']['EnableFarmTeam'] or settings['Teams']['EnableTimeTeam'] then
 							local equippedPetsNumber = tostring(PlayerGui.MainGui.Pets.Main.Equipped.Amount.Text)
 
 							local s1, s2 = equippedPetsNumber:match("(%d+)/(%d+)")
