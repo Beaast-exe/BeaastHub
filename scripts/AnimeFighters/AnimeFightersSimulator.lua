@@ -1055,7 +1055,6 @@
 		task.spawn(function()
 			while task.wait() and not Library.Unloaded do
 				if settings['Teams']['EnableTimeTeam'] then
-					
 					if player.World.Value == 'TimeChamber' then						
 						for teamName, teamButton in pairs(playerTeams) do
 							if teamName == settings['Teams']['TimeChamber'] then
@@ -1354,7 +1353,7 @@
 											if settings['AutoFarm']['AttackAll'] then
 												task.wait(0.1)
 											else
-												if settings['Dungeon']['EnableTeams'] then
+												if settings['Dungeon']['EnableTeams']  then
 													if enemy.Name == 'Chest' then
 														for teamName, teamButton in pairs(playerTeams) do
 															if teamName == settings['Teams']['AutoFarmChests'] then
@@ -1590,7 +1589,7 @@
 			-- // AUTOFARM ALL
 			task.spawn(function()
 				while task.wait(0.05) and not Library.Unloaded do
-					if settings['AutoFarm']['AttackAll'] then
+					if settings['AutoFarm']['AttackAll'] and player.World.Value ~= "TimeChamber" then
 						local Closest, ClosestDistance = findNearestEnemy()
 						if Closest then
 							if lastClosest == nil then lastClosest = Closest end
