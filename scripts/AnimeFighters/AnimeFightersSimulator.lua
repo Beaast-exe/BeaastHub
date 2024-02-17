@@ -310,6 +310,7 @@
 			["Viking Star"] = "VinlandEgg",
 			["Mercenary Star"] = "AkameGaKillEgg",
 			["Ball Star"] = "BlueLockEgg",
+			["Classroom Star"] = "AClassroomEgg",
 			["Snow Star (Winter 2023)"] = "Christmas2Egg"
 		}
 
@@ -476,7 +477,8 @@
 				[52] = "Viking Star",
 				[53] = "Mercenary Star",
 				[54] = "Ball Star",
-				[55] = "Snow Star (Winter 2023)"
+				[55] = "Classroom Star,
+				[56] = "Snow Star (Winter 2023)"
 			}
 
 			for k, v in ipairs(orderedEggs) do
