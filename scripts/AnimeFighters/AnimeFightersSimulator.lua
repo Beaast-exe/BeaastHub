@@ -477,7 +477,7 @@
 				[52] = "Viking Star",
 				[53] = "Mercenary Star",
 				[54] = "Ball Star",
-				[55] = "Classroom Star,
+				[55] = "Classroom Star",
 				[56] = "Snow Star (Winter 2023)"
 			}
 
