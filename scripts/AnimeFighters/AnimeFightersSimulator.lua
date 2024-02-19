@@ -1492,7 +1492,7 @@
 							print(worldName)
 							
 							if settings['AutoRaid']['ToggleAllRaids'] then
-								if minute == '19' or minute == '49' then
+								if minute == '09' or minute == '9' or minute == '49' then
 									for _, v in pairs(getconnections(yesButton.Activated)) do
 										if _ == 1 then
 											v:Fire()
@@ -1514,7 +1514,7 @@
 														end
 													end
 												end
-											until minute == '20' or minute == '50' or Library.Unloaded or not settings['AutoRaid']['Enabled']
+											until minute == '10' or minute == '50' or Library.Unloaded or not settings['AutoRaid']['Enabled']
 											--until min == '15' or min =='45' or Library.Unloaded or not raidWorlds[worldName]
 										end
 									end
@@ -1522,7 +1522,7 @@
 									repeat
 										task.wait()
 										minute = os.date("%M")
-									until minute == '19' or minute =='49' or Library.Unloaded or not settings['AutoRaid']['Enabled']
+									until minute == '09' or minute == '9' or minute == '49' or Library.Unloaded or not settings['AutoRaid']['Enabled']
 									--until min == '14' or min =='44' or Library.Unloaded or not raidWorlds[worldName]
 								end
 							end
