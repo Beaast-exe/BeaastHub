@@ -1482,9 +1482,9 @@
 						local currentRaidMap = Workspace.Worlds['Raid'].Map:FindFirstChildOfClass('Model')
 						if currentRaidMap then
 							local worldName = Workspace.Worlds['Raid'].RaidData.CurrentWorld.Value
-							print(minute)
-							print(currentRaidMap)
-							print(worldName)
+							-- print(minute)
+							-- print(currentRaidMap)
+							-- print(worldName)
 							
 							if settings['AutoRaid']['ToggleAllRaids'] then
 								if minute == '09' or minute == '9' or minute == '29' or minute == '49' then
