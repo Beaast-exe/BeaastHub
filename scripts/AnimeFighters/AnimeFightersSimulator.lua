@@ -1003,6 +1003,8 @@
 			end
 		})
 
+		local minuteLabel = Misc:AddLabel("Minute: ", true)
+
 		Library.ToggleKeybind = Options.MenuKeybind
 
 		-- // DUNGEON TAB
@@ -1472,13 +1474,6 @@
 					task.wait()
 				end
 			end)
-			
-			task.spawn(function()
-				while not Library.Unloaded do
-					minute = os.date("%M")
-					task.wait(0.1)
-				end
-			end)
 
 			-- // AUTORAID TP
 			task.spawn(function()
@@ -1822,6 +1817,14 @@
 
 		OtherScripts:AddButton('Dark Dex', function()
 			task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/Deniied0/Dex/master/source.lua', true)))
+		end)
+
+		task.spawn(function()
+			while not Library.Unloaded do
+				minute = os.date("%M")
+				minuteLabel:SetText("Minute: " .. minute)
+				task.wait(0.1)
+			end
 		end)
 
 		Library.ToggleKeybind = Options.MenuKeybind
