@@ -1420,6 +1420,7 @@
 							if raidData.Enemies.Value == 0 and raidData.Forcefield.Value == false and enemy.Name == raidData.BossId.Value then
 								pcall(function()
 									character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame
+									retreat()
 									movePetsToPlayer()
 
 									repeat
@@ -1445,6 +1446,7 @@
 							elseif raidData.Enemies.Value ~= 0 and raidData.Forcefield.Value == true and enemy.Name ~= raidData.BossId.Value then
 								pcall(function()
 									character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame
+									retreat()
 									movePetsToPlayer()
 
 									repeat
