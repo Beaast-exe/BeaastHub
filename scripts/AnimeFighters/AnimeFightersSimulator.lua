@@ -1489,7 +1489,7 @@
 							local worldName = Workspace.Worlds['Raid'].RaidData.CurrentWorld.Value
 							
 							if settings['AutoRaid']['ToggleAllRaids'] then
-								if minute == '09' or minute == '39' then
+								if minute == '09' or minute == '49' then
 									for _, v in pairs(getconnections(yesButton.Activated)) do
 										if _ == 1 then
 											v:Fire()
@@ -1511,7 +1511,7 @@
 														end
 													end
 												end
-											until minute == '10' or minute == '40' or minute == '0' or Library.Unloaded or not settings['AutoRaid']['Enabled']
+											until minute == '10' or minute == '50' or Library.Unloaded or not settings['AutoRaid']['Enabled']
 											--until min == '15' or min =='45' or Library.Unloaded or not raidWorlds[worldName]
 										end
 									end
