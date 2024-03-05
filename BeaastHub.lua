@@ -28,6 +28,8 @@ elseif placeID == 15367026228 then -- [[ ANIME SOULS SIMULATOR X ]] --
 	execute('AnimeSouls/AnimeSoulsX_Protected.lua')
 elseif placeID == 12886143095 then -- [[ ANIME LAST STAND ]] --
 	execute('AnimeLastStand/AnimeLastStand.lua')
+elseif placeID ==  then
+	execute('PetSimulator/PS99.lua')
 end
 
 if _G.IY then
