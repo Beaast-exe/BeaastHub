@@ -49,10 +49,7 @@ end
 local RELICS_FIND_DELAY = 0.5
 
 function Initialize()
-    print('1')
-
     if game.PlaceId == 8737899170 then
-        print('2')
         WORLD = 1
     
         repeat
@@ -60,7 +57,6 @@ function Initialize()
             task.wait(1)
         until #Workspace['Map']:GetChildren() == 100
     elseif game.PlaceId == 16498369169 then
-        print('3')
         WORLD = 2
     
         repeat
@@ -68,16 +64,14 @@ function Initialize()
             task.wait(1)
         until #Workspace['Map']:GetChildren() == 26
     end
-    print('4')
 
     repeat task.wait(1) until Workspace['__THINGS'] and Workspace['__DEBRIS']
     
-    print('5')
     task.wait(5)
-    print('[Beaast Hub] Loaded Pet Simulator 99 :: WORLD ' . WORLD)
+    print('[Beaast Hub] Loaded Pet Simulator 99 :: WORLD ' .. WORLD)
 end
 
-local Autos = Tabs['Main']:AddRightGroupBox('Autos')
+local Autos = Tabs['Main']:AddRightGroupbox('Autos')
 Autos:AddToggle('enableAutoShinyRelics', {
 	Text = 'Auto Shiny Relics',
 	Default = settings['Relics']['Enabled'],
@@ -91,35 +85,37 @@ Autos:AddToggle('enableAutoShinyRelics', {
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        for _, relic in pairs(Workspace['__THINGS']:FindFirstChild('ShinyRelics'):GetChildren()) do
-            if relic:IsA('BasePart') then
-                if relic.Transparency == 0.75 then
-                    relic:Destroy()
+        if settings['Relics']['Enabled'] then
+            for _, relic in pairs(Workspace['__THINGS']:FindFirstChild('ShinyRelics'):GetChildren()) do
+                if relic:IsA('BasePart') then
+                    if relic.Transparency == 0.75 then
+                        --relic:Destroy()
+                    end
                 end
             end
-        end
-
-        local highlight = Workspace['__THINGS']:FindFirstChild('ShinyRelics'):FindFirstChild('Highlight')
-        if highlight then
-            highlight:Destroy()
-        end
-
-        local allRelics = ReplicatedStorage['Network']['Relics_Request']:InvokeServer()
-        for _, v in pairs(Workspace['__THINGS']:FindFirstChild('ShinyRelics'):GetChildren()) do
-            Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').CFrame = v.CFrame
-            task.wait(RELICS_FIND_DELAY)
-
-            local relicNumber
-            for relicNum, relicData in pairs(allRelics) do
-                if relicData.Position == v.CFrame then
-                    relicNumber = relicNum
-                    break
-                end
+    
+            local highlight = Workspace['__THINGS']:FindFirstChild('ShinyRelics'):FindFirstChild('Highlight')
+            if highlight then
+                highlight:Destroy()
             end
-
-            print(ReplicatedStorage['Network']['Relic_Found']:InvokeServer(relicNumber))
-            task.wait(1)
-            v:Destroy()
+    
+            local allRelics = ReplicatedStorage['Network']['Relics_Request']:InvokeServer()
+            for _, v in pairs(Workspace['__THINGS']:FindFirstChild('ShinyRelics'):GetChildren()) do
+                Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').CFrame = v.CFrame
+                task.wait(RELICS_FIND_DELAY)
+    
+                local relicNumber
+                for relicNum, relicData in pairs(allRelics) do
+                    if relicData.Position == v.CFrame then
+                        relicNumber = relicNum
+                        break
+                    end
+                end
+    
+                print(ReplicatedStorage['Network']['Relic_Found']:InvokeServer(relicNumber))
+                task.wait(1)
+                --v.Destroy()
+            end
         end
     end
 end)
