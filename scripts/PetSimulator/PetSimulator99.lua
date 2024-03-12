@@ -89,7 +89,7 @@ task.spawn(function()
             for _, relic in pairs(Workspace['__THINGS']:FindFirstChild('ShinyRelics'):GetChildren()) do
                 if relic:IsA('BasePart') then
                     if relic.Transparency == 0.75 then
-                        --relic:Destroy()
+                        relic:Destroy()
                     end
                 end
             end
@@ -113,7 +113,7 @@ task.spawn(function()
                 end
     
                 print(ReplicatedStorage['Network']['Relic_Found']:InvokeServer(relicNumber))
-                task.wait(1)
+                task.wait()
                 --v.Destroy()
             end
         end
