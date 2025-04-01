@@ -96,16 +96,26 @@ task.spawn(function()
 			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
         end
 
+		
+    end
+end)
+
+task.spawn(function()
+	while task.wait() and not Library.Unloaded do
 		if settings['AutoFarm']['AutoArise'] then
 			local args = { [1] = "arise" }
 			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
 		end
+	end
+end)
 
+task.spawn(function()
+	while task.wait() and not Library.Unloaded do
 		if settings['AutoFarm']['AutoAbility'] then
 			local args = { [1] = "useAbility" }
 			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
 		end
-    end
+	end
 end)
 
 function Initialize()
