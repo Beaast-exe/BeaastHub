@@ -26,6 +26,11 @@ local defaultSettings = {
         ['AutoAttack'] = false,
         ['AutoArise'] = false
     },
+	['AutoRoll'] = {
+		['Lineages'] = false,
+		['Swords'] = false,
+		['Star'] = false
+	},
     ['Keybinds'] = {
 		['menuKeybind'] = 'LeftShift'
 	},
@@ -113,6 +118,67 @@ task.spawn(function()
 	while task.wait() and not Library.Unloaded do
 		if settings['AutoFarm']['AutoAbility'] then
 			local args = { [1] = "useAbility" }
+			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
+		end
+	end
+end)
+
+local AutoRoll = Tabs['Main']:AddLeftGroupbox('Auto Roll')
+AutoRoll:AddToggle('enableAutoRollLineages', {
+	Text = 'Auto Roll Lineages',
+	Default = settings['AutoRoll']['Lineages'],
+	Tooltip = 'Enable Auto Roll Lineages',
+
+	Callback = function(value)
+		settings['AutoRoll']['Lineages'] = value
+		SaveConfig()
+	end
+})
+
+AutoRoll:AddToggle('enableAutoRollSwords', {
+	Text = 'Auto Roll Swords',
+	Default = settings['AutoRoll']['Swords'],
+	Tooltip = 'Enable Auto Roll Swords',
+
+	Callback = function(value)
+		settings['AutoRoll']['Swords'] = value
+		SaveConfig()
+	end
+})
+
+AutoRoll:AddToggle('enableAutoRollStar', {
+	Text = 'Auto Roll Star (Last World)',
+	Default = settings['AutoRoll']['Star'],
+	Tooltip = 'Enable Auto Roll Star (Last World)',
+
+	Callback = function(value)
+		settings['AutoRoll']['Star'] = value
+		SaveConfig()
+	end
+})
+
+task.spawn(function()
+	while task.wait() and not Library.Unloaded do
+		if settings['AutoRoll']['Lineages'] then
+			local args = { [1] = "rollLineages" }
+			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
+		end
+	end
+end)
+
+task.spawn(function()
+	while task.wait() and not Library.Unloaded do
+		if settings['AutoRoll']['Swords'] then
+			local args = { [1] = "rollSwords",  [2] = "one" }
+			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
+		end
+	end
+end)
+
+task.spawn(function()
+	while task.wait() and not Library.Unloaded do
+		if settings['AutoRoll']['Star'] then
+			local args = { [1] = "rollChampion", [2] = "one", [3] = "cursed school" }
 			ReplicatedStorage.Shared.events.RemoteEvent:FireServer(unpack(args))
 		end
 	end
