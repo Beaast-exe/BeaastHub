@@ -184,6 +184,29 @@ task.spawn(function()
 	end
 end)
 
+local Timers = Tabs['Main']:AddRightGroupbox('Timers')
+
+local EasyDungeon = Timers:AddLabel("Easy Dungeon >> ", true)
+local MediumDungeon = Timers:AddLabel("Medium Dungeon >> ", true)
+local HardDungeon = Timers:AddLabel("Hard Dungeon >> ", true)
+local InsaneDungeon = Timers:AddLabel("Insane Dungeon >> ", true)
+
+task.spawn(function()
+	while task.wait() and not Library.Unloaded do
+		local dungeonTimers = Workspace.currentWorld.dungeon.elements.hitboxes
+
+		local easyTimer = dungeonTimers.easy.billboard.timer.Text
+		local mediumTimer = dungeonTimers.medium.billboard.timer.Text
+		local hardTimer = dungeonTimers.hard.billboard.timer.Text
+		local insaneTimer = dungeonTimers.insane.billboard.timer.Text
+
+		EasyDungeon:SetText("Easy Dungeon   >>  " .. easyTimer)
+		MediumDungeon:SetText("Medium Dungeon >>  " .. mediumTimer)
+		HardDungeon:SetText("Hard Dungeon   >>  " .. hardTimer)
+		InsaneDungeon:SetText("Insane Dungeon >>  " .. insaneTimer)
+	end
+end)
+
 function Initialize()
 	Library:Notify(string.format('Script Loaded in %.2f second(s)!', tick() - StartTick), 5)
 	print("[Beaast Hub] Loaded")
