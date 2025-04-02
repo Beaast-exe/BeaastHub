@@ -191,9 +191,119 @@ local MediumDungeon = Timers:AddLabel("Medium Dungeon >> ", true)
 local HardDungeon = Timers:AddLabel("Hard Dungeon >> ", true)
 local InsaneDungeon = Timers:AddLabel("Insane Dungeon >> ", true)
 
+local loop = nil
+
+local dungeonsInfo = {
+	["possibleDrops"] = {
+		["gems"] = {
+			["sword fragment"] = 5,
+			["upgrade points"] = 5,
+			["haki shard"] = 5,
+			["lineage crystal"] = 3
+		}
+	},
+	["dungeons"] = {
+		["easy"] = {
+			["metadata"] = "colorg",
+			["coinsRate"] = 2043400000,
+			["baseHealth"] = 1.749875e17,
+			["startingMinute"] = 0,
+			["primaryColor"] = Color3.fromRGB(65, 255, 113),
+			["secondaryColor"] = Color3.fromRGB(155, 180, 118),
+			["pivot"] = CFrame.new(0, 10000, 0)
+		},
+		["medium"] = {
+			["metadata"] = "colory",
+			["coinsRate"] = 24043400000,
+			["baseHealth"] = 3.9999875e22,
+			["startingMinute"] = 15,
+			["primaryColor"] = Color3.fromRGB(254, 229, 41),
+			["secondaryColor"] = Color3.fromRGB(180, 172, 113),
+			["pivot"] = CFrame.new(-200, 10000, -0)
+		},
+		["hard"] = {
+			["metadata"] = "coloro",
+			["coinsRate"] = 119340000000,
+			["baseHealth"] = 6.999975e28,
+			["startingMinute"] = 30,
+			["primaryColor"] = Color3.fromRGB(248, 79, 12),
+			["secondaryColor"] = Color3.fromRGB(180, 132, 117),
+			["pivot"] = CFrame.new(-400, 10000, 0)
+		},
+		["insane"] = {
+			["metadata"] = "colorpu",
+			["coinsRate"] = 2e16,
+			["baseHealth"] = 4.5e32,
+			["startingMinute"] = 45,
+			["primaryColor"] = Color3.fromRGB(74, 41, 185),
+			["secondaryColor"] = Color3.fromRGB(136, 114, 180),
+			["pivot"] = CFrame.new(-600, 10000, 0)
+		}
+	}
+}
+
+local function getTimers()
+	local CollectionService = game:GetService("CollectionService")
+	local dungeonHitboxes = CollectionService:GetTagged("dungeonHitboxes")
+
+	local v25 = Workspace:GetServerTimeNow()
+	local v26 = v25 // 60 % 60
+	local v27 = v25 % 60 // 1
+
+	for _, v28 in dungeonHitboxes do
+		local v29 = v28.Name
+		local v30 = dungeonsInfo.dungeons[v29]
+
+		if v30 then
+			local v31 = v28.billboard
+			local v32 = v30.startingMinute
+			local v33 = v32 < v26 + 1 and 59 - v26 + v32 or v32 - v26 - 1
+            local v34 = 59 - v27
+			local v35 = v33 + 1 == 60
+            v28.color.Dots.Enabled = v35
+
+			if v35 then
+				v31.timer.Text = ("Dungeon closing in %* seconds"):format(v34)
+				-- utility:tween(v28.color, {
+                --     ["Color"] = Color3.fromHex("a69eb4")
+                -- }, 1)
+			else
+				v31.timer.Text = string.format("%02i:%02i", v33, v34)
+                -- utility:tween(v28.color, {
+                --     ["Color"] = v30.secondaryColor
+                -- }, 1)
+			end
+		end
+	end
+end
+
+local loopScheduler = require(ReplicatedStorage.Shared.loopScheduler)
+
+task.spawn(function()
+	while task.wait() do
+		if not Library.Unloaded then
+			if not loop then
+				loop = loopScheduler:Bind(getTimers, 1)
+			end
+		else
+			if loop then
+				loop:Disconnect()
+				loop = nil
+			end
+			return
+		end
+	end
+end)
+
 task.spawn(function()
 	while task.wait() and not Library.Unloaded do
-		local dungeonTimers = Workspace.currentWorld.dungeon.elements.hitboxes
+		local dungeonTimers = nil		
+
+		if Workspace.currentWorld:FindFirstChild("dungeon") then
+			dungeonTimers = Workspace.currentWorld.dungeon.elements.hitboxes
+		else
+			dungeonTimers = ReplicatedStorage.Assets.Worlds.dungeon.elements.hitboxes
+		end
 
 		local easyTimer = dungeonTimers.easy.billboard.timer.Text
 		local mediumTimer = dungeonTimers.medium.billboard.timer.Text
