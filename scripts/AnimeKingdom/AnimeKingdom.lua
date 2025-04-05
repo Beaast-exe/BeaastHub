@@ -8,7 +8,7 @@ local repo = 'https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/libs
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 
-local Window = Library:CreateWindow({ Title = 'Beaast Hub | Anime Power', Center = true, AutoShow = true })
+local Window = Library:CreateWindow({ Title = 'Beaast Hub | Anime Kingdom Simulator', Center = true, AutoShow = true })
 local Tabs = {
 	['Main'] = Window:AddTab('Main'),
 	['UI Settings'] = Window:AddTab('UI Settings')
