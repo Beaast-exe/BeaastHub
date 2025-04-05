@@ -72,7 +72,7 @@ local VirtualInputManager = game:GetService('VirtualInputManager')
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService')
 
-local ScriptLibrary = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
+local ScriptLibrary = require(game:GetService('ReplicatedStorage'):WaitForChild("Framework"):WaitForChild("Library"))--.PlayerData.RaidDelay
 local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
 
 local player = Players.LocalPlayer
@@ -120,31 +120,6 @@ local worldsTableNumbers = {
 	["ABC City"] = 3,
 	["Cursed School"] = 4
 }
-
--- local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
--- AutoFarm:AddDropdown('autoFarmWorld', {
---     Text = 'Auto Farm World',
--- 	Tooltip = 'Select world to auto farm',
--- 	Default = settings['AutoFarm']['World'],
--- 	Multi = false,
--- 	Values = worldsNames,
-
--- 	Callback = function(value)
--- 		settings['AutoFarm']['World'] = value
--- 		SaveConfig()
--- 	end
--- })
-
--- AutoFarm:AddToggle('enableAutoFarm', {
--- 	Text = 'Enable Auto Farm',
--- 	Default = settings['AutoFarm']['Enabled'],
--- 	Tooltip = 'Enable Auto Farm',
-
--- 	Callback = function(value)
--- 		settings['AutoFarm']['Enabled'] = value
--- 		SaveConfig()
--- 	end
--- })
 
 local attacking = false
 local lastClosest = nil
@@ -224,7 +199,7 @@ local RaidCooldown = Timers:AddLabel("RAID >> ", true)
 
 local function getTime(time)
     if time >= -999999 and time < 60 then
-        return ("%02is"):format(p21 % 60)
+        return ("%02is"):format(time % 60)
     elseif time > 59 and time < 3600 then
         return ("%02im %02is"):format(time / 60 % 60, time % 60)
     elseif time > 3599 and time < 86399 then
@@ -271,7 +246,7 @@ function Initialize()
 end
 
 task.spawn(function()
-	while not Library.Unloaded do -- terste
+	while not Library.Unloaded do
 		task.wait(0.1)
 
 		minute = os.date("%M")
