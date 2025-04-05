@@ -246,13 +246,13 @@ task.spawn(function()
         RaidCooldown:SetText('RAID >> ' .. raidMessage)
 
         if Time < RaidDelay then
-            raidMessage = ("<r>in</> <w>%s</>"):format((getTime(RaidDelay - Time)))
+            raidMessage = ("in %s"):format((getTime(RaidDelay - Time)))
         else
             raidMessage = 'CAN CREATE'
         end
 
         if Time < DungeonDelay then
-            dungeonMessage = ("<r>in</> <w>%s</>"):format((getTime(dungeonMessage - Time)))
+            dungeonMessage = ("in %s"):format((getTime(dungeonMessage - Time)))
         else
             dungeonMessage = 'CAN CREATE'
         end
