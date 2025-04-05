@@ -32,6 +32,8 @@ elseif placeID == 8737899170 or placeID == 16498369169 then -- [[ PET SIMULATOR 
 	execute('PetSimulator/PS99.lua')
 elseif placeID == 76598287484083 then
 	execute('AnimePower/AnimePower.lua')
+elseif placeID == 17334984034 then
+	execute('AnimeKingdom/AnimeKingdom.lua')
 end
 
 if _G.IY then
