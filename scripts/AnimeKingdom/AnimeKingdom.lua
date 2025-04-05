@@ -71,6 +71,7 @@ local VirtualUser = game:GetService('VirtualUser')
 local VirtualInputManager = game:GetService('VirtualInputManager')
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService')
+
 local ScriptLibrary = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
 local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
 
@@ -206,7 +207,7 @@ task.spawn(function()
     end
 end)
 
-local Misc = Tabs['Main']:AddRightGroupbox('Miscellaneous')
+local Misc = Tabs['Main']:AddLeftGroupbox('Miscellaneous')
 Misc:AddToggle('enableAutoMount', {
     Text = 'Enable Auto Mount',
     Default = settings['Misc']['Mount'],
@@ -217,26 +218,47 @@ Misc:AddToggle('enableAutoMount', {
     end
 })
 
--- Misc:AddSlider('speedSlider', {
---     Text = 'Speed Slider',
---     Default = settings['Misc']['Speed'],
---     Min = 26,
---     Max = 150,
---     Rounding = 0,
---     Compact = false,
+local Timers = Tabs['Main']:AddRightGroupbox('Timers')
+local DungeonCooldown = Timers:AddLabel("DUNGEON >> ", true)
+local RaidCooldown = Timers:AddLabel("RAID >> ", true)
 
---     Callback = function(value)
---         settings['Misc']['Speed'] = value
---         SaveConfig()
---     end
--- })
+local function getTime(time)
+    if time >= -999999 and time < 60 then
+        return ("%02is"):format(p21 % 60)
+    elseif time > 59 and time < 3600 then
+        return ("%02im %02is"):format(time / 60 % 60, time % 60)
+    elseif time > 3599 and time < 86399 then
+        return ("%02ih %02im"):format(time / 3600 % 24, time / 60 % 60)
+    else
+        return ("%02id %02ih"):format(time / 86400, time / 3600 % 24)
+    end
+end
 
--- task.spawn(function()
---     while true do
---         task.wait()
---         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = settings['Misc']['Speed']
---     end
--- end)
+local dungeonMessage = 'DUNGEON >> '
+local raidMessage = 'RAID >> '
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
+        local DungeonDelay = ScriptLibrary.PlayerData.DungeonDelay
+        local Time = ReplicatedStorage:GetAttribute('Time')
+
+        DungeonCooldown:SetText('DUNGEON >> ' .. dungeonMessage)
+        RaidCooldown:SetText('RAID >> ' .. raidMessage)
+
+        if Time < RaidDelay then
+            raidMessage = ("<r>in</> <w>%s</>"):format((getTime(RaidDelay - Time)))
+        else
+            raidMessage = 'CAN CREATE'
+        end
+
+        if Time < DungeonDelay then
+            dungeonMessage = ("<r>in</> <w>%s</>"):format((getTime(dungeonMessage - Time)))
+        else
+            dungeonMessage = 'CAN CREATE'
+        end
+    end
+end)
+
 
 local minute = os.date("%M")
 local unixTimestamp
