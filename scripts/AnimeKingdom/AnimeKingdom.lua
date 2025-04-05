@@ -216,13 +216,13 @@ task.spawn(function()
         local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
         local Time = ReplicatedStorage:GetAttribute('Time')
 
-        RaidCooldown:SetText('RAID >> ' .. raidMessage)
-
         if Time < RaidDelay then
-            raidMessage = ("in %s"):format(getTime(RaidDelay - Time))
+            raidMessage = "in " .. tostring(getTime(RaidDelay - Time))
         else
             raidMessage = 'CAN CREATE'
         end
+
+        RaidCooldown:SetText('RAID >> ' .. raidMessage)
     end
 end)
 
@@ -231,13 +231,13 @@ task.spawn(function()
         local DungeonDelay = ScriptLibrary.PlayerData.DungeonDelay
         local Time = ReplicatedStorage:GetAttribute('Time')
 
-        DungeonCooldown:SetText('DUNGEON >> ' .. dungeonMessage)
-
         if Time < DungeonDelay then
-            dungeonMessage = ("in %s"):format(getTime(DungeonDelay - Time))
+            dungeonMessage = "in " .. tostring(getTime(DungeonDelay - Time))
         else
             dungeonMessage = 'CAN CREATE'
         end
+
+        DungeonCooldown:SetText('DUNGEON >> ' .. dungeonMessage)
     end
 end)
 
