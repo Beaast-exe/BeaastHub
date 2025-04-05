@@ -83,7 +83,9 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
 		local PETS = workspace['_PETS'][player.UserId]
 		for i, v in pairs(PETS:GetChildren()) do
-			v:SetAttribute('WalkSPD', 100)
+			v:SetAttribute('WalkSPD', 1000)
+			-- v:SetAttribute('Level', 50)
+			-- v:SetAttribute('Form', 'Shiny')
 		end
 
         playerMap = ScriptLibrary.PlayerData.CurrentMap
