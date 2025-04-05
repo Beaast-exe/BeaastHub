@@ -30,7 +30,8 @@ local defaultSettings = {
         ['SelectedStar'] = ''
     },
     ['Misc'] = {
-        ['Mount'] = false
+        ['Mount'] = false,
+		['Speed'] = 26
     },
     ['Keybinds'] = {
 		['menuKeybind'] = 'LeftShift'
@@ -84,8 +85,6 @@ task.spawn(function()
 		local PETS = workspace['_PETS'][player.UserId]
 		for i, v in pairs(PETS:GetChildren()) do
 			v:SetAttribute('WalkSPD', 1000)
-			-- v:SetAttribute('Level', 50)
-			-- v:SetAttribute('Form', 'Shiny')
 		end
 
         playerMap = ScriptLibrary.PlayerData.CurrentMap
@@ -121,64 +120,30 @@ local worldsTableNumbers = {
 	["Cursed School"] = 4
 }
 
-local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
-AutoFarm:AddDropdown('autoFarmWorld', {
-    Text = 'Auto Farm World',
-	Tooltip = 'Select world to auto farm',
-	Default = settings['AutoFarm']['World'],
-	Multi = false,
-	Values = worldsNames,
-
-	Callback = function(value)
-		settings['AutoFarm']['World'] = value
-		SaveConfig()
-	end
-})
-
--- local enemies = settings['AutoFarm']['Enemies']
--- local autoFarmEnemies = AutoFarm:AddDropdown('autoFarmEnemies', {
---     Text = 'Auto Farm Enemies',
--- 	Tooltip = 'Select enemies to auto farm',
--- 	Default = settings['AutoFarm']['Enemies'],
--- 	Multi = true,
--- 	Values = enemies,
+-- local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
+-- AutoFarm:AddDropdown('autoFarmWorld', {
+--     Text = 'Auto Farm World',
+-- 	Tooltip = 'Select world to auto farm',
+-- 	Default = settings['AutoFarm']['World'],
+-- 	Multi = false,
+-- 	Values = worldsNames,
 
 -- 	Callback = function(value)
--- 		settings['AutoFarm']['Enemies'] = value
+-- 		settings['AutoFarm']['World'] = value
 -- 		SaveConfig()
 -- 	end
 -- })
 
--- local enemyData = require(ReplicatedStorage.Framework.Modules.Data.EnemyData)
--- task.spawn(function()
---     while task.wait() and not Library.Unloaded do
---         local enemies = {}
+-- AutoFarm:AddToggle('enableAutoFarm', {
+-- 	Text = 'Enable Auto Farm',
+-- 	Default = settings['AutoFarm']['Enabled'],
+-- 	Tooltip = 'Enable Auto Farm',
 
---         if playerMode == nil then
---             for i, v in pairs(enemyData) do
---                 if tostring(enemyData[i]['Map']) == tostring(playerMap) then
---                     table.insert(enemies, i)
---                 end
---             end
-    
---             autoFarmEnemies:SetValues(enemies)
---             autoFarmEnemies:Refresh(enemies)
---         end
-
---         task.wait(1000)
---     end
--- end)
-
-AutoFarm:AddToggle('enableAutoFarm', {
-	Text = 'Enable Auto Farm',
-	Default = settings['AutoFarm']['Enabled'],
-	Tooltip = 'Enable Auto Farm',
-
-	Callback = function(value)
-		settings['AutoFarm']['Enabled'] = value
-		SaveConfig()
-	end
-})
+-- 	Callback = function(value)
+-- 		settings['AutoFarm']['Enabled'] = value
+-- 		SaveConfig()
+-- 	end
+-- })
 
 local attacking = false
 local lastClosest = nil
@@ -252,6 +217,20 @@ Misc:AddToggle('enableAutoMount', {
     end
 })
 
+Misc:AddSlider('speedSlider', {
+    Text = 'This is my slider!',
+    Default = settings['Misc']['Speed'],
+    Min = 26,
+    Max = 150,
+    Rounding = 1,
+    Compact = false,
+
+    Callback = function(Value)
+        settings['Misc']['Speed'] = value
+        SaveConfig()
+    end
+})
+
 local minute = os.date("%M")
 local unixTimestamp
 local NoClipping = nil
@@ -298,6 +277,7 @@ task.spawn(function()
             local args = { [1] = { [1] = { [1] = "MountSystem", [2] = "Add", ["n"] = 2 }, [2] = "\2" } }
             ReplicatedStorage:WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))           
         end
+		task.wait(1000)
     end
 end)
 
