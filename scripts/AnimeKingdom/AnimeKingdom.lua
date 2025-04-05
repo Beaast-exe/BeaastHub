@@ -227,7 +227,7 @@ task.spawn(function()
         end
 
         if Time < DungeonDelay then
-            dungeonMessage = ("in %s"):format((getTime(dungeonMessage - Time)))
+            dungeonMessage = ("in %s"):format((getTime(DungeonDelay - Time)))
         else
             dungeonMessage = 'CAN CREATE'
         end
