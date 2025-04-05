@@ -21,6 +21,8 @@ local saveFile = saveFolderName .. '/' .. gameFolderName .. '/' .. saveFileName
 
 local defaultSettings = {
     ['AutoFarm'] = {
+        ['World'] = 'Slayer Town',
+        ['Enemies'] = {'Gyutaro'},
         ['Enabled'] = false
     },
     ['AutoStar'] = {
@@ -68,23 +70,33 @@ local VirtualUser = game:GetService('VirtualUser')
 local VirtualInputManager = game:GetService('VirtualInputManager')
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService')
+local ScriptLibrary = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
+local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
 
 local player = Players.LocalPlayer
 local character = player.Character
 local PlayerGui = player.PlayerGui
+local playerMap = 1
+local playerMode = nil
 
-local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+		local PETS = workspace['_PETS'][player.UserId]
+		for i, v in pairs(PETS:GetChildren()) do
+			v:SetAttribute('WalkSPD', 100)
+		end
 
-local Misc = Tabs['Main']:AddRightGroupbox('Miscellaneous')
-    Misc:AddToggle('enableAutoMount', {
-    Text = 'Enable Auto Mount',
-    Default = settings['Misc']['Mount'],
-
-    Callback = function(value)
-        settings['Misc']['Mount'] = value
-        SaveConfig()
+        playerMap = ScriptLibrary.PlayerData.CurrentMap
+        
+        if player:GetAttribute('Mode') ~= nil then
+            if player:GetAttribute('Mode') == 'Dungeon' then
+                playerMode = 'Dungeon'
+            elseif player:GetAttribute('Mode') == 'Raid' then
+                playerMode = 'Raid'
+            end
+        end
     end
-})
+end)
 
 local worldsNames = {
     'Slayer Town',
@@ -99,6 +111,144 @@ local worldsTable = {
 	["ABC City"] = "3",
 	["Cursed School"] = "4"
 }
+
+local worldsTableNumbers = {
+    ["Slayer Town"] = 1,
+	["Giant District"] = 2,
+	["ABC City"] = 3,
+	["Cursed School"] = 4
+}
+
+local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
+AutoFarm:AddDropdown('autoFarmWorld', {
+    Text = 'Auto Farm World',
+	Tooltip = 'Select world to auto farm',
+	Default = settings['AutoFarm']['World'],
+	Multi = false,
+	Values = worldsNames,
+
+	Callback = function(value)
+		settings['AutoFarm']['World'] = value
+		SaveConfig()
+	end
+})
+
+-- local enemies = settings['AutoFarm']['Enemies']
+-- local autoFarmEnemies = AutoFarm:AddDropdown('autoFarmEnemies', {
+--     Text = 'Auto Farm Enemies',
+-- 	Tooltip = 'Select enemies to auto farm',
+-- 	Default = settings['AutoFarm']['Enemies'],
+-- 	Multi = true,
+-- 	Values = enemies,
+
+-- 	Callback = function(value)
+-- 		settings['AutoFarm']['Enemies'] = value
+-- 		SaveConfig()
+-- 	end
+-- })
+
+-- local enemyData = require(ReplicatedStorage.Framework.Modules.Data.EnemyData)
+-- task.spawn(function()
+--     while task.wait() and not Library.Unloaded do
+--         local enemies = {}
+
+--         if playerMode == nil then
+--             for i, v in pairs(enemyData) do
+--                 if tostring(enemyData[i]['Map']) == tostring(playerMap) then
+--                     table.insert(enemies, i)
+--                 end
+--             end
+    
+--             autoFarmEnemies:SetValues(enemies)
+--             autoFarmEnemies:Refresh(enemies)
+--         end
+
+--         task.wait(1000)
+--     end
+-- end)
+
+AutoFarm:AddToggle('enableAutoFarm', {
+	Text = 'Enable Auto Farm',
+	Default = settings['AutoFarm']['Enabled'],
+	Tooltip = 'Enable Auto Farm',
+
+	Callback = function(value)
+		settings['AutoFarm']['Enabled'] = value
+		SaveConfig()
+	end
+})
+
+local attacking = false
+local lastClosest = nil
+
+function findNearestEnemy()
+	local Closest = nil
+	local ClosestDistance = math.huge
+
+	local enemyModels = Workspace['_ENEMIES']['Server']:GetDescendants()
+
+	for _, targetEnemy in ipairs(enemyModels) do
+		if targetEnemy:IsA("Part") then
+			local Distance = (character.HumanoidRootPart.Position - targetEnemy.Position).magnitude
+
+			if Distance <= 1500 and Distance < ClosestDistance then
+				Closest = targetEnemy
+				ClosestDistance = Distance
+			end
+		end
+	end
+
+	if Closest == nil then ClosestDistance = math.huge end
+	return Closest, ClosestDistance
+end
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['AutoFarm']['Enabled'] then
+            local selectedWorld = settings['AutoFarm']['World']
+
+			if tostring(playerMap) == tostring(worldsTableNumbers[selectedWorld] + 1)  then
+                local worldEnemies = Workspace['_ENEMIES']['Server']:GetDescendants()
+				local Closest, ClosestDistance = findNearestEnemy()
+
+                if Closest then
+					print(ClosestDistance)
+                    if Closest:GetAttribute('Dead') == false then
+                        if lastClosest == nil then lastClosest = Closest end
+
+                        if lastClosest == Closest then
+                            if attacking == false then
+                                local args = { [1] = { [1] = { [1] = "PetSystem", [2] = "Attack", [3] = Closest.Name, [4] = true, ["n"] = 4 }, [2] = "\2" } }
+                                ReplicatedStorage:WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                                attacking = true
+                            end
+                        else
+                            VirtualInputManager:SendKeyEvent(true, 'R', false, nil)
+							task.wait(0.005)
+							VirtualInputManager:SendKeyEvent(false, 'R', false, nil)
+							lastClosest = Closest
+							attacking = false
+                        end
+					else
+						attacking = false	
+						lastClosest = Closest
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local Misc = Tabs['Main']:AddRightGroupbox('Miscellaneous')
+Misc:AddToggle('enableAutoMount', {
+    Text = 'Enable Auto Mount',
+    Default = settings['Misc']['Mount'],
+
+    Callback = function(value)
+        settings['Misc']['Mount'] = value
+        SaveConfig()
+    end
+})
 
 local minute = os.date("%M")
 local unixTimestamp
