@@ -217,19 +217,26 @@ Misc:AddToggle('enableAutoMount', {
     end
 })
 
-Misc:AddSlider('speedSlider', {
-    Text = 'This is my slider!',
-    Default = settings['Misc']['Speed'],
-    Min = 26,
-    Max = 150,
-    Rounding = 1,
-    Compact = false,
+-- Misc:AddSlider('speedSlider', {
+--     Text = 'Speed Slider',
+--     Default = settings['Misc']['Speed'],
+--     Min = 26,
+--     Max = 150,
+--     Rounding = 0,
+--     Compact = false,
 
-    Callback = function(Value)
-        settings['Misc']['Speed'] = value
-        SaveConfig()
-    end
-})
+--     Callback = function(value)
+--         settings['Misc']['Speed'] = value
+--         SaveConfig()
+--     end
+-- })
+
+-- task.spawn(function()
+--     while true do
+--         task.wait()
+--         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = settings['Misc']['Speed']
+--     end
+-- end)
 
 local minute = os.date("%M")
 local unixTimestamp
@@ -277,7 +284,6 @@ task.spawn(function()
             local args = { [1] = { [1] = { [1] = "MountSystem", [2] = "Add", ["n"] = 2 }, [2] = "\2" } }
             ReplicatedStorage:WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))           
         end
-		task.wait(1000)
     end
 end)
 
