@@ -27,7 +27,7 @@ local defaultSettings = {
     },
     ['AutoStar'] = {
         ['Enabled'] = false,
-        ['SelectedStar'] = ''
+        ['SelectedStar'] = 'Slayer Star'
     },
     ['Misc'] = {
         ['Mount'] = false,
@@ -178,6 +178,49 @@ task.spawn(function()
                     end
                 end
             end
+        end
+    end
+end)
+
+
+local stars = {
+    'Slayer Star',
+    'Titan Star',
+    'Punch Star',
+    'Cursed Star'
+}
+
+local AutoStar = Tabs['Main']:AddLeftGroupbox('Auto Star')
+AutoStar:AddDropdown('selectedAutoStar', {
+    Values = stars,
+    Default = settings['AutoStar']['SelectedStar'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Auto Star',
+    Tooltip = 'Selected Auto Star to open', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoStar']['SelectedStar'] = value
+        SaveConfig()
+    end
+})
+
+AutoStar:AddToggle('enableAutoStar', {
+    Text = 'Enable Auto Star',
+    Default = settings['AutoStar']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoStar']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['AutoStar']['Enabled'] then
+            local args = { [1] = { [1] = { [1] = "PetSystem", [2] = "Open", [3] = settings['AutoStar']['SelectedStar'], [4] = "All", ["n"] = 4 }, [2] = "\2" } }
+            
+            ReplicatedStorage:WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
         end
     end
 end)
