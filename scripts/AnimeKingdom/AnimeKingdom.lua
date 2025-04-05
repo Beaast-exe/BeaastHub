@@ -78,7 +78,7 @@ local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
 local Misc = Tabs['Main']:AddRightGroupbox('Miscellaneous')
     Misc:AddToggle('enableAutoMount', {
     Text = 'Enable Auto Mount',
-    Default = settings['Misc']['Mount'] or defaultSettings['Misc']['Mount'],
+    Default = settings['Misc']['Mount'],
 
     Callback = function(value)
         settings['Misc']['Mount'] = value
