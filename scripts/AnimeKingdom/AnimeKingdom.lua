@@ -187,7 +187,8 @@ local stars = {
     'Slayer Star',
     'Titan Star',
     'Punch Star',
-    'Cursed Star'
+    'Cursed Star',
+    'Player Star'
 }
 
 local AutoStar = Tabs['Main']:AddLeftGroupbox('Auto Star')
