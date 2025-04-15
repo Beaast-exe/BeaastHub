@@ -2,6 +2,7 @@ local placeId = 17334984034
 if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 local StartTick = tick()
+task.wait(5)
 
 local HttpService = game:GetService('HttpService')
 local repo = 'https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/libs/LinoriaLib/' -- BEAAST HUB LINORIA
