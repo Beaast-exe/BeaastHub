@@ -83,9 +83,9 @@ local playerMode = nil
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-		local PETS = workspace['_PETS'][player.UserId]
+		local PETS = workspace['_PETS']:WaitForChild(player.UserId)
 		for i, v in pairs(PETS:GetChildren()) do
-			v:SetAttribute('WalkSPD', 100)
+			v:SetAttribute('WalkSPD', 150)
 		end
 
         playerMap = ScriptLibrary.PlayerData.CurrentMap
