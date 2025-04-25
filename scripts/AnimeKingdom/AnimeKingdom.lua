@@ -183,7 +183,6 @@ task.spawn(function()
     end
 end)
 
-
 local stars = {
     'Slayer Star',
     'Titan Star',
