@@ -1,4 +1,4 @@
-print('Loading Linoria UI v2.18.1')
+print('[BeaastHub] Loading Linoria UI v2.18.1')
 
 -- violin-suzutsuki i love you !!!!!!
 

@@ -10,7 +10,7 @@ game:GetService('Players').LocalPlayer.Idled:Connect(function()
 end)
 
 function execute(rawScriptPath)
-	print('Executing ' .. rawScriptPath)
+	print('[BeaastHub] Executing ' .. rawScriptPath)
 	task.spawn(loadstring(game:HttpGet(GitHub .. rawScriptPath, true)))
 end
 
