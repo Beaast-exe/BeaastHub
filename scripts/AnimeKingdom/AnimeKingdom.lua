@@ -2,7 +2,7 @@ local placeId = 17334984034
 if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 local StartTick = tick()
-task.wait(3)
+--task.wait(3)
 
 local HttpService = game:GetService('HttpService')
 local repo = 'https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/libs/LinoriaLib/' -- BEAAST HUB LINORIA
@@ -242,6 +242,7 @@ Misc:AddToggle('enableAutoMount', {
 local Timers = Tabs['Main']:AddRightGroupbox('Timers')
 local DungeonCooldown = Timers:AddLabel("DUNGEON >> ", true)
 local RaidCooldown = Timers:AddLabel("RAID >> ", true)
+local EasterCooldown = Timers:AddLabel("EASTER >> ", true)
 
 local function getTime(time)
     if time >= -999999 and time < 60 then
@@ -256,7 +257,8 @@ local function getTime(time)
 end
 
 local dungeonMessage = 'DUNGEON >> '
-local raidMessage = 'RAID >> '
+local raidMessage = 'RAID    >> '
+local easterMessage = 'EASTER  >> '
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
@@ -265,7 +267,7 @@ task.spawn(function()
         if Time < RaidDelay then
             raidMessage = "in " .. tostring(getTime(RaidDelay - Time))
         else
-            raidMessage = 'CAN CREATE'
+            raidMessage = 'READY !'
         end
 
         RaidCooldown:SetText('RAID >> ' .. raidMessage)
@@ -280,10 +282,25 @@ task.spawn(function()
         if Time < DungeonDelay then
             dungeonMessage = "in " .. tostring(getTime(DungeonDelay - Time))
         else
-            dungeonMessage = 'CAN CREATE'
+            dungeonMessage = 'READY !'
         end
 
         DungeonCooldown:SetText('DUNGEON >> ' .. dungeonMessage)
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local EasterDelay = ScriptLibrary.PlayerData.EasterInvasionDelay
+        local Time = ReplicatedStorage:GetAttribute('Time')
+
+        if Time < EasterDelay then
+            easterMessage = "in " .. tostring(getTime(EasterDelay - Time))
+        else
+            easterMessage = 'READY !'
+        end
+
+        EasterCooldown:SetText('EASTER >> ' .. easterMessage)
     end
 end)
 
