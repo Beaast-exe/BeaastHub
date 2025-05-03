@@ -190,7 +190,8 @@ local stars = {
     'Cursed Star',
     'Player Star',
     'Pirate Star',
-    'Bizarre Star'
+    'Bizarre Star',
+    'Z Star'
 }
 
 local AutoStar = Tabs['Main']:AddLeftGroupbox('Auto Star')
