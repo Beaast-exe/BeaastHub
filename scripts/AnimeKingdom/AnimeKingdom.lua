@@ -2,7 +2,7 @@ local placeId = 17334984034
 if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 local StartTick = tick()
-task.wait(3)
+-- task.wait(3)
 
 local HttpService = game:GetService('HttpService')
 local repo = 'https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/libs/LinoriaLib/' -- BEAAST HUB LINORIA
@@ -73,8 +73,24 @@ local VirtualInputManager = game:GetService('VirtualInputManager')
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService')
 
-local ScriptLibrary = require(game:GetService('ReplicatedStorage'):WaitForChild("Framework"):WaitForChild("Library"))
+local ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
 local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
+
+-- local PetService = ScriptLibrary:GetService("PetService")
+-- local EnemyService = ScriptLibrary:GetService("EnemyService")
+-- local DebounceService = ScriptLibrary:GetService("DebounceService")
+
+local TableUtil = {
+    Find = function(Table, Value)
+        for i, v in Table do
+            if Value(v, i, Table) then
+                return v, i
+            end
+        end
+
+        return nil, nil
+    end
+}
 
 local player = Players.LocalPlayer
 local character = player.Character
@@ -92,11 +108,7 @@ task.spawn(function()
         playerMap = ScriptLibrary.PlayerData.CurrentMap
         
         if player:GetAttribute('Mode') ~= nil then
-            if player:GetAttribute('Mode') == 'Dungeon' then
-                playerMode = 'Dungeon'
-            elseif player:GetAttribute('Mode') == 'Raid' then
-                playerMode = 'Raid'
-            end
+            playerMode = player:GetAttribute('Mode')
         end
     end
 end)
@@ -121,67 +133,6 @@ local worldsTableNumbers = {
 	["ABC City"] = 3,
 	["Cursed School"] = 4
 }
-
-local attacking = false
-local lastClosest = nil
-
-function findNearestEnemy()
-	local Closest = nil
-	local ClosestDistance = math.huge
-
-	local enemyModels = Workspace['_ENEMIES']['Server']:GetDescendants()
-
-	for _, targetEnemy in ipairs(enemyModels) do
-		if targetEnemy:IsA("Part") then
-			local Distance = (character.HumanoidRootPart.Position - targetEnemy.Position).magnitude
-
-			if Distance <= 1500 and Distance < ClosestDistance then
-				Closest = targetEnemy
-				ClosestDistance = Distance
-			end
-		end
-	end
-
-	if Closest == nil then ClosestDistance = math.huge end
-	return Closest, ClosestDistance
-end
-
-task.spawn(function()
-    while task.wait() and not Library.Unloaded do
-        if settings['AutoFarm']['Enabled'] then
-            local selectedWorld = settings['AutoFarm']['World']
-
-			if tostring(playerMap) == tostring(worldsTableNumbers[selectedWorld] + 1)  then
-                local worldEnemies = Workspace['_ENEMIES']['Server']:GetDescendants()
-				local Closest, ClosestDistance = findNearestEnemy()
-
-                if Closest then
-					print(ClosestDistance)
-                    if Closest:GetAttribute('Dead') == false then
-                        if lastClosest == nil then lastClosest = Closest end
-
-                        if lastClosest == Closest then
-                            if attacking == false then
-                                local args = { [1] = { [1] = { [1] = "PetSystem", [2] = "Attack", [3] = Closest.Name, [4] = true, ["n"] = 4 }, [2] = "\2" } }
-                                ReplicatedStorage:WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
-                                attacking = true
-                            end
-                        else
-                            VirtualInputManager:SendKeyEvent(true, 'R', false, nil)
-							task.wait(0.005)
-							VirtualInputManager:SendKeyEvent(false, 'R', false, nil)
-							lastClosest = Closest
-							attacking = false
-                        end
-					else
-						attacking = false	
-						lastClosest = Closest
-                    end
-                end
-            end
-        end
-    end
-end)
 
 local stars = {
     'Slayer Star',
@@ -304,6 +255,30 @@ task.spawn(function()
         DefenseCooldown:SetText('DEFENSE >> ' .. defenseMessage)
     end
 end)
+
+-- AUTOATTACK
+-- task.spawn(function()
+--     while task.wait(0.1) and not Library.Unloaded do
+--             if ScriptLibrary.PlayerData.Settings.AutoAttack then
+--                 local playerRange = PetService:GetRange(ScriptLibrary.Player, true)
+--                 local currentTargets = PetService:GetCurrentTargets(ScriptLibrary.Player)
+--                 local nearests = EnemyService:GetNearests(playerRange, true)
+    
+--                 if #nearests ~= 0 then
+--                     local nearest = nearests[1]
+--                     local isAttackingSameEnemy = PetService.AttackingSameEnemy(ScriptLibrary.Player)
+    
+--                     local found = TableUtil.Find(nearests, function(target)    
+--                         return target.Name == currentTargets[1]
+--                     end)
+    
+--                     if #currentTargets ~= 1 or not (found and isAttackingSameEnemy) then                        
+--                         ScriptLibrary.Remote:Fire("PetSystem", "Attack", nearest.Name, true)
+--                     end
+--                 end
+--             end
+--     end
+-- end)
 
 local minute = os.date("%M")
 local unixTimestamp
