@@ -1,8 +1,16 @@
 local placeId = 17334984034
 if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
+if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
--- task.wait(3)
+task.wait(3)
+
+local Players = game:GetService('Players')
+local player = Players.LocalPlayer
+local character = player.Character
+local PlayerGui = player.PlayerGui
+
+repeat task.wait() until player.Character and player.Character:FindFirstChild('HumanoidRootPart')
 
 local HttpService = game:GetService('HttpService')
 local repo = 'https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/libs/LinoriaLib/' -- BEAAST HUB LINORIA
@@ -22,8 +30,24 @@ local saveFile = saveFolderName .. '/' .. gameFolderName .. '/' .. saveFileName
 
 local defaultSettings = {
     ['AutoFarm'] = {
+        ['Enabled'] = false,
+        ['PetStats'] = false,
+        ['TeleportToEnemies'] = false,
+        ['TeleportPetsToEnemies'] = false,
+        ['AutoClick'] = false,
+
         ['World'] = 'Slayer Town',
-        ['Enemies'] = {'Gyutaro'},
+        ['Enemies'] = {'Gyutaro'}
+    },
+    ['AutoRaid'] = {
+        ['Enabled'] = false,
+        ['World'] = 'Slayer Town'
+    },
+    ['AutoDungeon'] = {
+        ['Enabled'] = false,
+        ['Difficulty'] = 'Easy'
+    },
+    ['AutoDefense'] = {
         ['Enabled'] = false
     },
     ['AutoStar'] = {
@@ -67,71 +91,61 @@ SaveConfig()
 local HttpService = game:GetService('HttpService')
 local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local Workspace = game:GetService('Workspace')
-local Players = game:GetService('Players')
 local VirtualUser = game:GetService('VirtualUser')
 local VirtualInputManager = game:GetService('VirtualInputManager')
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService')
+local TeleportService = game:GetService('TeleportService')
+
+local ffrostflame_bridgenet2 = ReplicatedStorage:FindFirstChild("ffrostflame_bridgenet2@1.0.0")
+local dataRemoteEvent = ffrostflame_bridgenet2:FindFirstChild("dataRemoteEvent")
 
 local ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
 local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
 
--- local PetService = ScriptLibrary:GetService("PetService")
--- local EnemyService = ScriptLibrary:GetService("EnemyService")
--- local DebounceService = ScriptLibrary:GetService("DebounceService")
-
-local TableUtil = {
-    Find = function(Table, Value)
-        for i, v in Table do
-            if Value(v, i, Table) then
-                return v, i
-            end
-        end
-
-        return nil, nil
-    end
-}
-
-local player = Players.LocalPlayer
-local character = player.Character
-local PlayerGui = player.PlayerGui
 local playerMap = 1
 local playerMode = nil
 
-task.spawn(function()
-    while task.wait() and not Library.Unloaded do
-		local PETS = workspace['_PETS']:WaitForChild(player.UserId)
-		for i, v in pairs(PETS:GetChildren()) do
-			v:SetAttribute('WalkSPD', 150)
-		end
-
-        playerMap = ScriptLibrary.PlayerData.CurrentMap
-        
-        if player:GetAttribute('Mode') ~= nil then
-            playerMode = player:GetAttribute('Mode')
-        end
-    end
-end)
-
 local worldsNames = {
-    'Slayer Town',
-    'Giant District',
-    'ABC City',
-    'Cursed School'
+    "Slayer Town",
+	"Giant District",
+	"ABC City",
+	"Cursed School",
+    "Leveling Town",
+    "Sand Empire",
+    "Bizarre Desert",
+    "Z Hills"
+}
+
+local dungeonDifficulties = {
+    "Easy",
+    "Medium",
+    "Hard",
+    "Insane",
+    "Extreme",
+    "Impossible"
 }
 
 local worldsTable = {
     ["Slayer Town"] = "1",
 	["Giant District"] = "2",
 	["ABC City"] = "3",
-	["Cursed School"] = "4"
+	["Cursed School"] = "4",
+    ["Leveling Town"] = "5",
+    ["Sand Empire"] = "6",
+    ["Bizarre Desert"] = "7",
+    ["Z Hills"] = "8"
 }
 
 local worldsTableNumbers = {
     ["Slayer Town"] = 1,
 	["Giant District"] = 2,
 	["ABC City"] = 3,
-	["Cursed School"] = 4
+	["Cursed School"] = 4,
+    ["Leveling Town"] = 5,
+    ["Sand Empire"] = 6,
+    ["Bizarre Desert"] = 7,
+    ["Z Hills"] = 8
 }
 
 local stars = {
@@ -144,6 +158,543 @@ local stars = {
     'Bizarre Star',
     'Z Star'
 }
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+		local PETS = workspace['_PETS']:WaitForChild(player.UserId)
+		for i, v in pairs(PETS:GetChildren()) do
+			v:SetAttribute('WalkSPD', 150)
+		end
+        
+        playerMap = ScriptLibrary.PlayerData.CurrentMap
+        
+        if player:GetAttribute('Mode') ~= nil then
+            playerMode = player:GetAttribute('Mode')
+        end
+    end
+end)
+
+local function checkDungeon()
+    local In_Doing = nil
+    local pgui = player:FindFirstChild('PlayerGui')
+    if pgui then
+        local Mode = pgui:FindFirstChild('Mode')
+        if Mode then
+            local Content = Mode:FindFirstChild("Content")
+            if Content then 
+                for i,v in ipairs(Content:GetChildren()) do
+                    if v:IsA('Frame') and v.Visible then
+                        In_Doing = v
+                    end
+                end
+            end
+        end
+    end
+
+    return In_Doing
+    -- local inDungeon = false
+
+    -- if playerMode == 'Dungeon' then
+    --     inDungeon = true
+    -- end
+
+    -- return inDungeon
+end
+
+local function checkEnemy()
+    local enemyFolder = nil
+
+    for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
+        if folder:IsA('Folder') and (folder.Name == 'Dungeon' or folder.Name == 'Raid' or folder.Name == 'Defense') then
+            for _, v in pairs(folder:GetChildren()) do
+                if v:IsA('Folder') and v.Name == tostring(player.UserId) and #v:GetChildren() > 0 then
+                    enemyFolder = v
+                end
+            end
+        end
+    end
+
+    return enemyFolder
+end
+
+local function getEnemy()
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local distance = math.huge
+    local enemy = nil
+
+    for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
+        if enemyFolder:IsA("Folder") then
+            local targetFolder = checkEnemy()
+            if targetFolder then
+                enemyFolder = targetFolder
+            end
+
+            for _, v in ipairs(enemyFolder:GetChildren()) do
+                local HP = v:GetAttribute('HP')
+                local Shield = v:GetAttribute('Shield')
+
+                if HP and HP > 0 and Shield ~= true then
+                    if v:IsA('Part') then
+                        local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
+
+                        if magnitude < distance then
+                            distance = magnitude
+                            enemy = v
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return enemy
+end
+
+local function equipTeam(id)
+    dataRemoteEvent:FireServer(unpack({{{"PetSystem","EquipTeam",tostring(ID),["n"] = 3},"\2"}}))
+end
+
+local function retreat()
+    dataRemoteEvent:FireServer(unpack({{{"PetSystem", "Retreat", n = 2}, "\2"}}))
+end
+
+local function attack()
+    dataRemoteEvent:FireServer(unpack({{{"PetSystem", "Attack", tostring(getEnemy()), true, n = 133}, "\2"}}))
+end
+
+local function disableEffects()
+    local whitelist = {'Damage', 'Hit'}
+
+    for i, v in ipairs(Workspace['_IGNORE']:GetChildren()) do
+        if v:IsA('Model') or v:IsA('Part') then
+            if table.find(whitelist, v.Name) then
+                v:Destroy()
+            end
+        end
+    end
+end
+
+local function setPetsStats()
+    for i, v in ipairs(Workspace['_PETS'][player.UserId]:GetChildren()) do
+        v:SetAttribute('WalkSPD', 150)
+        v:SetAttribute('MaxUlt', 0)
+        v:SetAttribute('Scale', 2.5)
+        v:SetAttribute('Stats', '{"HitDMG":1e9,"AtkSPD":1e9,"WalkSPD":1e9,"UltDMG":1e9}')
+    end
+end
+
+local function teleportToEnemy()
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local enemy = getEnemy()
+    if enemy then
+        HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
+    end
+end
+
+local function sendPetsToEnemy()
+    local enemy = getEnemy()
+    if not enemy then return end
+
+    for _, folder in ipairs(Workspace['_PETS']:GetChildren()) do
+        if folder:IsA('Folder') then
+            if folder.Name == tostring(player.UserId) then
+                for __, pets in ipairs(folder:GetChildren()) do
+                    for i, v in ipairs(pets:GetChildren()) do
+                        if v:IsA('Model') then
+                            local target = v:FindFirstChild('HumanoidRootPart')
+
+                            if target and enemy then
+                                local magnitude = (target.Position - enemy.Position).magnitude
+
+                                if magnitude > 15 then
+                                    target.CFrame = enemy.CFrame
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        for i, v in ipairs(Workspace['_IGNORE']['ShinyModels']:GetChildren()) do
+            if v:IsA('Model') then
+                local target = v:FindFirstChild('HumanoidRootPart')
+                if target and enemy then
+                    local magnitude = (target.Position - enemy.Position).magnitude
+
+                    if magnitude > 15 then
+                        target.CFrame = enemy.CFrame
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function setupAttack()
+    for i = 1, settings['AutoFarm']['Enabled'] do
+        attack()
+        task.wait()
+    end
+
+    task.wait(0.25)
+end
+
+local function getCurrentWorld()
+    local world = nil
+    local map = Workspace['_MAP']
+
+    if map then
+        for i, v in ipairs(map:GetChildren()) do
+            if v:IsA('Folder') then
+                local spawn = v:FindFirstChild('Spawn')
+                local another = v:FindFirstChild(player.UserId)
+
+                if spawn then
+                    world = tostring(v)
+                elseif another then
+                    local spawn2 = another:FindFirstChild('Spawn')
+
+                    if spawn2 then
+                        world = tostring(v)
+                    end
+                end
+            end
+        end
+    end
+
+    return world
+end
+
+local function inDungeon()
+    local currentWorld = getCurrentWorld()
+
+    if currentWorld == 'Dungeon' then
+        return true
+    end
+
+    return
+end
+
+local function inRaid()
+    local currentWorld = getCurrentWorld()
+
+    if currentWorld == 'Raid' then
+        return true
+    end
+
+    return
+end
+
+local function inDefense()
+    local currentWorld = getCurrentWorld()
+
+    if currentWorld == 'Defense' then
+        return true
+    end
+
+    return
+end
+
+local function getDungeonCooldown()
+    local PlayerGui = player:FindFirstChild('PlayerGui')
+    local cooldown = false
+
+    if PlayerGui then
+        local center = PlayerGui:FindFirstChild('_CENTER')
+        if center then
+            local DungeonList = center:FindFirstChild('DungeonList')
+            if DungeonList then
+                local Info = DungeonList:FindFirstChild('Info')
+                if Info and Info.Visible then
+                    cooldown = true
+                end
+            end
+        end
+    end
+
+    return cooldown
+end
+
+local function createDungeon(difficulty)
+    dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "Create", n = 2}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "SelectMap", "RuinedPrison", n = 3}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "SelectDiff", difficulty, n = 3}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "Start", n = 2}, "\2"}}))
+end
+
+local function startDungeon(difficulty)
+    if getDungeonCooldown() then return end
+    print(checkDungeon())
+    if checkDungeon() == nil then
+        createDungeon(difficulty)
+        task.wait(5)
+    elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
+        teleportToEnemy()
+        sendPetsToEnemy()
+        task.wait(0.25)
+    end
+end
+
+local function getDefenseCooldown()
+    local PlayerGui = player:FindFirstChild('PlayerGui')
+    local cooldown = false
+
+    if PlayerGui then
+        local center = PlayerGui:FindFirstChild('_CENTER')
+        if center then
+            local DefenseList = center:FindFirstChild('DefenseList')
+            if DefenseList then
+                local Info = DefenseList:FindFirstChild('Info')
+                if Info and Info.Visible then
+                    cooldown = true
+                end
+            end
+        end
+    end
+
+    return cooldown
+end
+
+local function createDefense()
+    dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Create", "AlienPlanet", n = 3}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Start", n = 2}, "\2"}}))
+end
+
+local function startDefense()
+    if getDefenseCooldown() then return end
+    if checkDungeon() == nil then
+        createDefense()
+        task.wait(5)
+    elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
+        teleportToEnemy()
+        sendPetsToEnemy()
+        task.wait(0.25)
+    end
+end
+
+local function clickDamage()
+    dataRemoteEvent:FireServer(unpack({{{"PetSystem", "Click", n = 2}, "\2"}}))
+end
+
+local function getRaidCooldown()
+    local PlayerGui = player:FindFirstChild('PlayerGui')
+    local cooldown = false
+
+    if PlayerGui then
+        local center = PlayerGui:FindFirstChild('_CENTER')
+        if center then
+            local RaidList = center:FindFirstChild('RaidList')
+            if RaidList then
+                local Info = RaidList:FindFirstChild('Info')
+                if Info and Info.Visible then
+                    cooldown = true
+                end
+            end
+        end
+    end
+
+    return cooldown
+end
+
+local function createRaid(mapNumber)
+    dataRemoteEvent:FireServer(unpack({{{"RaidSystem", "Create", n = 2}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"RaidSystem", "SelectMap", mapNumber, n = 3}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"RaidSystem", "Start", n = 2}, "\2"}}))
+end
+
+local function startRaid(mapNumber)
+    if getRaidCooldown() then return end
+    if checkDungeon() == nil then
+        createRaid(mapNumber)
+        task.wait(5)
+    elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
+        teleportToEnemy()
+        sendPetsToEnemy()
+        task.wait(0.25)
+    end
+end
+
+local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
+AutoFarm:AddToggle('enableAutoFarm', {
+    Text = 'Enable Auto AutoFarm',
+    Default = settings['AutoFarm']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoFarm']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoFarm']['Enabled'] then
+            attack()
+        end
+    end
+end)
+
+AutoFarm:AddToggle('enablePetStats', {
+    Text = 'Enable Pet Stats Modifier',
+    Default = settings['AutoFarm']['PetStats'],
+
+    Callback = function(value)
+        settings['AutoFarm']['PetStats'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['AutoFarm']['PetStats'] then
+            setPetsStats()
+        end
+    end
+end)
+
+AutoFarm:AddToggle('enableTeleportToEnemies', {
+    Text = 'Teleport to Closest Enemies',
+    Default = settings['AutoFarm']['TeleportToEnemies'],
+
+    Callback = function(value)
+        settings['AutoFarm']['TeleportToEnemies'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.25) and not Library.Unloaded do
+        if settings['AutoFarm']['TeleportToEnemies'] then
+            teleportToEnemy()
+        end
+    end
+end)
+
+AutoFarm:AddToggle('enablePetsTeleport', {
+    Text = 'Teleport Pets to Closest Enemies',
+    Default = settings['AutoFarm']['TeleportPetsToEnemies'],
+
+    Callback = function(value)
+        settings['AutoFarm']['TeleportPetsToEnemies'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoFarm']['TeleportPetsToEnemies'] then
+            sendPetsToEnemy()
+        end
+    end
+end)
+
+AutoFarm:AddToggle('enableAutoClick', {
+    Text = 'Enable Auto Click',
+    Default = settings['AutoFarm']['AutoClick'],
+
+    Callback = function(value)
+        settings['AutoFarm']['AutoClick'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoFarm']['AutoClick'] then
+            clickDamage()
+        end
+    end
+end)
+
+local AutoRaid = Tabs['Main']:AddRightGroupbox('Auto Raid')
+
+AutoRaid:AddDropdown('selectedRaidMap', {
+    Values = worldsNames,
+    Default = settings['AutoRaid']['World'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Raid World',
+    Tooltip = 'Selected Auto Raid World', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoRaid']['World'] = value
+        SaveConfig()
+    end
+})
+
+AutoRaid:AddToggle('enableAutoRaid', {
+    Text = 'Enable Auto Raid',
+    Default = settings['AutoRaid']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoRaid']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoRaid']['Enabled'] then
+            startRaid(worldsTableNumbers[settings['AutoRaid']['World']])
+        end
+    end
+end)
+
+local AutoDungeon = Tabs['Main']:AddRightGroupbox('Auto Dungeon')
+AutoDungeon:AddDropdown('selectedDungeonDifficulty', {
+    Values = dungeonDifficulties,
+    Default = settings['AutoDungeon']['Difficulty'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Dungeon Difficulty',
+    Tooltip = 'Selected Auto Dungeon Difficulty', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoDungeon']['Difficulty'] = value
+        SaveConfig()
+    end
+})
+
+AutoDungeon:AddToggle('enableAutoDungeon', {
+    Text = 'Enable Auto Dungeon',
+    Default = settings['AutoDungeon']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoDungeon']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoDungeon']['Enabled'] then
+            startDungeon(settings['AutoDungeon']['Difficulty'])
+        end
+    end
+end)
+
+local AutoDefense = Tabs['Main']:AddRightGroupbox('Auto Defense')
+AutoDefense:AddToggle('enableAutoDefense', {
+    Text = 'Enable Auto Defense',
+    Default = settings['AutoDefense']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoDefense']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['AutoDefense']['Enabled'] then
+            startDefense()
+        end
+    end
+end)
 
 local AutoStar = Tabs['Main']:AddLeftGroupbox('Auto Star')
 AutoStar:AddDropdown('selectedAutoStar', {
@@ -255,30 +806,6 @@ task.spawn(function()
         DefenseCooldown:SetText('DEFENSE >> ' .. defenseMessage)
     end
 end)
-
--- AUTOATTACK
--- task.spawn(function()
---     while task.wait(0.1) and not Library.Unloaded do
---             if ScriptLibrary.PlayerData.Settings.AutoAttack then
---                 local playerRange = PetService:GetRange(ScriptLibrary.Player, true)
---                 local currentTargets = PetService:GetCurrentTargets(ScriptLibrary.Player)
---                 local nearests = EnemyService:GetNearests(playerRange, true)
-    
---                 if #nearests ~= 0 then
---                     local nearest = nearests[1]
---                     local isAttackingSameEnemy = PetService.AttackingSameEnemy(ScriptLibrary.Player)
-    
---                     local found = TableUtil.Find(nearests, function(target)    
---                         return target.Name == currentTargets[1]
---                     end)
-    
---                     if #currentTargets ~= 1 or not (found and isAttackingSameEnemy) then                        
---                         ScriptLibrary.Remote:Fire("PetSystem", "Attack", nearest.Name, true)
---                     end
---                 end
---             end
---     end
--- end)
 
 local minute = os.date("%M")
 local unixTimestamp
