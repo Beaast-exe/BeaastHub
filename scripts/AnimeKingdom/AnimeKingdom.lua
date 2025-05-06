@@ -73,7 +73,7 @@ local VirtualInputManager = game:GetService('VirtualInputManager')
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService')
 
-local ScriptLibrary = require(game:GetService('ReplicatedStorage'):WaitForChild("Framework"):WaitForChild("Library"))--.PlayerData.RaidDelay
+local ScriptLibrary = require(game:GetService('ReplicatedStorage'):WaitForChild("Framework"):WaitForChild("Library"))
 local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
 
 local player = Players.LocalPlayer
@@ -242,8 +242,8 @@ Misc:AddToggle('enableAutoMount', {
 
 local Timers = Tabs['Main']:AddRightGroupbox('Timers')
 local DungeonCooldown = Timers:AddLabel("DUNGEON >> ", true)
-local RaidCooldown = Timers:AddLabel("RAID >> ", true)
-local EasterCooldown = Timers:AddLabel("EASTER >> ", true)
+local RaidCooldown = Timers:AddLabel("RAID    >> ", true)
+local DefenseCooldown = Timers:AddLabel("DEFENSE >> ", true)
 
 local function getTime(time)
     if time >= -999999 and time < 60 then
@@ -259,7 +259,7 @@ end
 
 local dungeonMessage = 'DUNGEON >> '
 local raidMessage = 'RAID    >> '
-local easterMessage = 'EASTER  >> '
+local defenseMessage = 'DEFENSE >> '
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
@@ -271,7 +271,7 @@ task.spawn(function()
             raidMessage = 'READY !'
         end
 
-        RaidCooldown:SetText('RAID >> ' .. raidMessage)
+        RaidCooldown:SetText('RAID    >> ' .. raidMessage)
     end
 end)
 
@@ -292,16 +292,16 @@ end)
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        local EasterDelay = ScriptLibrary.PlayerData.EasterInvasionDelay
+        local DefenseDelay = ScriptLibrary.PlayerData.DefenseDelay
         local Time = ReplicatedStorage:GetAttribute('Time')
 
-        if Time < EasterDelay then
-            easterMessage = "in " .. tostring(getTime(EasterDelay - Time))
+        if Time < DefenseDelay then
+            defenseMessage = "in " .. tostring(getTime(DefenseDelay - Time))
         else
-            easterMessage = 'READY !'
+            defenseMessage = 'READY !'
         end
 
-        EasterCooldown:SetText('EASTER >> ' .. easterMessage)
+        DefenseCooldown:SetText('DEFENSE >> ' .. defenseMessage)
     end
 end)
 
