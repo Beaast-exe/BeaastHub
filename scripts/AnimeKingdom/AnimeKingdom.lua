@@ -248,6 +248,22 @@ local function checkEnemy()
     return enemyFolder
 end
 
+local function checkEnemyInMap()
+    local enemyFolder = nil
+
+    for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
+        if folder:IsA('Folder') and (folder.Name == 'Dungeon' or folder.Name == 'Raid' or folder.Name == 'Defense') then
+            for _, v in pairs(folder:GetChildren()) do
+                if v:IsA('Folder') and v.Name == tostring(player.UserId) and #v:GetChildren() > 0 then
+                    enemyFolder = v
+                end
+            end
+        end
+    end
+
+    return enemyFolder
+end
+
 local function getEnemy()
     local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
     if not HumanoidRootPart then return end
@@ -273,6 +289,39 @@ local function getEnemy()
                         if magnitude < distance then
                             distance = magnitude
                             enemy = v
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return enemy
+end
+
+local function getEnemyInMap()
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local distance = math.huge
+    local enemy = nil
+
+    for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
+        if enemyFolder:IsA("Folder") then
+            local targetFolder = checkEnemyInMap()
+            if targetFolder then
+                for _, v in ipairs(enemyFolder:GetChildren()) do
+                    local HP = v:GetAttribute('HP')
+                    local Shield = v:GetAttribute('Shield')
+    
+                    if HP and HP > 0 and Shield ~= true then
+                        if v:IsA('Part') then
+                            local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
+    
+                            if magnitude < distance then
+                                distance = magnitude
+                                enemy = v
+                            end
                         end
                     end
                 end
@@ -321,6 +370,16 @@ local function teleportToEnemy()
     if not HumanoidRootPart then return end
 
     local enemy = getEnemy()
+    if enemy then
+        HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
+    end
+end
+
+local function teleportToEnemyInMap()
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local enemy = getEnemyInMap()
     if enemy then
         HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
     end
@@ -456,7 +515,7 @@ local function startDungeon(difficulty)
         task.wait(5)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
         if inDungeon then
-            teleportToEnemy()
+            teleportToEnemyInMap('Dungeon')
             sendPetsToEnemy()
             task.wait(0.25)
         end
@@ -486,7 +545,7 @@ local function startDefense()
         task.wait(5)
     elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
         if inDefense then
-            teleportToEnemy()
+            teleportToEnemyInMap('Defense')
             sendPetsToEnemy()
             task.wait(0.25)
         end
@@ -522,7 +581,7 @@ local function startRaid(mapNumber)
         task.wait(5)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
         if inRaid then
-            teleportToEnemy()
+            teleportToEnemyInMap('Raid')
             sendPetsToEnemy()
             task.wait(0.25)
         end
@@ -799,7 +858,7 @@ task.spawn(function()
         local playerGui = player:FindFirstChild('PlayerGui')
 
         if playerGui and settings['Misc']['TeleportBack'] then
-            print(playerMap)
+            print(playerMap, playerMode, teleportedBack)
             local ResultsGui = playerGui.Results
             local ReturnButton = ResultsGui.Content.Return
 
@@ -817,7 +876,7 @@ task.spawn(function()
                     for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             repeat
-                                task.wait()
+                                task.wait(1)
                                 button:Fire()
                                 teleportToSavedPosition()
                             until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
@@ -828,7 +887,7 @@ task.spawn(function()
 
                     if not teleportedBack then
                         repeat
-                            task.wait()
+                            task.wait(1)
                             teleportToSavedPosition()
                         until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
 
@@ -837,14 +896,14 @@ task.spawn(function()
                 end
             elseif playerMode == nil and teleportedBack == false then
                 repeat
-                    task.wait()
+                    task.wait(1)
                     teleportToSavedPosition()
                 until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
 
                 teleportedBack = true
             end
 
-            if playerMap ~= settings['Misc']['BackWorld'] then
+            if playerMap ~= settings['Misc']['BackWorld'] and not inDungeon and not inRaid and not inDefense then
                 teleportedBack = false
             end
         end
