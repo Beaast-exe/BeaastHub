@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(3)
+--task.wait(3)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -56,7 +56,9 @@ local defaultSettings = {
     },
     ['Misc'] = {
         ['Mount'] = false,
-		['Speed'] = 26
+        ['BackPosition'] = nil,
+        ['BackWorld'] = "1",
+        ['TeleportBack'] = false
     },
     ['Keybinds'] = {
 		['menuKeybind'] = 'LeftShift'
@@ -103,7 +105,7 @@ local dataRemoteEvent = ffrostflame_bridgenet2:FindFirstChild("dataRemoteEvent")
 local ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
 local passiveStats = require(ReplicatedStorage.Framework.Modules.Data.PassiveData)
 
-local playerMap = 1
+local playerMap = "1"
 local playerMode = nil
 
 local worldsNames = {
@@ -148,6 +150,17 @@ local worldsTableNumbers = {
     ["Z Hills"] = 8
 }
 
+local numbersToWorlds = {
+    [1] = "Slayer Town",
+    [2] = "Giant District",
+    [3] = "ABC City",
+    [4] = "Cursed School",
+    [5] = "Leveling Town",
+    [6] = "Sand Empire",
+    [7] = "Bizarre Desert",
+    [8] = "Z Hills"
+}
+
 local stars = {
     'Slayer Star',
     'Titan Star',
@@ -161,6 +174,9 @@ local stars = {
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
+        local playerGui = player:FindFirstChild('PlayerGui')
+        playerGui:FindFirstChild('Transition').Enabled = false
+
 		local PETS = workspace['_PETS']:WaitForChild(player.UserId)
 		for i, v in pairs(PETS:GetChildren()) do
 			v:SetAttribute('WalkSPD', 150)
@@ -173,6 +189,28 @@ task.spawn(function()
         end
     end
 end)
+
+local function getTime(time)
+    if time >= -999999 and time < 60 then
+        return ("%02is"):format(time % 60)
+    elseif time > 59 and time < 3600 then
+        return ("%02im %02is"):format(time / 60 % 60, time % 60)
+    elseif time > 3599 and time < 86399 then
+        return ("%02ih %02im"):format(time / 3600 % 24, time / 60 % 60)
+    else
+        return ("%02id %02ih"):format(time / 86400, time / 3600 % 24)
+    end
+end
+
+function stringToCFrame(string)
+    return CFrame.new(table.unpack(string:gsub(' ', ''):split(',')))
+end
+
+function teleportToWorld(world, cframe)
+    dataRemoteEvent:FireServer(unpack({{{"TeleportSystem", "To", tonumber(world), n = 3}, "\002"}}))
+    task.wait(1)
+    character.HumanoidRootPart.CFrame = cframe
+end
 
 local function checkDungeon()
     local In_Doing = nil
@@ -192,13 +230,6 @@ local function checkDungeon()
     end
 
     return In_Doing
-    -- local inDungeon = false
-
-    -- if playerMode == 'Dungeon' then
-    --     inDungeon = true
-    -- end
-
-    -- return inDungeon
 end
 
 local function checkEnemy()
@@ -401,23 +432,32 @@ local function inDefense()
 end
 
 local function getDungeonCooldown()
-    local PlayerGui = player:FindFirstChild('PlayerGui')
-    local cooldown = false
+    local DungeonDelay = ScriptLibrary.PlayerData.DungeonDelay
+        local Time = ReplicatedStorage:GetAttribute('Time')
 
-    if PlayerGui then
-        local center = PlayerGui:FindFirstChild('_CENTER')
-        if center then
-            local DungeonList = center:FindFirstChild('DungeonList')
-            if DungeonList then
-                local Info = DungeonList:FindFirstChild('Info')
-                if Info and Info.Visible then
-                    cooldown = true
-                end
-            end
+        if Time < DungeonDelay then
+            return true
+        else
+            return false
         end
-    end
 
-    return cooldown
+    -- local PlayerGui = player:FindFirstChild('PlayerGui')
+    -- local cooldown = false
+
+    -- if PlayerGui then
+    --     local center = PlayerGui:FindFirstChild('_CENTER')
+    --     if center then
+    --         local DungeonList = center:FindFirstChild('DungeonList')
+    --         if DungeonList then
+    --             local Info = DungeonList:FindFirstChild('Info')
+    --             if Info and Info.Visible then
+    --                 cooldown = true
+    --             end
+    --         end
+    --     end
+    -- end
+
+    -- return cooldown
 end
 
 local function createDungeon(difficulty)
@@ -429,7 +469,6 @@ end
 
 local function startDungeon(difficulty)
     if getDungeonCooldown() then return end
-    print(checkDungeon())
     if checkDungeon() == nil then
         createDungeon(difficulty)
         task.wait(5)
@@ -441,23 +480,31 @@ local function startDungeon(difficulty)
 end
 
 local function getDefenseCooldown()
-    local PlayerGui = player:FindFirstChild('PlayerGui')
-    local cooldown = false
+    local DefenseDelay = ScriptLibrary.PlayerData.DefenseDelay
+    local Time = ReplicatedStorage:GetAttribute('Time')
 
-    if PlayerGui then
-        local center = PlayerGui:FindFirstChild('_CENTER')
-        if center then
-            local DefenseList = center:FindFirstChild('DefenseList')
-            if DefenseList then
-                local Info = DefenseList:FindFirstChild('Info')
-                if Info and Info.Visible then
-                    cooldown = true
-                end
-            end
-        end
+    if Time < DefenseDelay then
+        return true
+    else
+        return false
     end
+    -- local PlayerGui = player:FindFirstChild('PlayerGui')
+    -- local cooldown = false
 
-    return cooldown
+    -- if PlayerGui then
+    --     local center = PlayerGui:FindFirstChild('_CENTER')
+    --     if center then
+    --         local DefenseList = center:FindFirstChild('DefenseList')
+    --         if DefenseList then
+    --             local Info = DefenseList:FindFirstChild('Info')
+    --             if Info and Info.Visible then
+    --                 cooldown = true
+    --             end
+    --         end
+    --     end
+    -- end
+
+    -- return cooldown
 end
 
 local function createDefense()
@@ -482,23 +529,32 @@ local function clickDamage()
 end
 
 local function getRaidCooldown()
-    local PlayerGui = player:FindFirstChild('PlayerGui')
-    local cooldown = false
+    local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
+    local Time = ReplicatedStorage:GetAttribute('Time')
 
-    if PlayerGui then
-        local center = PlayerGui:FindFirstChild('_CENTER')
-        if center then
-            local RaidList = center:FindFirstChild('RaidList')
-            if RaidList then
-                local Info = RaidList:FindFirstChild('Info')
-                if Info and Info.Visible then
-                    cooldown = true
-                end
-            end
-        end
+    if Time < RaidDelay then
+        return true
+    else
+        return false
     end
 
-    return cooldown
+    -- local PlayerGui = player:FindFirstChild('PlayerGui')
+    -- local cooldown = false
+
+    -- if PlayerGui then
+    --     local center = PlayerGui:FindFirstChild('_CENTER')
+    --     if center then
+    --         local RaidList = center:FindFirstChild('RaidList')
+    --         if RaidList then
+    --             local Info = RaidList:FindFirstChild('Info')
+    --             if Info and Info.Visible then
+    --                 cooldown = true
+    --             end
+    --         end
+    --     end
+    -- end
+
+    -- return cooldown
 end
 
 local function createRaid(mapNumber)
@@ -509,6 +565,7 @@ end
 
 local function startRaid(mapNumber)
     if getRaidCooldown() then return end
+
     if checkDungeon() == nil then
         createRaid(mapNumber)
         task.wait(5)
@@ -742,22 +799,112 @@ Misc:AddToggle('enableAutoMount', {
     end
 })
 
+local ignoredBackWorlds = {"Defense", "Dungeon", "EasterInvasion", "Portal", "Raid"} 
+local selectBackPosition = Misc:AddButton({
+    Text = 'Save Back Position',
+    Func = function()
+        if table.find(ignoredBackWorlds, playerMap) then
+            Library:Notify('Cannot save position in ' .. playerMap, 5)
+            return
+        end
+
+        settings['Misc']['BackPosition'] = tostring(character:FindFirstChild("HumanoidRootPart").CFrame)
+        settings['Misc']['BackWorld'] = playerMap
+        SaveConfig()
+        Library:Notify('Saved Position', 5)
+    end,
+    DoubleClick = false
+})
+
+local testSavedBackPosition = Misc:AddButton({
+    Text = 'Test Back Position',
+    Func = function()
+        teleportToWorld(settings['Misc']['BackWorld'], stringToCFrame(settings['Misc']['BackPosition']))
+    end,
+    DoubleClick = false
+})
+
+
+Misc:AddToggle('enableAutoTeleportBack', {
+    Text = 'Teleport Back After Modes',
+    Default = settings['Misc']['TeleportBack'],
+
+    Callback = function(value)
+        settings['Misc']['TeleportBack'] = value
+        SaveConfig()
+    end
+})
+
+function teleportToSavedPosition()
+    teleportToWorld(settings['Misc']['BackWorld'], stringToCFrame(settings['Misc']['BackPosition']))
+end
+
+local modes = {"Dungeon", "Defense", "Portal"}
+teleportedBack = false
+task.spawn(function()
+    while task.wait(1) and not Library.Unloaded do
+        local playerGui = player:FindFirstChild('PlayerGui')
+
+        if playerGui and settings['Misc']['TeleportBack'] then
+            print(playerMap)
+            local ResultsGui = playerGui.Results
+            local ReturnButton = ResultsGui.Content.Return
+
+            if playerMode == 'Raid' then
+                local raidGui = PlayerGui.Mode.Content.Raid
+
+                if raidGui.Visible then
+                    repeat task.wait() until raidGui.Visible == false
+                else
+                    teleportToSavedPosition()
+                end
+            -- elseif playerMode == 'Dungeon' then
+            --     if ResultsGui.Enabled then
+
+            --     end
+            elseif table.find(modes, playerMode) then
+                if ResultsGui.Enabled then
+                    for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
+                        if i == 1 then
+                            repeat
+                                task.wait()
+                                button:Fire()
+                                teleportToSavedPosition()
+                            until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
+                            
+                            teleportedBack = true
+                        end
+                    end
+
+                    if not teleportedBack then
+                        repeat
+                            task.wait()
+                            teleportToSavedPosition()
+                        until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
+
+                        teleportedBack = true
+                    end
+                end
+            elseif playerMode == nil and teleportedBack == false then
+                repeat
+                    task.wait()
+                    teleportToSavedPosition()
+                until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
+
+                teleportedBack = true
+            end
+
+            if playerMap ~= settings['Misc']['BackWorld'] then
+                teleportedBack = false
+            end
+        end
+    end
+end)
+
 local Timers = Tabs['Main']:AddRightGroupbox('Timers')
 local DungeonCooldown = Timers:AddLabel("DUNGEON >> ", true)
 local RaidCooldown = Timers:AddLabel("RAID    >> ", true)
 local DefenseCooldown = Timers:AddLabel("DEFENSE >> ", true)
-
-local function getTime(time)
-    if time >= -999999 and time < 60 then
-        return ("%02is"):format(time % 60)
-    elseif time > 59 and time < 3600 then
-        return ("%02im %02is"):format(time / 60 % 60, time % 60)
-    elseif time > 3599 and time < 86399 then
-        return ("%02ih %02im"):format(time / 3600 % 24, time / 60 % 60)
-    else
-        return ("%02id %02ih"):format(time / 86400, time / 3600 % 24)
-    end
-end
 
 local dungeonMessage = 'DUNGEON >> '
 local raidMessage = 'RAID    >> '
