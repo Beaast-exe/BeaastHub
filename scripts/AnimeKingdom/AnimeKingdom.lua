@@ -810,7 +810,7 @@ task.spawn(function()
                     repeat task.wait() until raidGui.Visible == false
                 else
                     teleportToSavedPosition()
-                    teleportedBack == true
+                    teleportedBack = true
                 end
             elseif table.find(modes, playerMode) and teleportedBack == false then
                 if ResultsGui.Enabled then
