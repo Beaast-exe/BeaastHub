@@ -894,7 +894,7 @@ task.spawn(function()
                         teleportedBack = true
                     end
                 end
-            elseif playerMode == nil and teleportedBack == false then
+            elseif checkDungeon() == nil and teleportedBack == false then
                 repeat
                     task.wait(1)
                     teleportToSavedPosition()
