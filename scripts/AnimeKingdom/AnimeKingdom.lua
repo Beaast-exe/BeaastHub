@@ -455,9 +455,11 @@ local function startDungeon(difficulty)
         createDungeon(difficulty)
         task.wait(5)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
-        teleportToEnemy()
-        sendPetsToEnemy()
-        task.wait(0.25)
+        if inDungeon then
+            teleportToEnemy()
+            sendPetsToEnemy()
+            task.wait(0.25)
+        end
     end
 end
 
@@ -483,9 +485,11 @@ local function startDefense()
         createDefense()
         task.wait(5)
     elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
-        teleportToEnemy()
-        sendPetsToEnemy()
-        task.wait(0.25)
+        if inDefense then
+            teleportToEnemy()
+            sendPetsToEnemy()
+            task.wait(0.25)
+        end
     end
 end
 
@@ -517,9 +521,11 @@ local function startRaid(mapNumber)
         createRaid(mapNumber)
         task.wait(5)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
-        teleportToEnemy()
-        sendPetsToEnemy()
-        task.wait(0.25)
+        if inRaid then
+            teleportToEnemy()
+            sendPetsToEnemy()
+            task.wait(0.25)
+        end
     end
 end
 
