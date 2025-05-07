@@ -803,15 +803,16 @@ task.spawn(function()
             local ResultsGui = playerGui.Results
             local ReturnButton = ResultsGui.Content.Return
 
-            if playerMode == 'Raid' then
+            if playerMode == 'Raid' and teleportedBack == false then
                 local raidGui = PlayerGui.Mode.Content.Raid
 
                 if raidGui.Visible then
                     repeat task.wait() until raidGui.Visible == false
                 else
                     teleportToSavedPosition()
+                    teleportedBack == true
                 end
-            elseif table.find(modes, playerMode) then
+            elseif table.find(modes, playerMode) and teleportedBack == false then
                 if ResultsGui.Enabled then
                     for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
