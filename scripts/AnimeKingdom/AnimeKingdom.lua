@@ -248,11 +248,11 @@ local function checkEnemy()
     return enemyFolder
 end
 
-local function checkEnemyInMap()
+local function checkEnemyInMap(map)
     local enemyFolder = nil
 
     for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
-        if folder:IsA('Folder') and (folder.Name == 'Dungeon' or folder.Name == 'Raid' or folder.Name == 'Defense') then
+        if folder:IsA('Folder') and folder.Name == 'Dungeon' then
             for _, v in pairs(folder:GetChildren()) do
                 if v:IsA('Folder') and v.Name == tostring(player.UserId) and #v:GetChildren() > 0 then
                     enemyFolder = v
@@ -299,7 +299,7 @@ local function getEnemy()
     return enemy
 end
 
-local function getEnemyInMap()
+local function getEnemyInMap(map)
     local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
     if not HumanoidRootPart then return end
 
@@ -308,9 +308,9 @@ local function getEnemyInMap()
 
     for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
         if enemyFolder:IsA("Folder") then
-            local targetFolder = checkEnemyInMap()
+            local targetFolder = checkEnemyInMap(map)
             if targetFolder then
-                for _, v in ipairs(enemyFolder:GetChildren()) do
+                for _, v in ipairs(targetFolder:GetChildren()) do
                     local HP = v:GetAttribute('HP')
                     local Shield = v:GetAttribute('Shield')
     
@@ -375,11 +375,11 @@ local function teleportToEnemy()
     end
 end
 
-local function teleportToEnemyInMap()
+local function teleportToEnemyInMap(map)
     local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
     if not HumanoidRootPart then return end
 
-    local enemy = getEnemyInMap()
+    local enemy = getEnemyInMap(map)
     if enemy then
         HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
     end
@@ -465,9 +465,9 @@ local function inDungeon()
 
     if currentWorld == 'Dungeon' then
         return true
+    else
+        return false    
     end
-
-    return
 end
 
 local function inRaid()
@@ -475,9 +475,9 @@ local function inRaid()
 
     if currentWorld == 'Raid' then
         return true
+    else
+        return false    
     end
-
-    return
 end
 
 local function inDefense()
@@ -485,9 +485,9 @@ local function inDefense()
 
     if currentWorld == 'Defense' then
         return true
+    else
+        return false    
     end
-
-    return
 end
 
 local function getDungeonCooldown()
@@ -514,10 +514,10 @@ local function startDungeon(difficulty)
         createDungeon(difficulty)
         task.wait(5)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
-        if inDungeon then
+        if inDungeon() then
             teleportToEnemyInMap('Dungeon')
             sendPetsToEnemy()
-            task.wait(0.25)
+            task.wait(0.1)
         end
     end
 end
@@ -544,7 +544,7 @@ local function startDefense()
         createDefense()
         task.wait(5)
     elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
-        if inDefense then
+        if inDefense() then
             teleportToEnemyInMap('Defense')
             sendPetsToEnemy()
             task.wait(0.25)
@@ -580,7 +580,7 @@ local function startRaid(mapNumber)
         createRaid(mapNumber)
         task.wait(5)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
-        if inRaid then
+        if inRaid() then
             teleportToEnemyInMap('Raid')
             sendPetsToEnemy()
             task.wait(0.25)
@@ -858,7 +858,7 @@ task.spawn(function()
         local playerGui = player:FindFirstChild('PlayerGui')
 
         if playerGui and settings['Misc']['TeleportBack'] then
-            print(playerMap, playerMode, teleportedBack)
+            print('MAP:', playerMap, 'MODE:', playerMode, 'TELEPORTED:', teleportedBack, 'CHECK DUNGEON:', checkDungeon())
             local ResultsGui = playerGui.Results
             local ReturnButton = ResultsGui.Content.Return
 
@@ -903,9 +903,11 @@ task.spawn(function()
                 teleportedBack = true
             end
 
-            if playerMap ~= settings['Misc']['BackWorld'] and not inDungeon and not inRaid and not inDefense then
+            if playerMap ~= settings['Misc']['BackWorld'] and not inDungeon() and not inRaid() and not inDefense() then
                 teleportedBack = false
             end
+
+            print(inDungeon(), inRaid(), inDefense())
         end
     end
 end)
