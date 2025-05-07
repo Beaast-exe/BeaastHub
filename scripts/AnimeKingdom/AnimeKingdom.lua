@@ -252,7 +252,7 @@ local function checkEnemyInMap(map)
     local enemyFolder = nil
 
     for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
-        if folder:IsA('Folder') and folder.Name == 'Dungeon' then
+        if folder:IsA('Folder') and folder.Name == map then
             for _, v in pairs(folder:GetChildren()) do
                 if v:IsA('Folder') and v.Name == tostring(player.UserId) and #v:GetChildren() > 0 then
                     enemyFolder = v
