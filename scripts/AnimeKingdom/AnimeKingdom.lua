@@ -440,24 +440,6 @@ local function getDungeonCooldown()
         else
             return false
         end
-
-    -- local PlayerGui = player:FindFirstChild('PlayerGui')
-    -- local cooldown = false
-
-    -- if PlayerGui then
-    --     local center = PlayerGui:FindFirstChild('_CENTER')
-    --     if center then
-    --         local DungeonList = center:FindFirstChild('DungeonList')
-    --         if DungeonList then
-    --             local Info = DungeonList:FindFirstChild('Info')
-    --             if Info and Info.Visible then
-    --                 cooldown = true
-    --             end
-    --         end
-    --     end
-    -- end
-
-    -- return cooldown
 end
 
 local function createDungeon(difficulty)
@@ -488,23 +470,6 @@ local function getDefenseCooldown()
     else
         return false
     end
-    -- local PlayerGui = player:FindFirstChild('PlayerGui')
-    -- local cooldown = false
-
-    -- if PlayerGui then
-    --     local center = PlayerGui:FindFirstChild('_CENTER')
-    --     if center then
-    --         local DefenseList = center:FindFirstChild('DefenseList')
-    --         if DefenseList then
-    --             local Info = DefenseList:FindFirstChild('Info')
-    --             if Info and Info.Visible then
-    --                 cooldown = true
-    --             end
-    --         end
-    --     end
-    -- end
-
-    -- return cooldown
 end
 
 local function createDefense()
@@ -537,24 +502,6 @@ local function getRaidCooldown()
     else
         return false
     end
-
-    -- local PlayerGui = player:FindFirstChild('PlayerGui')
-    -- local cooldown = false
-
-    -- if PlayerGui then
-    --     local center = PlayerGui:FindFirstChild('_CENTER')
-    --     if center then
-    --         local RaidList = center:FindFirstChild('RaidList')
-    --         if RaidList then
-    --             local Info = RaidList:FindFirstChild('Info')
-    --             if Info and Info.Visible then
-    --                 cooldown = true
-    --             end
-    --         end
-    --     end
-    -- end
-
-    -- return cooldown
 end
 
 local function createRaid(mapNumber)
@@ -842,7 +789,7 @@ end
 local modes = {"Dungeon", "Defense", "Portal"}
 teleportedBack = false
 task.spawn(function()
-    while task.wait(1) and not Library.Unloaded do
+    while task.wait(5) and not Library.Unloaded do
         local playerGui = player:FindFirstChild('PlayerGui')
 
         if playerGui and settings['Misc']['TeleportBack'] then
@@ -858,10 +805,6 @@ task.spawn(function()
                 else
                     teleportToSavedPosition()
                 end
-            -- elseif playerMode == 'Dungeon' then
-            --     if ResultsGui.Enabled then
-
-            --     end
             elseif table.find(modes, playerMode) then
                 if ResultsGui.Enabled then
                     for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
