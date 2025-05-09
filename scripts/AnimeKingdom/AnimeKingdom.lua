@@ -182,11 +182,9 @@ task.spawn(function()
 			v:SetAttribute('WalkSPD', 150)
 		end
         
-        playerMap = ScriptLibrary.PlayerData.CurrentMap
+        playerMap = tostring(ScriptLibrary.PlayerData.CurrentMap)
         
-        if player:GetAttribute('Mode') ~= nil then
-            playerMode = player:GetAttribute('Mode')
-        end
+        playerMode = player:GetAttribute('Mode') or nil
     end
 end)
 
@@ -854,7 +852,7 @@ end
 local modes = {"Dungeon", "Defense", "Portal"}
 teleportedBack = false
 task.spawn(function()
-    while task.wait(5) and not Library.Unloaded do
+    while task.wait(1) and not Library.Unloaded do
         local playerGui = player:FindFirstChild('PlayerGui')
 
         if playerGui and settings['Misc']['TeleportBack'] then
@@ -862,8 +860,9 @@ task.spawn(function()
             local ResultsGui = playerGui.Results
             local ReturnButton = ResultsGui.Content.Return
 
-            if (playerMode == 'Raid' or checkDungeon() == 'Raid') and teleportedBack == false then
+            if (playerMode == 'Raid' or checkDungeon() == 'Raid') then
                 local raidGui = PlayerGui.Mode.Content.Raid
+                teleportedBack = false
 
                 if raidGui.Visible then
                     repeat task.wait() until raidGui.Visible == false
@@ -871,43 +870,37 @@ task.spawn(function()
                     teleportToSavedPosition()
                     teleportedBack = true
                 end
-            elseif table.find(modes, checkDungeon()) and teleportedBack == false then
+            elseif table.find(modes, checkDungeon()) then
                 if ResultsGui.Enabled then
                     for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             repeat
-                                task.wait(1)
+                                task.wait()
+                                teleportedBack = false
                                 button:Fire()
                                 teleportToSavedPosition()
-                            until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
-                            
+                            until (playerMap == settings['Misc']['BackWorld'] and stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame) or Library.Unloaded
+
                             teleportedBack = true
                         end
                     end
-
-                    if not teleportedBack then
-                        repeat
-                            task.wait(1)
-                            teleportToSavedPosition()
-                        until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
-
-                        teleportedBack = true
-                    end
                 end
-            elseif checkDungeon() == nil and teleportedBack == false then
+            end    
+
+            if (playerMode == nil or checkDungeon() == nil) and not inDungeon() and not inRaid() and not inDefense() then
                 repeat
-                    task.wait(1)
+                    task.wait()
                     teleportToSavedPosition()
-                until playerMap == settings['Misc']['BackWorld'] or stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame or Library.Unloaded
+                until (playerMap == settings['Misc']['BackWorld'] and stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame) or Library.Unloaded
 
                 teleportedBack = true
             end
 
-            if playerMap ~= settings['Misc']['BackWorld'] and not inDungeon() and not inRaid() and not inDefense() then
-                teleportedBack = false
+            if teleportedBack then
+                if (playerMap == settings['Misc']['BackWorld'] and stringToCFrame(settings['Misc']['BackPosition']) ~= character:FindFirstChild("HumanoidRootPart").CFrame) then
+                    teleportedBack = false
+                end
             end
-
-            print(inDungeon(), inRaid(), inDefense())
         end
     end
 end)
