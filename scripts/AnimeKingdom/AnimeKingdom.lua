@@ -116,7 +116,8 @@ local worldsNames = {
     "Leveling Town",
     "Sand Empire",
     "Bizarre Desert",
-    "Z Hills"
+    "Z Hills",
+    "Ninja Village"
 }
 
 local dungeonDifficulties = {
@@ -136,7 +137,8 @@ local worldsTable = {
     ["Leveling Town"] = "5",
     ["Sand Empire"] = "6",
     ["Bizarre Desert"] = "7",
-    ["Z Hills"] = "8"
+    ["Z Hills"] = "8",
+    ["Ninja Village"] = "9"
 }
 
 local worldsTableNumbers = {
@@ -147,7 +149,8 @@ local worldsTableNumbers = {
     ["Leveling Town"] = 5,
     ["Sand Empire"] = 6,
     ["Bizarre Desert"] = 7,
-    ["Z Hills"] = 8
+    ["Z Hills"] = 8,
+    ["Ninja Village"] = 9
 }
 
 local numbersToWorlds = {
@@ -158,7 +161,8 @@ local numbersToWorlds = {
     [5] = "Leveling Town",
     [6] = "Sand Empire",
     [7] = "Bizarre Desert",
-    [8] = "Z Hills"
+    [8] = "Z Hills",
+    [9] = "Ninja Village"
 }
 
 local stars = {
@@ -169,7 +173,8 @@ local stars = {
     'Player Star',
     'Pirate Star',
     'Bizarre Star',
-    'Z Star'
+    'Z Star',
+    'Ninja Star'
 }
 
 task.spawn(function()
