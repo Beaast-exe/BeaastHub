@@ -174,16 +174,8 @@ local stars = {
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        local playerGui = player:FindFirstChild('PlayerGui')
-        playerGui:FindFirstChild('Transition').Enabled = false
-
-		local PETS = workspace['_PETS']:WaitForChild(player.UserId)
-		for i, v in pairs(PETS:GetChildren()) do
-			v:SetAttribute('WalkSPD', 150)
-		end
-        
+        PlayerGui:FindFirstChild('Transition').Enabled = false
         playerMap = tostring(ScriptLibrary.PlayerData.CurrentMap)
-        
         playerMode = player:GetAttribute('Mode') or nil
     end
 end)
@@ -357,9 +349,6 @@ end
 local function setPetsStats()
     for i, v in ipairs(Workspace['_PETS'][player.UserId]:GetChildren()) do
         v:SetAttribute('WalkSPD', 150)
-        v:SetAttribute('MaxUlt', 0)
-        v:SetAttribute('Scale', 2.5)
-        v:SetAttribute('Stats', '{"HitDMG":1e9,"AtkSPD":1e9,"WalkSPD":1e9,"UltDMG":1e9}')
     end
 end
 
@@ -398,7 +387,7 @@ local function sendPetsToEnemy()
                             if target and enemy then
                                 local magnitude = (target.Position - enemy.Position).magnitude
 
-                                if magnitude > 15 then
+                                if magnitude > 15 and magnitude < 70 then
                                     target.CFrame = enemy.CFrame
                                 end
                             end
@@ -414,7 +403,7 @@ local function sendPetsToEnemy()
                 if target and enemy then
                     local magnitude = (target.Position - enemy.Position).magnitude
 
-                    if magnitude > 15 then
+                    if magnitude > 15 and magnitude < 70 then
                         target.CFrame = enemy.CFrame
                     end
                 end
@@ -606,7 +595,7 @@ task.spawn(function()
 end)
 
 AutoFarm:AddToggle('enablePetStats', {
-    Text = 'Enable Pet Stats Modifier',
+    Text = 'Boost Pets Speed (Need Re-equip)',
     Default = settings['AutoFarm']['PetStats'],
 
     Callback = function(value)
@@ -652,7 +641,7 @@ AutoFarm:AddToggle('enablePetsTeleport', {
 })
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['AutoFarm']['TeleportPetsToEnemies'] then
             sendPetsToEnemy()
         end
@@ -853,55 +842,45 @@ local modes = {"Dungeon", "Defense", "Portal"}
 teleportedBack = false
 task.spawn(function()
     while task.wait(1) and not Library.Unloaded do
-        local playerGui = player:FindFirstChild('PlayerGui')
+        if settings['Misc']['TeleportBack'] then
+            print('playerMode:', playerMode, '::', 'playerMap:', playerMap, '::', 'teleportedBack:', teleportedBack)
 
-        if playerGui and settings['Misc']['TeleportBack'] then
-            print('MAP:', playerMap, 'MODE:', playerMode, 'TELEPORTED:', teleportedBack, 'CHECK DUNGEON:', checkDungeon())
-            local ResultsGui = playerGui.Results
-            local ReturnButton = ResultsGui.Content.Return
 
-            if (playerMode == 'Raid' or checkDungeon() == 'Raid') then
-                local raidGui = PlayerGui.Mode.Content.Raid
+            if playerMode ~= nil then
                 teleportedBack = false
+                local ResultsGUI = PlayerGui.Results
 
-                if raidGui.Visible then
-                    repeat task.wait() until raidGui.Visible == false
-                else
-                    teleportToSavedPosition()
-                    teleportedBack = true
-                end
-            elseif table.find(modes, checkDungeon()) then
-                if ResultsGui.Enabled then
-                    for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
+                if ResultsGUI.Enabled == true then
+                    local ReturnButton = ResultsGUI.Content.Return
+
+                    for i, button in pairs(getconnections(ReturnButton.Activated)) do
                         if i == 1 then
-                            repeat
-                                task.wait()
-                                teleportedBack = false
-                                button:Fire()
-                                teleportToSavedPosition()
-                            until (playerMap == settings['Misc']['BackWorld'] and stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame) or Library.Unloaded
+                            button:Fire()
 
-                            teleportedBack = true
+                            repeat
+                                pcall(function()
+                                    teleportToSavedPosition()
+                                    teleportedBack = true
+                                end)
+                            until Results.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack']
                         end
                     end
                 end
-            end    
-
-            if (playerMode == nil or checkDungeon() == nil) and not inDungeon() and not inRaid() and not inDefense() then
-                repeat
-                    task.wait()
-                    teleportToSavedPosition()
-                until (playerMap == settings['Misc']['BackWorld'] and stringToCFrame(settings['Misc']['BackPosition']) == character:FindFirstChild("HumanoidRootPart").CFrame) or Library.Unloaded
-
-                teleportedBack = true
-            end
-
-            if teleportedBack then
-                if (playerMap == settings['Misc']['BackWorld'] and stringToCFrame(settings['Misc']['BackPosition']) ~= character:FindFirstChild("HumanoidRootPart").CFrame) then
-                    teleportedBack = false
+            elseif playerMode == nil and character:FindFirstChild("HumanoidRootPart").CFrame ~= stringToCFrame(settings['Misc']['BackPosition']) --[[ playerMap ~= settings['Misc']['BackWorld']] and teleportedBack == false then
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                
+                if hrp then
+                    repeat
+                        pcall(function()
+                            teleportToSavedPosition()
+                            teleportedBack = true
+                        end)
+                    until stringToCFrame(settings['Misc']['BackPosition']) == hrp.CFrame
                 end
             end
         end
+
+        task.wait()
     end
 end)
 
