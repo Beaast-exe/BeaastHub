@@ -505,7 +505,7 @@ end
 
 local function startDungeon(difficulty)
     if getDungeonCooldown() then return end
-    if checkDungeon() == nil then
+    if playerMode == nil then
         createDungeon(difficulty)
         task.wait(5)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
@@ -535,7 +535,7 @@ end
 
 local function startDefense()
     if getDefenseCooldown() then return end
-    if checkDungeon() == nil then
+    if playerMode == nil then
         createDefense()
         task.wait(5)
     elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
@@ -571,14 +571,14 @@ end
 local function startRaid(mapNumber)
     if getRaidCooldown() then return end
 
-    if checkDungeon() == nil then
+    if playerMode == nil then
         createRaid(mapNumber)
         task.wait(5)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
         if inRaid() then
             teleportToEnemyInMap('Raid')
             sendPetsToEnemy()
-            task.wait(0.25)
+            task.wait(0.1)
         end
     end
 end
@@ -753,7 +753,7 @@ AutoDefense:AddToggle('enableAutoDefense', {
 })
 
 task.spawn(function()
-    while task.wait() and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoDefense']['Enabled'] then
             startDefense()
         end
