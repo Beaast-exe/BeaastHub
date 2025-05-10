@@ -202,9 +202,12 @@ function stringToCFrame(string)
 end
 
 function teleportToWorld(world, cframe)
+    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
     dataRemoteEvent:FireServer(unpack({{{"TeleportSystem", "To", tonumber(world), n = 3}, "\002"}}))
     task.wait(1)
-    character.HumanoidRootPart.CFrame = cframe
+    hrp.CFrame = cframe
 end
 
 local function checkDungeon()
@@ -539,7 +542,7 @@ local function startDefense()
         if inDefense() then
             teleportToEnemyInMap('Defense')
             sendPetsToEnemy()
-            task.wait(0.25)
+            task.wait(0.1)
         end
     end
 end
@@ -840,6 +843,8 @@ Misc:AddToggle('enableAutoTeleportBack', {
 })
 
 function teleportToSavedPosition()
+    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
     teleportToWorld(settings['Misc']['BackWorld'], stringToCFrame(settings['Misc']['BackPosition']))
 end
 
@@ -849,14 +854,35 @@ task.spawn(function()
     while task.wait(1) and not Library.Unloaded do
         if settings['Misc']['TeleportBack'] then
             print('playerMode:', playerMode, '::', 'playerMap:', playerMap, '::', 'teleportedBack:', teleportedBack)
+            local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
 
+            local ResultsGUI = PlayerGui.Resultss
+            local ReturnButton = ResultsGUI.Content.Return
+
+            if ResultsGUI.Enabled then
+                print("ResultsGUI.Enabled == true")
+
+                for i, button in pairs(getconnections(ReturnButton.Activated)) do
+                        if i == 1 then
+                            button:Fire()
+
+                            repeat
+                                pcall(function()
+                                    print("repeat RESULTS GUI")
+                                    teleportToSavedPosition()
+                                    teleportedBack = true
+                                end)
+                            until Results.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack'] or not Library.Unloaded
+                        end
+                    end
+            end
 
             if playerMode ~= nil then
                 teleportedBack = false
-                local ResultsGUI = PlayerGui.Results
-
+                 
                 if ResultsGUI.Enabled == true then
-                    local ReturnButton = ResultsGUI.Content.Return
+                    print("1")
 
                     for i, button in pairs(getconnections(ReturnButton.Activated)) do
                         if i == 1 then
@@ -864,24 +890,27 @@ task.spawn(function()
 
                             repeat
                                 pcall(function()
+                                    print("repeat 1")
                                     teleportToSavedPosition()
                                     teleportedBack = true
                                 end)
-                            until Results.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack']
+                            until Results.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack'] or not Library.Unloaded
                         end
                     end
                 end
-            elseif playerMode == nil and character:FindFirstChild("HumanoidRootPart").CFrame ~= stringToCFrame(settings['Misc']['BackPosition']) --[[ playerMap ~= settings['Misc']['BackWorld']] and teleportedBack == false then
-                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-                
-                if hrp then
-                    repeat
-                        pcall(function()
-                            teleportToSavedPosition()
-                            teleportedBack = true
-                        end)
-                    until stringToCFrame(settings['Misc']['BackPosition']) == hrp.CFrame
-                end
+            elseif playerMode == nil and hrp.CFrame ~= stringToCFrame(settings['Misc']['BackPosition']) and teleportedBack == false then              
+                print("2")
+                --print("[" .. tostring(hrp.CFrame) .. "]" .. '::' .. "[" .. tostring(settings['Misc']['BackPosition']) .. "]")
+                print(tostring(hrp.CFrame))
+                print(tostring(settings['Misc']['BackPosition']))
+                repeat
+                    pcall(function()
+                        print("repeat 2")
+                        teleportToSavedPosition()
+                        teleportedBack = true
+                    end)
+                --until stringToCFrame(settings['Misc']['BackPosition']) == hrp.CFrame or not settings['Misc']['TeleportBack'] or not Library.Unloaded
+                until tostring(settings['Misc']['BackPosition']) == tostring(hrp.CFrame) or not settings['Misc']['TeleportBack'] or not Library.Unloaded
             end
         end
 
