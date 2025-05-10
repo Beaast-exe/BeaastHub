@@ -859,6 +859,7 @@ task.spawn(function()
 
             local ResultsGUI = PlayerGui.Results
             local ReturnButton = ResultsGUI.Content.Return
+            local RaidGui = PlayerGui.Mode.Content.Raid
 
             if ResultsGUI.Enabled and ReturnButton.Visible then
                 for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
@@ -870,7 +871,7 @@ task.spawn(function()
                                     teleportToSavedPosition()
                                     teleportedBack = true
                                 end)
-                            until Results.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack'] or not Library.Unloaded
+                            until ResultsGUI.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack'] or not Library.Unloaded
                         end
                     end
             end
@@ -889,7 +890,7 @@ task.spawn(function()
                                     teleportToSavedPosition()
                                     teleportedBack = true
                                 end)
-                            until Results.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack'] or not Library.Unloaded
+                            until ResultsGUI.Enabled == false or Library.Unloaded or not settings['Misc']['TeleportBack'] or not Library.Unloaded
                         end
                     end
                 end
