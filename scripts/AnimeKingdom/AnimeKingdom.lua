@@ -857,7 +857,7 @@ task.spawn(function()
             local hrp = player.Character:FindFirstChild("HumanoidRootPart")
             if not hrp then return end
 
-            local ResultsGUI = PlayerGui.Resultss
+            local ResultsGUI = PlayerGui.Results
             local ReturnButton = ResultsGUI.Content.Return
 
             if ResultsGUI.Enabled then
