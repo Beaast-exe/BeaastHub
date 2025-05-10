@@ -859,10 +859,18 @@ local selectBackPosition = Misc:AddButton({
             return
         end
 
-        settings['Misc']['BackPosition'] = tostring(character:FindFirstChild("HumanoidRootPart").CFrame)
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            Library:Notify('No HumanoidRootPart', 5)
+            return
+        end
+
+        settings['Misc']['BackPosition'] = tostring(hrp.CFrame)
         settings['Misc']['BackWorld'] = playerMap
+
         SaveConfig()
         Library:Notify('Saved Position', 5)
+        --Library:Notify('World: ' .. playerMap .. '\nPosition: ' .. settings['Misc']['BackPosition'], 5)
     end,
     DoubleClick = false
 })
