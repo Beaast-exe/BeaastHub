@@ -56,6 +56,8 @@ local defaultSettings = {
     },
     ['Misc'] = {
         ['Mount'] = false,
+        ['Results'] = false,
+        ['ResultsDelay'] = 0,
         ['BackPosition'] = nil,
         ['BackWorld'] = "1",
         ['TeleportBack'] = false
@@ -806,6 +808,48 @@ Misc:AddToggle('enableAutoMount', {
     end
 })
 
+Misc:AddToggle('enableResultsSkip', {
+    Text = 'Disable Results Screen',
+    Default = settings['Misc']['Results'],
+
+    Callback = function(value)
+        settings['Misc']['Results'] = value
+        SaveConfig()
+    end
+})
+
+Misc:AddSlider('skipResultsSlider', {
+    Text = 'Results Skip Delay',
+    Default = settings['Misc']['ResultsDelay'],
+    Min = 0,
+    Max = 5,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['Misc']['ResultsDelay'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['Misc']['Results'] then
+            local ResultsGUI = PlayerGui.Results
+            local ReturnButton = ResultsGUI.Content.Return
+
+            if ResultsGUI.Enabled and ReturnButton.Visible then
+                for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
+                    if i == 1 then
+                        task.wait(settings['Misc']['ResultsDelay'])
+                        button:Fire()
+                    end
+                end
+            end
+        end
+    end
+end)
+
 local ignoredBackWorlds = {"Defense", "Dungeon", "EasterInvasion", "Portal", "Raid"} 
 local selectBackPosition = Misc:AddButton({
     Text = 'Save Back Position',
@@ -830,7 +874,6 @@ local testSavedBackPosition = Misc:AddButton({
     end,
     DoubleClick = false
 })
-
 
 Misc:AddToggle('enableAutoTeleportBack', {
     Text = 'Teleport Back After Modes',
