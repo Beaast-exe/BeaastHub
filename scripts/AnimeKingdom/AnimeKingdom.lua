@@ -528,8 +528,8 @@ local function getDefenseCooldown()
     end
 end
 
-local function createDefense()
-    dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Create", "AlienPlanet", n = 3}, "\2"}}))
+local function createDefense()    
+    dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Create", "AlienPlanet", n = 3}, "\002"}}))
     dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Start", n = 2}, "\2"}}))
 end
 
