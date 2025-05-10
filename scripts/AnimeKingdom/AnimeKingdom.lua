@@ -860,7 +860,7 @@ task.spawn(function()
             local ResultsGUI = PlayerGui.Results
             local ReturnButton = ResultsGUI.Content.Return
 
-            if ResultsGUI.Enabled then
+            if ResultsGUI.Enabled and ReturnButton.Visible then
                 for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             button:Fire()
@@ -878,7 +878,7 @@ task.spawn(function()
             if playerMode ~= nil then
                 teleportedBack = false
                  
-                if ResultsGUI.Enabled == true then
+                if ResultsGUI.Enabled == true and ReturnButton.Visible == true then
                     for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             button:Fire()
