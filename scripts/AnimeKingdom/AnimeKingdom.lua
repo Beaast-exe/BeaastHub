@@ -863,7 +863,7 @@ task.spawn(function()
             if ResultsGUI.Enabled then
                 print("ResultsGUI.Enabled == true")
 
-                for i, button in pairs(getconnections(ReturnButton.Activated)) do
+                for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             button:Fire()
 
