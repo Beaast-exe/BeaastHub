@@ -861,15 +861,12 @@ task.spawn(function()
             local ReturnButton = ResultsGUI.Content.Return
 
             if ResultsGUI.Enabled then
-                print("ResultsGUI.Enabled == true")
-
                 for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             button:Fire()
 
                             repeat
                                 pcall(function()
-                                    print("repeat RESULTS GUI")
                                     teleportToSavedPosition()
                                     teleportedBack = true
                                 end)
@@ -882,9 +879,7 @@ task.spawn(function()
                 teleportedBack = false
                  
                 if ResultsGUI.Enabled == true then
-                    print("1")
-
-                    for i, button in pairs(getconnections(ReturnButton.Activated)) do
+                    for i, button in pairs(getconnections(ReturnButton.MouseButton1Click)) do
                         if i == 1 then
                             button:Fire()
 
