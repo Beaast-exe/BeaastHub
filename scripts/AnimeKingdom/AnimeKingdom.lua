@@ -544,7 +544,7 @@ local function startDefense()
         if inDefense() then
             teleportToEnemyInMap('Defense')
             sendPetsToEnemy()
-            task.wait(0.1)
+            task.wait()
         end
     end
 end
