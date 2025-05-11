@@ -45,7 +45,9 @@ local defaultSettings = {
     },
     ['AutoDungeon'] = {
         ['Enabled'] = false,
-        ['Difficulty'] = 'Easy'
+        ['Difficulty'] = 'Easy',
+        ['LeaveWave'] = 1,
+        ['AutoLeave'] = false
     },
     ['AutoDefense'] = {
         ['Enabled'] = false
@@ -210,6 +212,12 @@ function teleportToWorld(world, cframe)
     dataRemoteEvent:FireServer(unpack({{{"TeleportSystem", "To", tonumber(world), n = 3}, "\002"}}))
     task.wait(1)
     hrp.CFrame = cframe
+end
+
+function teleportToSavedPosition()
+    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    teleportToWorld(settings['Misc']['BackWorld'], stringToCFrame(settings['Misc']['BackPosition']))
 end
 
 local function checkDungeon()
@@ -735,10 +743,45 @@ AutoDungeon:AddToggle('enableAutoDungeon', {
     end
 })
 
+AutoDungeon:AddSlider('dungeonLeaveWaveSlider', {
+    Text = 'DungeonLeaveWave',
+    Default = settings['AutoDungeon']['LeaveWave'],
+    Min = 1,
+    Max = 50,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['AutoDungeon']['LeaveWave'] = value
+        SaveConfig()
+    end
+})
+
+AutoDungeon:AddToggle('enableDungeonAutoLeave', {
+    Text = 'Auto Leave Dungeon at Wave',
+    Default = settings['AutoDungeon']['AutoLeave'],
+
+    Callback = function(value)
+        settings['AutoDungeon']['AutoLeave'] = value
+        SaveConfig()
+    end
+})
+
 task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoDungeon']['Enabled'] then
             startDungeon(settings['AutoDungeon']['Difficulty'])
+
+            if settings['AutoDungeon']['AutoLeave'] and playerMode == 'Dungeon' then
+                local Dungeon = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Dungeon')
+                if Dungeon:FindFirstChild(player.UserId) then
+                    if Dungeon[player.UserId].Players:GetAttribute(player.UserId) == true then
+                        if Dungeon[player.UserId]:GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
+                            teleportToSavedPosition()
+                        end
+                    end
+                end
+            end
         end
     end
 end)
@@ -892,12 +935,6 @@ Misc:AddToggle('enableAutoTeleportBack', {
         SaveConfig()
     end
 })
-
-function teleportToSavedPosition()
-    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    teleportToWorld(settings['Misc']['BackWorld'], stringToCFrame(settings['Misc']['BackPosition']))
-end
 
 local modes = {"Dungeon", "Defense", "Portal"}
 teleportedBack = false
