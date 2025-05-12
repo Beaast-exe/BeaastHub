@@ -522,7 +522,7 @@ local function startDungeon(difficulty)
         if inDungeon() then
             teleportToEnemyInMap('Dungeon')
             sendPetsToEnemy()
-            task.wait(0.1)
+            task.wait()
         end
     end
 end
@@ -588,7 +588,7 @@ local function startRaid(mapNumber)
         if inRaid() then
             teleportToEnemyInMap('Raid')
             sendPetsToEnemy()
-            task.wait(0.1)
+            task.wait()
         end
     end
 end
