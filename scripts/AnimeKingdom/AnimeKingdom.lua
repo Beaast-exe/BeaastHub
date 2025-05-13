@@ -1062,7 +1062,7 @@ local Clip = true
 
 function Initialize()
 	Library:Notify(string.format('Script Loaded in %.2f second(s)!', tick() - StartTick), 5)
-	print("[BeaastHub - Anime Kingdom] Loaded")
+	print("[BeaastHub] Anime Kingdom Loaded")
 end
 
 task.spawn(function()
@@ -1075,7 +1075,7 @@ task.spawn(function()
 end)
 
 Library:OnUnload(function()
-	print('[BeaastHub - Anime Kingdom] Unloaded')
+	print('[BeaastHub] Anime Kingdom Unloaded')
 	Library.Unloaded = true
 end)
 
