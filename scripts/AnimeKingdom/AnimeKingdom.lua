@@ -941,7 +941,7 @@ teleportedBack = false
 task.spawn(function()
     while task.wait(1) and not Library.Unloaded do
         if settings['Misc']['TeleportBack'] then
-            print('playerMode:', playerMode, '::', 'playerMap:', playerMap, '::', 'teleportedBack:', teleportedBack)
+            --print('playerMode:', playerMode, '::', 'playerMap:', playerMap, '::', 'teleportedBack:', teleportedBack)
             local hrp = player.Character:FindFirstChild("HumanoidRootPart")
             if not hrp then return end
 
@@ -974,7 +974,7 @@ task.spawn(function()
 
                             repeat
                                 pcall(function()
-                                    print("repeat 1")
+                                    --print("repeat 1")
                                     teleportToSavedPosition()
                                     teleportedBack = true
                                 end)
@@ -983,13 +983,13 @@ task.spawn(function()
                     end
                 end
             elseif playerMode == nil and hrp.CFrame ~= stringToCFrame(settings['Misc']['BackPosition']) and teleportedBack == false then              
-                print("2")
+                --print("2")
                 --print("[" .. tostring(hrp.CFrame) .. "]" .. '::' .. "[" .. tostring(settings['Misc']['BackPosition']) .. "]")
-                print(tostring(hrp.CFrame))
-                print(tostring(settings['Misc']['BackPosition']))
+                --print(tostring(hrp.CFrame))
+                --print(tostring(settings['Misc']['BackPosition']))
                 repeat
                     pcall(function()
-                        print("repeat 2")
+                        --print("repeat 2")
                         teleportToSavedPosition()
                         teleportedBack = true
                     end)
@@ -1062,7 +1062,7 @@ local Clip = true
 
 function Initialize()
 	Library:Notify(string.format('Script Loaded in %.2f second(s)!', tick() - StartTick), 5)
-	print("[Beaast Hub] Loaded")
+	print("[BeaastHub - Anime Kingdom] Loaded")
 end
 
 task.spawn(function()
@@ -1075,7 +1075,7 @@ task.spawn(function()
 end)
 
 Library:OnUnload(function()
-	print('[Beaast Hub] Unloaded')
+	print('[BeaastHub - Anime Kingdom] Unloaded')
 	Library.Unloaded = true
 end)
 
