@@ -121,7 +121,8 @@ local worldsNames = {
     "Sand Empire",
     "Bizarre Desert",
     "Z Hills",
-    "Ninja Village"
+    "Ninja Village",
+    "Soul City"
 }
 
 local dungeonDifficulties = {
