@@ -52,6 +52,9 @@ local defaultSettings = {
     ['AutoDefense'] = {
         ['Enabled'] = false
     },
+    ['AutoInvasion'] = {
+        ['Enabled'] = false
+    },
     ['AutoStar'] = {
         ['Enabled'] = false,
         ['SelectedStar'] = 'Slayer Star'
@@ -500,6 +503,16 @@ local function inDefense()
     end
 end
 
+local function inInvasion()
+    local currentWorld = getCurrentWorld()
+
+    if currentWorld == 'Invasion' then
+        return true
+    else
+        return false    
+    end
+end
+
 local function getDungeonCooldown()
     local DungeonDelay = ScriptLibrary.PlayerData.DungeonDelay
         local Time = ReplicatedStorage:GetAttribute('Time')
@@ -556,6 +569,36 @@ local function startDefense()
     elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
         if inDefense() then
             teleportToEnemyInMap('Defense')
+            sendPetsToEnemy()
+            task.wait()
+        end
+    end
+end
+
+local function getInvasionCooldown()
+    local InvasionDelay = ScriptLibrary.PlayerData.InvasionDelay
+    local Time = ReplicatedStorage:GetAttribute('Time')
+
+    if Time < InvasionDelay then
+        return true
+    else
+        return false
+    end
+end
+
+local function createInvasion()
+    dataRemoteEvent:FireServer(unpack({{{"InvasionSystem", "Create", "HollowInvasion", n = 3 }, "\002"}}))
+    dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Start", n = 2}, "\2"}}))
+end
+
+local function startInvasion()
+    if getInvasionCooldown() then return end
+    if playerMode == nil then
+        createInvasion()
+        task.wait(5)
+    elseif checkDungeon() == 'Invasion' or playerMode == 'Invasion' then
+        if inInvasion() then
+            teleportToEnemyInMap('Invasion')
             sendPetsToEnemy()
             task.wait()
         end
@@ -810,6 +853,25 @@ task.spawn(function()
     end
 end)
 
+local AutoInvasion = Tabs['Main']:AddRightGroupbox('Auto Invasion')
+AutoInvasion:AddToggle('enableAutoInvasion', {
+    Text = 'Enable Auto Invasion',
+    Default = settings['AutoInvasion']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoInvasion']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoInvasion']['Enabled'] then
+            startInvasion()
+        end
+    end
+end)
+
 local AutoStar = Tabs['Main']:AddLeftGroupbox('Auto Star')
 AutoStar:AddDropdown('selectedAutoStar', {
     Values = stars,
@@ -1011,10 +1073,12 @@ local Timers = Tabs['Main']:AddRightGroupbox('Timers')
 local DungeonCooldown = Timers:AddLabel("DUNGEON >> ", true)
 local RaidCooldown = Timers:AddLabel("RAID    >> ", true)
 local DefenseCooldown = Timers:AddLabel("DEFENSE >> ", true)
+local InvasionCooldown = Timers:AddLabel("INVASION >> ", true)
 
-local dungeonMessage = 'DUNGEON >> '
-local raidMessage = 'RAID    >> '
-local defenseMessage = 'DEFENSE >> '
+local dungeonMessage = 'DUNGEON  >> '
+local raidMessage = 'RAID     >> '
+local defenseMessage = 'DEFENSE  >> '
+local invasionMessage = 'INVASION >> '
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
@@ -1026,7 +1090,7 @@ task.spawn(function()
             raidMessage = 'READY !'
         end
 
-        RaidCooldown:SetText('RAID    >> ' .. raidMessage)
+        RaidCooldown:SetText('RAID     >> ' .. raidMessage)
     end
 end)
 
@@ -1041,7 +1105,7 @@ task.spawn(function()
             dungeonMessage = 'READY !'
         end
 
-        DungeonCooldown:SetText('DUNGEON >> ' .. dungeonMessage)
+        DungeonCooldown:SetText('DUNGEON  >> ' .. dungeonMessage)
     end
 end)
 
@@ -1056,7 +1120,22 @@ task.spawn(function()
             defenseMessage = 'READY !'
         end
 
-        DefenseCooldown:SetText('DEFENSE >> ' .. defenseMessage)
+        DefenseCooldown:SetText('DEFENSE  >> ' .. defenseMessage)
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local InvasionDelay = ScriptLibrary.PlayerData.InvasionDelay
+        local Time = ReplicatedStorage:GetAttribute('Time')
+
+        if Time < InvasionDelay then
+            invasionMessage = "in " .. tostring(getTime(InvasionDelay - Time))
+        else
+            invasionMessage = 'READY !'
+        end
+
+        InvasionCooldown:SetText('INVASION >> ' .. invasionMessage)
     end
 end)
 
