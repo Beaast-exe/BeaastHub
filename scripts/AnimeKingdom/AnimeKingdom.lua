@@ -960,7 +960,7 @@ task.spawn(function()
     end
 end)
 
-local ignoredBackWorlds = {"Defense", "Dungeon", "EasterInvasion", "Portal", "Raid"} 
+local ignoredBackWorlds = {"Defense", "Dungeon", "EasterInvasion", "Portal", "Raid", "Invasion"} 
 local selectBackPosition = Misc:AddButton({
     Text = 'Save Back Position',
     Func = function()
@@ -1003,7 +1003,7 @@ Misc:AddToggle('enableAutoTeleportBack', {
     end
 })
 
-local modes = {"Dungeon", "Defense", "Portal"}
+local modes = {"Dungeon", "Defense", "Portal", "Invasion"}
 teleportedBack = false
 task.spawn(function()
     while task.wait(1) and not Library.Unloaded do
