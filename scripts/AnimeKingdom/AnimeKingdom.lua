@@ -515,13 +515,15 @@ end
 
 local function getDungeonCooldown()
     local DungeonDelay = ScriptLibrary.PlayerData.DungeonDelay
-        local Time = ReplicatedStorage:GetAttribute('Time')
+    if DungeonDelay == nil then return end
 
-        if Time < DungeonDelay then
-            return true
-        else
-            return false
-        end
+    local Time = ReplicatedStorage:GetAttribute('Time')
+
+    if Time < DungeonDelay then
+        return true
+    else
+        return false
+    end
 end
 
 local function createDungeon(difficulty)
@@ -548,6 +550,7 @@ end
 
 local function getDefenseCooldown()
     local DefenseDelay = ScriptLibrary.PlayerData.DefenseDelay
+    if DefenseDelay == nil then return end
     local Time = ReplicatedStorage:GetAttribute('Time')
 
     if Time < DefenseDelay then
@@ -579,6 +582,7 @@ end
 
 local function getInvasionCooldown()
     local InvasionDelay = ScriptLibrary.PlayerData.InvasionDelay
+    if InvasionDelay == nil then return end
     local Time = ReplicatedStorage:GetAttribute('Time')
 
     if Time < InvasionDelay then
@@ -614,6 +618,7 @@ end
 
 local function getRaidCooldown()
     local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
+    if RaidDelay == nil then return end
     local Time = ReplicatedStorage:GetAttribute('Time')
 
     if Time < RaidDelay then
