@@ -588,7 +588,7 @@ end
 
 local function createInvasion()
     dataRemoteEvent:FireServer(unpack({{{"InvasionSystem", "Create", "HollowInvasion", n = 3 }, "\002"}}))
-    dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Start", n = 2}, "\2"}}))
+    dataRemoteEvent:FireServer(unpack({{{"InvasionSystem", "Start", n = 2}, "\2"}}))
 end
 
 local function startInvasion()
