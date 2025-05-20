@@ -1086,6 +1086,7 @@ local invasionMessage = 'INVASION >> '
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local RaidDelay = ScriptLibrary.PlayerData.RaidDelay
+        if RaidDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
 
         if Time < RaidDelay then
@@ -1101,6 +1102,7 @@ end)
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local DungeonDelay = ScriptLibrary.PlayerData.DungeonDelay
+        if DungeonDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
 
         if Time < DungeonDelay then
@@ -1116,6 +1118,7 @@ end)
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local DefenseDelay = ScriptLibrary.PlayerData.DefenseDelay
+        if DefenseDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
 
         if Time < DefenseDelay then
@@ -1131,6 +1134,7 @@ end)
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         local InvasionDelay = ScriptLibrary.PlayerData.InvasionDelay
+        if InvasionDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
 
         if Time < InvasionDelay then
