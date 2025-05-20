@@ -528,6 +528,7 @@ local function createDungeon(difficulty)
     dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "Create", n = 2}, "\2"}}))
     dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "SelectMap", "RuinedPrison", n = 3}, "\2"}}))
     dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "SelectDiff", difficulty, n = 3}, "\2"}}))
+    task.wait(1)
     dataRemoteEvent:FireServer(unpack({{{"DungeonSystem", "Start", n = 2}, "\2"}}))
 end
 
@@ -535,7 +536,7 @@ local function startDungeon(difficulty)
     if getDungeonCooldown() then return end
     if playerMode == nil then
         createDungeon(difficulty)
-        task.wait(5)
+        task.wait(3)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
         if inDungeon() then
             teleportToEnemyInMap('Dungeon')
@@ -558,6 +559,7 @@ end
 
 local function createDefense()    
     dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Create", "AlienPlanet", n = 3}, "\002"}}))
+    task.wait(1)
     dataRemoteEvent:FireServer(unpack({{{"DefenseSystem", "Start", n = 2}, "\2"}}))
 end
 
@@ -565,7 +567,7 @@ local function startDefense()
     if getDefenseCooldown() then return end
     if playerMode == nil then
         createDefense()
-        task.wait(5)
+        task.wait(3)
     elseif checkDungeon() == 'Defense' or playerMode == 'Defense' then
         if inDefense() then
             teleportToEnemyInMap('Defense')
@@ -588,6 +590,7 @@ end
 
 local function createInvasion()
     dataRemoteEvent:FireServer(unpack({{{"InvasionSystem", "Create", "HollowInvasion", n = 3 }, "\002"}}))
+    task.wait(1)
     dataRemoteEvent:FireServer(unpack({{{"InvasionSystem", "Start", n = 2}, "\2"}}))
 end
 
@@ -595,7 +598,7 @@ local function startInvasion()
     if getInvasionCooldown() then return end
     if playerMode == nil then
         createInvasion()
-        task.wait(5)
+        task.wait(3)
     elseif checkDungeon() == 'Invasion' or playerMode == 'Invasion' then
         if inInvasion() then
             teleportToEnemyInMap('Invasion')
@@ -623,6 +626,7 @@ end
 local function createRaid(mapNumber)
     dataRemoteEvent:FireServer(unpack({{{"RaidSystem", "Create", n = 2}, "\2"}}))
     dataRemoteEvent:FireServer(unpack({{{"RaidSystem", "SelectMap", mapNumber, n = 3}, "\2"}}))
+    task.wait(1)
     dataRemoteEvent:FireServer(unpack({{{"RaidSystem", "Start", n = 2}, "\2"}}))
 end
 
@@ -631,7 +635,7 @@ local function startRaid(mapNumber)
 
     if playerMode == nil then
         createRaid(mapNumber)
-        task.wait(5)
+        task.wait(3)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
         if inRaid() then
             teleportToEnemyInMap('Raid')
