@@ -147,7 +147,9 @@ local worldsTable = {
     ["Bizarre Desert"] = "7",
     ["Z Hills"] = "8",
     ["Ninja Village"] = "9",
-    ["Soul City"] = "10"
+    ["Soul City"] = "10",
+    ["Clover Village"] = "11",
+    ["Hunter Palace"] = "12"
 }
 
 local worldsTableNumbers = {
@@ -160,7 +162,9 @@ local worldsTableNumbers = {
     ["Bizarre Desert"] = 7,
     ["Z Hills"] = 8,
     ["Ninja Village"] = 9,
-    ["Soul City"] = 10
+    ["Soul City"] = 10,
+    ["Clover Village"] = 11,
+    ["Hunter Palace"] = 12
 }
 
 local numbersToWorlds = {
@@ -173,7 +177,9 @@ local numbersToWorlds = {
     [7] = "Bizarre Desert",
     [8] = "Z Hills",
     [9] = "Ninja Village",
-    [10] = "Soul City"
+    [10] = "Soul City",
+    [11] = "Clover Village",
+    [12] = "Hunter Palace"
 }
 
 local stars = {
@@ -186,7 +192,9 @@ local stars = {
     'Bizarre Star',
     'Z Star',
     'Ninja Star',
-    'Soul Star'
+    'Soul Star',
+    'Clover Star',
+    'Hunter Star'
 }
 
 task.spawn(function()
