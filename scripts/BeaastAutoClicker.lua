@@ -128,7 +128,7 @@ AutoClicker:AddLabel('Keybind'):AddKeyPicker('autoClickerKeybind', {
         if value then
             Library:Notify('Enabled Auto Clicker on positions: ' .. settings['AutoClicker']['PosX'] .. ' ' .. settings['AutoClicker']['PosY'], 5)
         else
-            Library:Notify('Disabled Auto Clicker, 5')
+            Library:Notify('Disabled Auto Clicker', 5)
         end
     end,
 
