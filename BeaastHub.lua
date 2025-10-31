@@ -39,3 +39,7 @@ end
 if _G.IY then
 	task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source')))
 end
+
+if _G.AC then
+	task.spawn(loadstring(game:HttpGet('https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/scripts/BeaastAutoClicker.lua')))
+end
