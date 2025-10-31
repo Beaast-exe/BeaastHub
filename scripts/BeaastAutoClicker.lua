@@ -81,9 +81,10 @@ local AutoClicker = Tabs['Main']:AddLeftGroupbox('Auto Clicker')
 AutoClicker:AddSlider('autoClickerDelay', {
     Text = 'Auto Clicker Delay',
     Default = settings['AutoClicker']['Interval'],
-    Min = 0.01,
+    Min = 0.1,
     Max = 10,
-    Rounding = 0,
+    Rounding = 1,
+    Suffix = 's ',
     Compact = false,
 
     Callback = function(value)
