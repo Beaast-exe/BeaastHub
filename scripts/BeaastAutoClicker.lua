@@ -93,6 +93,24 @@ AutoClicker:AddSlider('autoClickerDelay', {
     end
 })
 
+local ScreenGui = Instance.new('ScreenGui')
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local Point = Instance.new('TextLabel')
+Point.Name = 'CLICK'
+Point.Text = 'CLICK'
+Point.Parent = ScreenGui
+Point.BackgroundTransparency = 0.000
+Point.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+Point.Size = UDim2.new(0, 20, 0, 20)
+Point.Position = UDim2.fromOffset(settings['AutoClicker']['PosX'], settings['AutoClicker']['PosY'])
+Point.Font = Enum.Font.SourceSans
+Point.TextScaled = true
+Point.TextSize = 14.000
+Point.TextWrapped = true
+Point.AnchorPoint = Vector2.new(0.5, 0.5)
+
 AutoClicker:AddLabel('Keybind'):AddKeyPicker('autoClickerKeybind', {
     Default = settings['AutoClicker']['Keybind'],
     SyncToggleState = false,
@@ -125,7 +143,12 @@ task.spawn(function()
 		if settings['AutoClicker']['Enabled'] then
 			VirtualInputManager:SendMouseButtonEvent(settings['AutoClicker']['PosX'], settings['AutoClicker']['PosY'], 0, true, game, 1)
 			VirtualInputManager:SendMouseButtonEvent(settings['AutoClicker']['PosX'], settings['AutoClicker']['PosY'], 0, false, game, 1)
+
+            Point.Position = UDim2.fromOffset(settings['AutoClicker']['PosX'], settings['AutoClicker']['PosY'])
+            Point.Visible = true
 			task.wait(settings['AutoClicker']['Interval'])
+        else
+            Point.Visible = false
 		end
 	end
 end)
