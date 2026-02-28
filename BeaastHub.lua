@@ -34,6 +34,8 @@ elseif placeID == 76598287484083 then
 	execute('AnimePower/AnimePower.lua')
 elseif placeID == 17334984034 then
 	execute('AnimeKingdom/AnimeKingdom.lua')
+elseif placeID == 101640913672688 then
+	execute('AnimeGhosts/AnimeGhosts.lua')
 end
 
 if _G.IY then
