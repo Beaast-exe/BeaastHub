@@ -351,7 +351,7 @@ end
 
 local function createDungeon(difficulty)
     dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Dungeon", "CrystalCave", difficulty, n = 6}, "\002" }}))
-    task.wait(1)
+    task.wait(5)
     dataRemoteEvent:FireServer(unpack({{{ "GamemodeSystem", "Start", "Dungeon", player.UserId, n = 4 }, "\002"}}))
 end
 
@@ -381,7 +381,7 @@ end
 
 local function createRaid()
     dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Raid", "TitanTown", "Easy", n = 6 }, "\002" }}))
-    task.wait(1)
+    task.wait(5)
     dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Start", "Raid", player.UserId, n = 4 }, "\002"}}))
 end
 
