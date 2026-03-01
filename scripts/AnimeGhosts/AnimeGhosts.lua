@@ -29,16 +29,22 @@ local saveFileName = game:GetService('Players').LocalPlayer.Name .. '.json'
 local saveFile = saveFolderName .. '/' .. gameFolderName .. '/' .. saveFileName
 
 local defaultSettings = {
+    ['AutoFarm'] = {
+        ['Enabled'] = false,
+        ['TeleportToEnemies'] = false,
+        ['World'] = 'Loading Docks',
+        ['Enemies'] = {''}
+    },
     ['AutoDungeon'] = {
         ['Enabled'] = false,
-        ['Map'] = "CrystalCave",
-        ['Difficulty'] = "Easy",
+        ['Map'] = 'CrystalCave',
+        ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
         ['LeaveWave'] = 10
     },
     ['AutoRaid'] = {
         ['Enabled'] = false,
-        ['Difficulty'] = "Easy",
+        ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
         ['LeaveWave'] = 10
     },
@@ -48,7 +54,7 @@ local defaultSettings = {
     },
     ['Misc'] = {
         ['BackPosition'] = nil,
-        ['BackWorld'] = "1",
+        ['BackWorld'] = '1',
         ['TeleportBack'] = false
     },
     ['Keybinds'] = {
@@ -413,6 +419,17 @@ local function startRaid()
         task.wait()
     end
 end
+
+-- local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
+-- AutoFarm:AddToggle('enableAutoFarm', {
+--     Text = 'Enable Auto Farm',
+--     Default = settings['AutoFarm']['Enabled'],
+
+--     Callback = function(value)
+--         settings['AutoFarm']['Enabled'] = value
+--         SaveConfig()
+--     end
+-- })
 
 local AutoScroll = Tabs['Main']:AddLeftGroupbox('Auto Scroll')
 AutoScroll:AddDropdown('selectedScroll', {
