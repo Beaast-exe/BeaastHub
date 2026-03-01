@@ -41,6 +41,10 @@ local defaultSettings = {
         ['AutoLeave'] = false,
         ['LeaveWave'] = 10
     },
+    ['AutoScroll'] = {
+        ['Enabled'] = false,
+        ['SelectedScroll'] = 'Titan Scroll'
+    },
     ['Misc'] = {
         ['BackPosition'] = nil,
         ['BackWorld'] = "1",
@@ -123,6 +127,14 @@ local numbersToWorlds = {
     [3] = "Spirit Town",
     [4] = "Double Dungeon",
     [5] = "Egg Island"
+}
+
+local scrolls = {
+    'Titan Scroll',
+    'Supernatural Scroll',
+    'Spiritual Scroll',
+    'Solo Scroll',
+    'Punk Scroll'
 }
 
 local dungeonDifficulties = {
@@ -396,9 +408,43 @@ local function startRaid()
     end
 end
 
+local AutoScroll = Tabs['Main']:AddLeftGroupbox('Auto Scroll')
+AutoScroll:AddDropdown('selectedDungeonDifficulty', {
+    Values = scrolls,
+    Default = settings['AutoScroll']['SelectedScroll'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Auto Scroll',
+    Tooltip = 'Selected Auto Scroll to open', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoScroll']['SelectedScroll'] = value
+        SaveConfig()
+    end
+})
+
+AutoScroll:AddToggle('enableAutoScroll', {
+    Text = 'Enable Auto Scroll',
+    Default = settings['AutoScroll']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoScroll']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['AutoScroll']['Enabled'] then
+            local args = {{{"PetSystem", "Open", settings['AutoScroll']['SelectedScroll'], "All", n = 4 }, "\002" }}
+            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+        end 
+    end
+end)
+
 local Misc = Tabs['Main']:AddLeftGroupbox('Miscellaneous')
 local ignoredBackWorlds = {"Gamemode"}
- local selectBackPosition = Misc:AddButton({
+local selectBackPosition = Misc:AddButton({
     Text = 'Save Back Position',
     Func = function()
         if table.find(ignoredBackWorlds, playerMap) then
