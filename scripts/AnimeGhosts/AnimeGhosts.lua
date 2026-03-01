@@ -31,6 +31,7 @@ local saveFile = saveFolderName .. '/' .. gameFolderName .. '/' .. saveFileName
 local defaultSettings = {
     ['AutoDungeon'] = {
         ['Enabled'] = false,
+        ['Map'] = "CrystalCave",
         ['Difficulty'] = "Easy",
         ['AutoLeave'] = false,
         ['LeaveWave'] = 10
@@ -137,6 +138,11 @@ local scrolls = {
     'Punk Scroll'
 }
 
+local dungeonMaps = {
+    "CrystalCave",
+    "PunkCity"
+}
+
 local dungeonDifficulties = {
     "Easy",
     "Medium",
@@ -208,7 +214,7 @@ local function checkEnemy()
     for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetDescendants()) do
         if folder:IsA('Folder') and (folder.Name == 'Dungeon' or folder.Name == 'Raid' or folder.Name == 'Gamemode') then
             for _, v in pairs(folder:GetChildren()) do
-                if v:IsA('Folder') and v.Name == tostring(player.UserId) and #v:GetChildren() > 0 then
+                if v:IsA('Folder') and #v:GetChildren() > 0 and (v.Name == tostring("Dungeon_" .. player.UserId) or v.Name == tostring("Raid_" .. player.UserId)) then
                     enemyFolder = v
                 end
             end
@@ -224,7 +230,7 @@ local function checkEnemyInMap(map)
     for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetDescendants()) do
         if folder:IsA('Folder') and folder.Name == map then
             for _, v in pairs(folder:GetChildren()) do
-                if v:IsA('Folder') and v.Name == tostring(player.UserId) and #v:GetChildren() > 0 then
+                if v:IsA('Folder') and #v:GetChildren() > 0 and (v.Name == tostring("Dungeon_" .. player.UserId) or v.Name == tostring("Raid_" .. player.UserId)) then
                     enemyFolder = v
                 end
             end
@@ -330,7 +336,7 @@ local function getCurrentWorld()
         for i, v in ipairs(map:GetChildren()) do
             if v:IsA('Folder') then
                 local spawn = v:FindFirstChild('Spawn')
-                local another = v:FindFirstChild(player.UserId)
+                local another = v:FindFirstChild("Dungeon_" .. player.UserId) or v:FindFirstChild("Raid_" .. player.UserId)
 
                 if spawn then
                     world = tostring(v)
@@ -362,7 +368,7 @@ local function getDungeonCooldown()
 end
 
 local function createDungeon(difficulty)
-    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Dungeon", "CrystalCave", difficulty, n = 6}, "\002" }}))
+    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Dungeon", settings['AutoDungeon']['Map'], difficulty, n = 6}, "\002" }}))
     task.wait(5)
     dataRemoteEvent:FireServer(unpack({{{ "GamemodeSystem", "Start", "Dungeon", player.UserId, n = 4 }, "\002"}}))
 end
@@ -409,7 +415,7 @@ local function startRaid()
 end
 
 local AutoScroll = Tabs['Main']:AddLeftGroupbox('Auto Scroll')
-AutoScroll:AddDropdown('selectedDungeonDifficulty', {
+AutoScroll:AddDropdown('selectedScroll', {
     Values = scrolls,
     Default = settings['AutoScroll']['SelectedScroll'], -- number index of the value / string
     Multi = false, -- true / false, allows multiple choices to be selected
@@ -553,6 +559,20 @@ end)
 
 
 local AutoDungeon = Tabs['Main']:AddRightGroupbox('Auto Dungeon')
+AutoDungeon:AddDropdown('selectedDungeonMap', {
+    Values = dungeonMaps,
+    Default = settings['AutoDungeon']['Map'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Dungeon Map',
+    Tooltip = 'Selected Auto Dungeon Map', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoDungeon']['Map'] = value
+        SaveConfig()
+    end
+})
+
 AutoDungeon:AddDropdown('selectedDungeonDifficulty', {
     Values = dungeonDifficulties,
     Default = settings['AutoDungeon']['Difficulty'], -- number index of the value / string
@@ -605,18 +625,14 @@ task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoDungeon']['Enabled'] then
             startDungeon(settings['AutoDungeon']['Difficulty'])
+            local dungeonName = "Dungeon_" .. player.UserId
 
             if settings['AutoDungeon']['AutoLeave'] and playerMode == 'Dungeon' then
                 local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-                if Gamemode:FindFirstChild(player.UserId) then
-                    --if Gamemode[player.UserId].Players:GetAttribute(player.UserId) == true then
-                        print(Gamemode:FindFirstChild(player.UserId):GetAttribute('Stage'))
-                        if Gamemode:FindFirstChild(player.UserId):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
-                            --if Gamemode[player.UserId]:GetAttribute('ModeId') == 'Dungeon' then
-                                teleportToSavedPosition()
-                            --end
-                        end
-                    --end
+                if Gamemode:FindFirstChild(dungeonName) then
+                    if Gamemode:FindFirstChild(dungeonName):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
+                        teleportToSavedPosition()
+                    end
                 end
             end
         end
@@ -662,18 +678,14 @@ task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoRaid']['Enabled'] then
             startRaid()
+            local raidName = "Raid_" .. player.UserId
 
             if settings['AutoRaid']['AutoLeave'] and playerMode == 'Raid' then
                 local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-                if Gamemode:FindFirstChild(player.UserId) then
-                    --if Gamemode[player.UserId].Players:GetAttribute(player.UserId) == true then
-                        print(Gamemode:FindFirstChild(player.UserId):GetAttribute('Stage'))
-                        if Gamemode:FindFirstChild(player.UserId):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
-                            --if Gamemode[player.UserId]:GetAttribute('ModeId') == 'Dungeon' then
-                                teleportToSavedPosition()
-                            --end
-                        end
-                    --end
+                if Gamemode:FindFirstChild(raidName) then
+                    if Gamemode:FindFirstChild(raidName):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
+                        teleportToSavedPosition()
+                    end
                 end
             end
         end
