@@ -784,8 +784,9 @@ end)
 
 task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
-        if settings['AutoDungeon']['AutoLeave'] then
-            local dungeonName = getPlayerGamemode()
+        local dungeonName = getPlayerGamemode()
+
+        if settings['AutoDungeon']['AutoLeave'] and dungeonName then
 
             local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
             if Gamemode:FindFirstChild(dungeonName.Name) and Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('ModeId') == 'Dungeon' then
@@ -881,8 +882,9 @@ end)
 
 task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
-        if settings['AutoRaid']['AutoLeave'] then
-            local raidName = getPlayerGamemode()
+        local raidName = getPlayerGamemode()
+
+        if settings['AutoRaid']['AutoLeave'] and raidName then
 
             local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
             if Gamemode:FindFirstChild(raidName.Name) and Gamemode:FindFirstChild(raidName.Name):GetAttribute('ModeId') == 'Raid' then
