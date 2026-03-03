@@ -37,6 +37,7 @@ local defaultSettings = {
     },
     ['AutoDungeon'] = {
         ['Enabled'] = false,
+        ['AutoDungeon'] = false,
         ['Map'] = 'CrystalCave',
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
@@ -44,6 +45,7 @@ local defaultSettings = {
     },
     ['AutoRaid'] = {
         ['Enabled'] = false,
+        ['AutoRaid'] = false,
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
         ['LeaveWave'] = 10
@@ -334,6 +336,62 @@ local function teleportToEnemyInMap(map)
     end
 end
 
+local function checkEnemyInGamemode(gamemode)
+    local enemyFolder = nil
+
+    for _, folder in ipairs(Workspace['_ENEMIES']['Server']['Gamemode']:GetChildren()) do
+        if folder:IsA('Folder') and #folder:GetChildren() > 0 and folder.Name == gamemode.Name then
+            enemyFolder = folder
+        end
+    end
+
+    --print(enemyFolder)
+    return enemyFolder
+end
+
+local function getEnemyInGamemode(gamemode)
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local distance = math.huge
+    local enemy = nil
+
+    for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']['Gamemode']:GetChildren()) do
+        if enemyFolder:IsA("Folder") then
+            local targetFolder = checkEnemyInGamemode(gamemode)
+            if targetFolder then
+                for _, v in ipairs(targetFolder:GetChildren()) do
+                    local HP = v:GetAttribute('HP')
+                    local Shield = v:GetAttribute('Shield')
+    
+                    if HP and HP > 0 and Shield ~= true then
+                        if v:IsA('Part') then
+                            local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
+    
+                            if magnitude < distance then
+                                distance = magnitude
+                                enemy = v
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return enemy
+end
+
+local function teleportToEnemyInGamemode(gamemode)
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local enemy = getEnemyInGamemode(gamemode)
+    if enemy then
+        HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
+    end
+end
+
 local function getCurrentWorld()
     local world = nil
     local map = Workspace['_MAP']
@@ -379,14 +437,40 @@ local function createDungeon(difficulty)
     dataRemoteEvent:FireServer(unpack({{{ "GamemodeSystem", "Start", "Dungeon", player.UserId, n = 4 }, "\002"}}))
 end
 
+local function getPlayerGamemode()
+    local dungeon = nil
+
+    for i, v in pairs(ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode'):GetChildren()) do
+        if v:FindFirstChild('Players') and v['Players']:GetAttribute(player.UserId) then
+            dungeon = v
+        end 
+    end
+
+    return dungeon
+end
+
 local function startDungeon(difficulty)
     if getDungeonCooldown() then return end
     if playerMode == nil then
         createDungeon(difficulty)
         task.wait(3)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
-        teleportToEnemyInMap('Gamemode')
+        -- teleportToEnemyInMap('Gamemode')
         task.wait()
+    end
+end
+
+local function startDungeon2()
+    if getDungeonCooldown() then return end
+
+    if checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
+        local gamemode = getPlayerGamemode()
+        if gamemode then
+            if gamemode:GetAttribute('ModeId') == 'Dungeon' and gamemode:GetAttribute('MapId') == settings['AutoDungeon']['Map'] and gamemode:GetAttribute('Diff') == settings['AutoDungeon']['Difficulty'] then
+                teleportToEnemyInGamemode(gamemode)
+                task.wait()
+            end
+        end
     end
 end
 
@@ -415,8 +499,22 @@ local function startRaid()
         createRaid()
         task.wait(3)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
-        teleportToEnemyInMap('Gamemode')
+        --teleportToEnemyInMap('Gamemode')
         task.wait()
+    end
+end
+
+local function startRaid2()
+    if getRaidCooldown() then return end
+
+    if checkDungeon() == 'Raid' or playerMode == 'Raid' then
+        local gamemode = getPlayerGamemode()
+        if gamemode then
+            if gamemode:GetAttribute('ModeId') == 'Raid' then
+                teleportToEnemyInGamemode(gamemode)
+                task.wait()
+            end
+        end
     end
 end
 
@@ -605,11 +703,21 @@ AutoDungeon:AddDropdown('selectedDungeonDifficulty', {
 })
 
 AutoDungeon:AddToggle('enableAutoDungeon', {
-    Text = 'Enable Auto Dungeon',
+    Text = 'Auto Create Dungeon',
     Default = settings['AutoDungeon']['Enabled'],
 
     Callback = function(value)
         settings['AutoDungeon']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+AutoDungeon:AddToggle('enableAutoDoDungeon', {
+    Text = 'Auto do dungeons',
+    Default = settings['AutoDungeon']['AutoDungeon'],
+
+    Callback = function(value)
+        settings['AutoDungeon']['AutoDungeon'] = value
         SaveConfig()
     end
 })
@@ -642,14 +750,47 @@ task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoDungeon']['Enabled'] then
             startDungeon(settings['AutoDungeon']['Difficulty'])
-            local dungeonName = "Dungeon_" .. player.UserId
+            -- local dungeonName = "Dungeon_" .. player.UserId
 
-            if settings['AutoDungeon']['AutoLeave'] and playerMode == 'Dungeon' then
-                local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-                if Gamemode:FindFirstChild(dungeonName) then
-                    if Gamemode:FindFirstChild(dungeonName):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
-                        teleportToSavedPosition()
-                    end
+            -- if settings['AutoDungeon']['AutoLeave'] and playerMode == 'Dungeon' then
+            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            --     if Gamemode:FindFirstChild(dungeonName) then
+            --         if Gamemode:FindFirstChild(dungeonName):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
+            --             teleportToSavedPosition()
+            --         end
+            --     end
+            -- end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoDungeon']['AutoDungeon'] then
+            startDungeon2()
+
+            -- local dungeonName = getPlayerGamemode()
+            -- if dungeonName and settings['AutoDungeon']['AutoLeave'] then
+            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            --     if Gamemode:FindFirstChild(dungeonName.Name) then
+            --         if Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
+            --            teleportToSavedPosition()
+            --         end
+            --     end
+            -- end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoDungeon']['AutoLeave'] then
+            local dungeonName = getPlayerGamemode()
+
+            local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            if Gamemode:FindFirstChild(dungeonName.Name) and Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('ModeId') == 'Dungeon' then
+                if Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
+                    teleportToSavedPosition()
                 end
             end
         end
@@ -658,11 +799,22 @@ end)
 
 local AutoRaid = Tabs['Main']:AddRightGroupbox('Auto Raid')
 AutoRaid:AddToggle('enableAutoRaid', {
-    Text = 'Enable Auto Raid',
+    Text = 'Auto Create Raid',
     Default = settings['AutoRaid']['Enabled'],
 
     Callback = function(value)
         settings['AutoRaid']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+
+AutoRaid:AddToggle('enableAutoDoRaid', {
+    Text = 'Auto do Raids',
+    Default = settings['AutoRaid']['AutoRaid'],
+
+    Callback = function(value)
+        settings['AutoRaid']['AutoRaid'] = value
         SaveConfig()
     end
 })
@@ -703,6 +855,39 @@ task.spawn(function()
                     if Gamemode:FindFirstChild(raidName):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
                         teleportToSavedPosition()
                     end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoRaid']['AutoRaid'] then
+            startRaid2()
+
+            -- local raidName = getPlayerGamemode()
+            -- if raidName and settings['AutoRaid']['AutoLeave'] then
+            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            --     if Gamemode:FindFirstChild(raidName.Name) then
+            --         if Gamemode:FindFirstChild(raidName.Name):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
+            --            teleportToSavedPosition()
+            --         end
+            --     end
+            -- end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoRaid']['AutoLeave'] then
+            local raidName = getPlayerGamemode()
+
+            local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            if Gamemode:FindFirstChild(raidName.Name) and Gamemode:FindFirstChild(raidName.Name):GetAttribute('ModeId') == 'Raid' then
+                if Gamemode:FindFirstChild(raidName.Name):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
+                    teleportToSavedPosition()
                 end
             end
         end
