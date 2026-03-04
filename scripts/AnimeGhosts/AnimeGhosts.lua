@@ -557,8 +557,13 @@ AutoScroll:AddToggle('enableAutoScroll', {
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if settings['AutoScroll']['Enabled'] then
-            local args = {{{"PetSystem", "Open", settings['AutoScroll']['SelectedScroll'], "All", n = 4 }, "\002" }}
-            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+            local playerGamemode = getPlayerGamemode()
+
+            if not playerGamemode and playerMode ~= 'Dungeon' and playerMode ~= 'Raid' then
+                print("teste")
+                local args = {{{"PetSystem", "Open", settings['AutoScroll']['SelectedScroll'], "All", n = 4 }, "\002" }}
+                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+            end
         end 
     end
 end)
