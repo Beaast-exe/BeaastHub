@@ -345,7 +345,6 @@ local function checkEnemyInGamemode(gamemode)
         end
     end
 
-    --print(enemyFolder)
     return enemyFolder
 end
 
@@ -560,7 +559,6 @@ task.spawn(function()
             local playerGamemode = getPlayerGamemode()
 
             if not playerGamemode and playerMode ~= 'Dungeon' and playerMode ~= 'Raid' then
-                print("teste")
                 local args = {{{"PetSystem", "Open", settings['AutoScroll']['SelectedScroll'], "All", n = 4 }, "\002" }}
                 game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
             end
@@ -617,7 +615,6 @@ teleportedBack = false
 task.spawn(function()
     while task.wait(1) and not Library.Unloaded do
         if settings['Misc']['TeleportBack'] then
-            --print('playerMode:', playerMode, '::', 'playerMap:', playerMap, '::', 'teleportedBack:', teleportedBack)
             local hrp = player.Character:FindFirstChild("HumanoidRootPart")
             if not hrp then return end
 
@@ -649,7 +646,6 @@ task.spawn(function()
 
                             repeat
                                 pcall(function()
-                                    --print("repeat 1")
                                     teleportToSavedPosition()
                                     teleportedBack = true
                                 end)
@@ -657,14 +653,9 @@ task.spawn(function()
                         end
                     end
                 end
-            elseif playerMode == nil and hrp.CFrame ~= stringToCFrame(settings['Misc']['BackPosition']) and teleportedBack == false then              
-                --print("2")
-                --print("[" .. tostring(hrp.CFrame) .. "]" .. '::' .. "[" .. tostring(settings['Misc']['BackPosition']) .. "]")
-                --print(tostring(hrp.CFrame))
-                --print(tostring(settings['Misc']['BackPosition']))
+            elseif playerMode == nil and hrp.CFrame ~= stringToCFrame(settings['Misc']['BackPosition']) and teleportedBack == false then
                 repeat
                     pcall(function()
-                        --print("repeat 2")
                         teleportToSavedPosition()
                         teleportedBack = true
                     end)
