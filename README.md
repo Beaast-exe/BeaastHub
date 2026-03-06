@@ -10,5 +10,6 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Beaast-exe/BeaastHub/
 ## Supported Games:
 - [Anime Fighters Simulator](https://www.roblox.com/games/6299805723)
 - [Anime Souls Simulator X](https://www.roblox.com/games/15367026228)
+- [Anime Ghosts](https://www.roblox.com/games/101640913672688)
 
 ## [DISCORD](https://discord.gg/MeAXMSCc9Q)
