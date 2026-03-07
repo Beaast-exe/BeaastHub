@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(3)
+-- task.wait(3)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -20,6 +20,7 @@ local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))
 local Window = Library:CreateWindow({ Title = 'Beaast Hub | Anime Ghosts', Center = true, AutoShow = true })
 local Tabs = {
 	['Main'] = Window:AddTab('Main'),
+    ['Gachas'] = Window:AddTab('Gachas'),
 	['UI Settings'] = Window:AddTab('UI Settings')
 }
 
@@ -41,14 +42,21 @@ local defaultSettings = {
         ['Map'] = 'CrystalCave',
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
-        ['LeaveWave'] = 10
+        ['LeaveWave'] = 50
     },
     ['AutoRaid'] = {
         ['Enabled'] = false,
         ['AutoRaid'] = false,
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
-        ['LeaveWave'] = 10
+        ['LeaveWave'] = 50
+    },
+    ['InfinityCastle'] = {
+        ['Enabled'] = false,
+        ['InfinityCastle'] = false,
+        ['Difficulty'] = 'Easy',
+        ['Autoleave'] = false,
+        ['LeaveWave'] = 50
     },
     ['AutoScroll'] = {
         ['Enabled'] = false,
@@ -59,9 +67,20 @@ local defaultSettings = {
         ['BackWorld'] = '1',
         ['TeleportBack'] = false
     },
+    ['AutoSpin'] = {
+        ['Avatar'] = false,
+        ['Weapons'] = false,
+        ['Traits'] = false,
+        ['WeaponBuffs'] = {
+            ['SelectedWeapon'] = '',
+            ['SelectedEnchant'] = {"Blessed","Haunt","Ruin","Electric"},
+            ['Enchant'] = false
+        }
+    },
     ['Keybinds'] = {
 		['menuKeybind'] = 'LeftShift'
 	},
+    ['GachaDelay'] = 0.5,
 	watermark = false
 }
 
@@ -106,12 +125,20 @@ local ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild(
 local playerMap = "1"
 local playerMode = nil
 
+local AnimeGhosts = {}
+AnimeGhosts.EnemyData = {}
+AnimeGhosts.WeaponData = {}
+AnimeGhosts.AvatarData = {}
+AnimeGhosts.WeaponNameLookup = {}
+AnimeGhosts.HeroNameLookup = {}
+
 local worldsNames = {
     "Loading Docks",
     "Supernatural Farm",
     "Spirit Town",
     "Double Dungeon",
-    "Egg Island"
+    "Egg Island",
+    "Demon District"
 }
 
 local worldsTable = {
@@ -119,7 +146,8 @@ local worldsTable = {
 	["Supernatural Farm"] = "2",
 	["Spirit Town"] = "3",
 	["Double Dungeon"] = "4",
-    ["Egg Island"] = "5"
+    ["Egg Island"] = "5",
+    ["Demon District"] = "6"
 }
 
 local worldsTableNumbers = {
@@ -127,7 +155,8 @@ local worldsTableNumbers = {
     ["Supernatural Farm"] = 2,
     ["Spirit Town"] = 3,
     ["Double Dungeon"] = 4,
-    ["Egg Island"] = 5
+    ["Egg Island"] = 5,
+    ["Demon District"] = 6
 }
 
 local numbersToWorlds = {
@@ -135,7 +164,8 @@ local numbersToWorlds = {
     [2] = "Supernatural Farm",
     [3] = "Spirit Town",
     [4] = "Double Dungeon",
-    [5] = "Egg Island"
+    [5] = "Egg Island",
+    [6] = "Demon District"
 }
 
 local scrolls = {
@@ -143,7 +173,8 @@ local scrolls = {
     'Supernatural Scroll',
     'Spiritual Scroll',
     'Solo Scroll',
-    'Punk Scroll'
+    'Punk Scroll',
+    'Slayer Scroll'
 }
 
 local dungeonMaps = {
@@ -162,6 +193,24 @@ task.spawn(function()
         PlayerGui:FindFirstChild('Transition').Enabled = false
         playerMap = tostring(ScriptLibrary.PlayerData.CurrentMap)
         playerMode = player:GetAttribute('Mode') or nil
+
+        pcall(function()
+            local ga = player.PlayerGui:FindFirstChild("GachaAnimation")
+            if ga then
+                ga.Enabled = false
+                local root = ga:FindFirstChild("Root")
+                if root then
+                    root.Visible = false
+                end
+            end
+        end)
+
+        pcall(function()
+            local sga = game:GetService("StarterGui"):FindFirstChild("GachaAnimation")
+            if sga then
+                sga:Destroy()
+            end
+        end)
     end
 end)
 
@@ -196,6 +245,200 @@ function teleportToSavedPosition()
     teleportToWorld(settings['Misc']['BackWorld'], stringToCFrame(settings['Misc']['BackPosition']))
 end
 
+local function FireBridge(...)
+    local args = {...}
+    args.n = #args
+    pcall(function()
+        local Event = game:GetService("ReplicatedStorage"):FindFirstChild("ffrostflame_bridgenet2@1.0.0")
+        if Event then Event = Event.dataRemoteEvent end
+        if Event then
+            Event:FireServer({args, "\x02"})
+        elseif ScriptLibrary and ScriptLibrary.Remote then
+            ScriptLibrary.Remote:Fire(table.unpack(args))
+        end
+    end)
+end
+
+local function GetInventoryData(categoryName)
+    local formattedItems = {}
+    local RS = game:GetService("ReplicatedStorage")
+
+    local rarityColors = {
+        Common = Color3.fromRGB(180, 180, 180),
+        Uncommon = Color3.fromRGB(0, 255, 0),
+        Rare = Color3.fromRGB(0, 255, 204),
+        Epic = Color3.fromRGB(170, 0, 255),
+        Legendary = Color3.fromRGB(255, 170, 0),
+        Mythic = Color3.fromRGB(255, 0, 128),
+        Mythical = Color3.fromRGB(255, 0, 128),
+        Secret = Color3.fromRGB(255, 50, 50)
+    }
+
+    pcall(function()
+        local RarityData = require(RS:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("RarityData"))
+        if RarityData then
+            for name, data in pairs(RarityData) do
+                if data.Color then rarityColors[name] = data.Color end
+            end
+        end
+    end)
+
+    local itemLookup = {}
+    pcall(function()
+        local DataPath = RS:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data")
+        local CurrencyData = require(DataPath:WaitForChild("CurrencyData"))
+        if CurrencyData then
+            for id, info in pairs(CurrencyData) do
+                itemLookup[id] = {
+                    Name = info.Name or id,
+                    Icon = info.Icon or "rbxassetid://10138402123",
+                    Color = info.Color or rarityColors[info.Rarity] or Color3.fromRGB(0, 255, 255)
+                }
+            end
+        end
+
+        local ItemDataFolder = DataPath:FindFirstChild("ItemData")
+        if ItemDataFolder then
+            for _, child in ipairs(ItemDataFolder:GetChildren()) do
+                pcall(function()
+                    local moduleData = require(child)
+                    if type(moduleData) == 'table' then
+                        for id, info in pairs(moduleData) do
+                            itemLookup[id] = {
+                                Name = info.Name or id,
+                                Icon = info.Icon or "rbxassetid://10138402123",
+                                Color = rarityColors[info.Rarity] or Color3.fromRGB(0, 255, 255),
+                                Desc = info.Desc
+                            }
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+
+    pcall(function()
+        local CenterGUI = player.PlayerGui:FindFirstChild("CenterGUI")
+        local Content = CenterGUI and CenterGUI:FindFirstChild("Inventory") and CenterGUI.Inventory:FindFirstChild("Content")
+        if not Content then return end
+            
+        local targetFolder = categoryName and Content:FindFirstChild(categoryName) or Content:FindFirstChild("Items")
+        if not targetFolder then return end
+            
+        local invScroll = targetFolder:FindFirstChild("Scroll") or targetFolder:FindFirstChild("ContentPage") or targetFolder
+        if invScroll then
+            for _, slot in ipairs(invScroll:GetChildren()) do
+                if slot:IsA("Frame") or slot:IsA("ImageButton") or slot:IsA("TextButton") then
+                    if slot.Name == "UIGridLayout" or slot.Name == "UIListLayout" then continue end
+                        
+                    local itemId = slot.Name
+                    local lookup = itemLookup[itemId]
+                    local iconImage = "rbxassetid://10138402123"
+                    local amount = 1
+                    local itemName = itemId
+                    local itemColor = Color3.fromRGB(0, 255, 255)
+                        
+                    if lookup then
+                        itemName = lookup.Name; iconImage = lookup.Icon; itemColor = lookup.Color
+                    else
+                        local img = slot:FindFirstChildWhichIsA("ImageLabel", true)
+                        if img then iconImage = img.Image end
+                            
+                        for _, child in ipairs(slot:GetDescendants()) do
+                            if child:IsA("TextLabel") and not tonumber(child.Text) and child.Text ~= "" and #child.Text > 1 then
+                                itemName = child.Text; break
+                            end
+                        end
+                    end
+                        
+                    for _, child in ipairs(slot:GetDescendants()) do
+                        if child:IsA("TextLabel") then
+                            local num = tonumber(child.Text:match("%d+"))
+                            if num and num > 0 then amount = num; break end
+                        end
+                    end
+                        
+                    table.insert(formattedItems, {Name = itemName, Icon = iconImage, Amount = amount, Color = itemColor, RawName = itemId})
+                end
+            end
+        end
+    end)
+
+    if #formattedItems == 0 and not categoryName then
+        pcall(function()
+            local GachaData = require(RS:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("GachaData"))
+            if GachaData then
+                for _, gachaInfo in pairs(GachaData) do
+                    if gachaInfo.Targets then
+                        for targetId, targetData in pairs(gachaInfo.Targets) do
+                            table.insert(formattedItems, { Name = targetData.Name or targetId, Icon = targetData.Icon or "rbxassetid://10138402123", Amount = 1, Color = rarityColors[targetData.Rarity] or Color3.fromRGB(0, 255, 255), RawName = targetId })
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    if #formattedItems == 0 then
+        pcall(function()
+            if ScriptLibrary and ScriptLibrary.PlayerData then
+                local playerData = ScriptLibrary.PlayerData
+                local invTable = playerData.Inventory or playerData.Weapons or playerData.Pets or {}
+                    
+                if categoryName == "Weapons" and playerData.Weapons then invTable = playerData.Weapons
+                elseif (categoryName == "Avatars" or categoryName == "Pets") and (playerData.Avatars or playerData.Pets) then invTable = playerData.Avatars or playerData.Pets end
+                    
+                if type(invTable) == "table" then
+                    for itemName, itemData in pairs(invTable) do
+                        if type(itemData) == "table" then
+                            local lookup = itemLookup[itemName]
+                            table.insert(formattedItems, { Name = (lookup and lookup.Name) or tostring(itemName), Icon = (lookup and lookup.Icon) or itemData.Icon or "rbxassetid://10138402123", Amount = itemData.Amount or itemData.Quantity or itemData.Copies or 1, Color = (lookup and lookup.Color) or rarityColors[itemData.Rarity] or Color3.fromRGB(0, 255, 255), RawName = itemName })
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    if #formattedItems == 0 then
+        table.insert(formattedItems, {
+            Name = "Empty Bag",
+            Amount = 0,
+            Color = Color3.fromRGB(255, 50, 90)
+        })
+    end
+
+    return formattedItems
+end
+
+task.spawn(function()
+    local enemyDataModule = ReplicatedStorage:FindFirstChild("Framework") and ReplicatedStorage.Framework:FindFirstChild("Modules") and ReplicatedStorage.Framework.Modules:FindFirstChild("Data") and ReplicatedStorage.Framework.Modules.Data:FindFirstChild("EnemyData")
+    if enemyDataModule then
+        for id, info in pairs(require(enemyDataModule)) do
+            AnimeGhosts.EnemyData[id] = info.Name or id
+        end
+    end
+end)
+
+task.spawn(function()
+    local weaponDataModule = ReplicatedStorage:FindFirstChild("Framework") and ReplicatedStorage.Framework:FindFirstChild("Modules") and ReplicatedStorage.Framework.Modules:FindFirstChild("Data") and ReplicatedStorage.Framework.Modules.Data:FindFirstChild("WeaponData")
+    if weaponDataModule then
+        AnimeGhosts.WeaponData = require(weaponDataModule)
+    end
+end)
+
+task.spawn(function()
+    local avatarDataModule = ReplicatedStorage:FindFirstChild("Framework") and ReplicatedStorage.Framework:FindFirstChild("Modules") and ReplicatedStorage.Framework.Modules:FindFirstChild("Data") and ReplicatedStorage.Framework.Modules.Data:FindFirstChild("AvatarData")
+    if avatarDataModule then
+        AnimeGhosts.AvatarData = require(avatarDataModule)
+    else
+        local petDataModule = ReplicatedStorage:FindFirstChild("Framework") and ReplicatedStorage.Framework:FindFirstChild("Modules") and ReplicatedStorage.Framework.Modules:FindFirstChild("Data") and ReplicatedStorage.Framework.Modules.Data:FindFirstChild("PetData")
+        if petDataModule then
+            AnimeGhosts.AvatarData = require(petDataModule)
+        end
+    end
+end)
+
 local function checkDungeon()
     local In_Doing = nil
     local pgui = player:FindFirstChild('PlayerGui')
@@ -222,7 +465,7 @@ local function checkEnemy()
     for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetDescendants()) do
         if folder:IsA('Folder') and (folder.Name == 'Dungeon' or folder.Name == 'Raid' or folder.Name == 'Gamemode') then
             for _, v in pairs(folder:GetChildren()) do
-                if v:IsA('Folder') and #v:GetChildren() > 0 and (v.Name == tostring("Dungeon_" .. player.UserId) or v.Name == tostring("Raid_" .. player.UserId)) then
+                if v:IsA('Folder') and #v:GetChildren() > 0 and (v.Name == tostring("Dungeon_" .. player.UserId) or v.Name == tostring("Raid_" .. player.UserId) or v.Name == tostring("Infinity Castle_" .. player.UserId)) then
                     enemyFolder = v
                 end
             end
@@ -399,7 +642,7 @@ local function getCurrentWorld()
         for i, v in ipairs(map:GetChildren()) do
             if v:IsA('Folder') then
                 local spawn = v:FindFirstChild('Spawn')
-                local another = v:FindFirstChild("Dungeon_" .. player.UserId) or v:FindFirstChild("Raid_" .. player.UserId)
+                local another = v:FindFirstChild("Dungeon_" .. player.UserId) or v:FindFirstChild("Raid_" .. player.UserId) or v:FindFirstChild("Infinity Castle_" .. player.UserId)
 
                 if spawn then
                     world = tostring(v)
@@ -442,7 +685,7 @@ local function getPlayerGamemode()
     for i, v in pairs(ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode'):GetChildren()) do
         if v:FindFirstChild('Players') and v['Players']:GetAttribute(player.UserId) then
             dungeon = v
-        end 
+        end
     end
 
     return dungeon
@@ -783,7 +1026,6 @@ task.spawn(function()
         local dungeonName = getPlayerGamemode()
 
         if settings['AutoDungeon']['AutoLeave'] and dungeonName then
-
             local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
             if Gamemode:FindFirstChild(dungeonName.Name) and Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('ModeId') == 'Dungeon' then
                 if Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
@@ -892,12 +1134,156 @@ task.spawn(function()
     end
 end)
 
-local Timers = Tabs['Main']:AddRightGroupbox('Timers')
-local DungeonCooldown = Timers:AddLabel("DUNGEON >> ", true)
-local RaidCooldown = Timers:AddLabel("RAID    >> ", true)
+local AutoInfinityCastle = Tabs['Main']:AddRightGroupbox('Auto Infinity Castle')
+AutoInfinityCastle:AddToggle('enableAutoInfinityCastle', {
+    Text = 'Auto Create Infinity Castle',
+    Default = settings['InfinityCastle']['Enabled'],
 
-local dungeonMessage = 'DUNGEON  >> '
-local raidMessage = 'RAID     >> '
+    Callback = function(value)
+        settings['InfinityCastle']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+
+AutoInfinityCastle:AddToggle('enableAutoDoInfinityCastle', {
+    Text = 'Auto do Infinity Castle',
+    Default = settings['InfinityCastle']['InfinityCastle'],
+
+    Callback = function(value)
+        settings['InfinityCastle']['InfinityCastle'] = value
+        SaveConfig()
+    end
+})
+
+AutoInfinityCastle:AddSlider('infinityCastleLeaveWaveSlider', {
+    Text = 'Infinity Castle Leave Wave',
+    Default = settings['InfinityCastle']['LeaveWave'],
+    Min = 1,
+    Max = 50,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['InfinityCastle']['LeaveWave'] = value
+        SaveConfig()
+    end
+})
+
+AutoInfinityCastle:AddToggle('enableInfinityCastleAutoLeave', {
+    Text = 'Auto Leave Infinity Castle at Wave',
+    Default = settings['InfinityCastle']['AutoLeave'],
+
+    Callback = function(value)
+        settings['InfinityCastle']['AutoLeave'] = value
+        SaveConfig()
+    end
+})
+
+local function getInfinityCastleCooldown()
+    local InfinityCastleDelay = ScriptLibrary.PlayerData.Delay['Infinity Castle']
+    if InfinityCastleDelay == nil then return end
+
+    local Time = ReplicatedStorage:GetAttribute('Time')
+
+    if Time < InfinityCastleDelay then
+        return true
+    else
+        return false
+    end
+end
+
+local function createInfinityCastle()
+    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Infinity Castle", "Act1", "Easy", n = 6 }, "\002" }}))
+    task.wait(5)
+    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Start", "Infinity Castle", player.UserId, n = 4 }, "\002"}}))
+end
+
+local function startInfinityCastle()
+    if getInfinityCastleCooldown() then return end
+    if playerMode == nil then
+        createInfinityCastle()
+        task.wait(3)
+    elseif checkDungeon() == 'Infinity Castle' or playerMode == 'Infinity Castle' then
+        --teleportToEnemyInMap('Gamemode')
+        task.wait()
+    end
+end
+
+local function startInfinityCastle2()
+    if getInfinityCastleCooldown() then return end
+
+    if checkDungeon() == 'Infinity Castle' or playerMode == 'Infinity Castle' then
+        local gamemode = getPlayerGamemode()
+        if gamemode then
+            if gamemode:GetAttribute('ModeId') == 'Infinity Castle' then
+                teleportToEnemyInGamemode(gamemode)
+                task.wait()
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['InfinityCastle']['Enabled'] then
+            startInfinityCastle()
+            local raidName = "Infinity Castle_" .. player.UserId
+
+            if settings['InfinityCastle']['AutoLeave'] and playerMode == 'Infinity Castle' then
+                local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+                if Gamemode:FindFirstChild(raidName) then
+                    if Gamemode:FindFirstChild(raidName):GetAttribute('Stage') >= settings['InfinityCastle']['LeaveWave'] then
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['InfinityCastle']['InfinityCastle'] then
+            startInfinityCastle2()
+
+            -- local raidName = getPlayerGamemode()
+            -- if raidName and settings['AutoRaid']['AutoLeave'] then
+            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            --     if Gamemode:FindFirstChild(raidName.Name) then
+            --         if Gamemode:FindFirstChild(raidName.Name):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
+            --            teleportToSavedPosition()
+            --         end
+            --     end
+            -- end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        local infCastleName = getPlayerGamemode()
+
+        if settings['InfinityCastle']['AutoLeave'] and infCastleName then
+
+            local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            if Gamemode:FindFirstChild(infCastleName.Name) and Gamemode:FindFirstChild(infCastleName.Name):GetAttribute('ModeId') == 'Infinity Castle' then
+                if Gamemode:FindFirstChild(infCastleName.Name):GetAttribute('Stage') >= settings['InfinityCastle']['LeaveWave'] then
+                    teleportToSavedPosition()
+                end
+            end
+        end
+    end
+end)
+
+local Timers = Tabs['Main']:AddLeftGroupbox('Timers')
+local DungeonCooldown = Timers:AddLabel("DUNGEON     >> ", true)
+local RaidCooldown = Timers:AddLabel("RAID        >> ", true)
+local InfCastleCooldown = Timers:AddLabel("INF CASTLE  >> ", true)
+
+local dungeonMessage = 'DUNGEON     >> '
+local raidMessage = 'RAID        >> '
+local infCastleMessage = 'INF CASTLE  >> '
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
@@ -911,7 +1297,7 @@ task.spawn(function()
             raidMessage = 'READY !'
         end
 
-        RaidCooldown:SetText('RAID     >> ' .. raidMessage)
+        RaidCooldown:SetText('RAID        >> ' .. raidMessage)
     end
 end)
 
@@ -927,7 +1313,235 @@ task.spawn(function()
             dungeonMessage = 'READY !'
         end
 
-        DungeonCooldown:SetText('DUNGEON  >> ' .. dungeonMessage)
+        DungeonCooldown:SetText('DUNGEON     >> ' .. dungeonMessage)
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local InfinityCastleDelay = ScriptLibrary.PlayerData.Delay['Infinity Castle']
+
+        if InfinityCastleDelay == nil then return end
+        local Time = ReplicatedStorage:GetAttribute('Time')
+
+        if Time < InfinityCastleDelay then
+            infCastleMessage = "in " .. tostring(getTime(InfinityCastleDelay - Time))
+        else
+            infCastleMessage = 'READY !'
+        end
+
+        InfCastleCooldown:SetText('INF CASTLE  >> ' .. infCastleMessage)
+    end
+end)
+
+local AutoGacha = Tabs['Gachas']:AddLeftGroupbox("Auto Gachas")
+local UnifiedFilters = {
+    Electric6 = true,
+    Haunt6 = true,
+    Blessed6 = true,
+    Ruin6 = true,
+    Secret = true,
+    Phantom = true,
+    Holy = true,
+    ColossalTitan = true,
+    Ackerman = true,
+    ColossalSerum = true,
+    EvilEye = true,
+	Singularity = true,
+    Earth = true,
+    TrueQuincy = true,
+    Nozarashi = true,
+    National = true,
+    DragonFruit = true,
+    BlackHaki = true,
+    Blessing6 = true,
+    Blessing5 = true,
+    Mist = true,
+    Flame = true
+}
+
+AutoGacha:AddToggle('enableAutoSpinAvatar', {
+    Text = 'Spin Avatar',
+    Default = settings['AutoSpin']['Avatar'],
+
+    Callback = function(value)
+        settings['AutoSpin']['Avatar'] = value
+        SaveConfig()
+    end
+})
+
+AutoGacha:AddToggle('enableAutoSpinWeapons', {
+    Text = 'Spin Weapons',
+    Default = settings['AutoSpin']['Weapons'],
+
+    Callback = function(value)
+        settings['AutoSpin']['Weapons'] = value
+        SaveConfig()
+    end
+})
+
+AutoGacha:AddToggle('enableAutoSpinTraits', {
+    Text = 'Spin Traits',
+    Default = settings['AutoSpin']['Traits'],
+
+    Callback = function(value)
+        settings['AutoSpin']['Traits'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoSpin']['Avatar'] then
+            FireBridge("GachaSystem", "Spin", "Avatar", "Classic", UnifiedFilters)
+        end
+
+        if settings['AutoSpin']['Weapons'] then
+            FireBridge("GachaSystem", "Spin", "Weapon", "Blood-Red", UnifiedFilters)
+        end
+
+        if settings['AutoSpin']['Traits'] then
+            FireBridge("ItemSystem", "RollTrait", "Trait")
+        end
+    end
+end)
+
+local AutoWeaponBuffs = Tabs['Gachas']:AddRightGroupbox("Weapon Buffs")
+
+AutoWeaponBuffs:AddLabel("SELECTED WEAPON INFO")
+-- AutoWeaponBuffs:AddDivider()
+-- local SelectedWeaponUuid = AutoWeaponBuffs:AddLabel("UUID >> \n", true)
+--AutoWeaponBuffs:AddDivider()
+local SelectedWeaponName = AutoWeaponBuffs:AddLabel("NAME >> \n", true)
+--AutoWeaponBuffs:AddDivider()
+local SelectedWeaponEnchant = AutoWeaponBuffs:AddLabel("ENCHANT >> \n", true)
+AutoWeaponBuffs:AddDivider()
+
+local WeaponList = {'None'}
+local EnchantList = {'None', 'Blessed6', 'Blessed5', 'Haunt6', 'Haunt5', 'Ruin6', 'Ruin5', 'Electric6', 'Electric5'}
+AutoWeaponBuffs:AddDropdown('selectedWeaponDropdown', {
+    Values = WeaponList,
+    Default = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Weapon',
+    Tooltip = 'Selected Weapon to Roll', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
+        settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = AnimeGhosts.WeaponNameLookup[value] or value
+        SaveConfig()
+
+        pcall(function()
+            if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Weapons then
+                local name = AnimeGhosts.WeaponData[ScriptLibrary.PlayerData.Weapons[value].Id].Name
+                local enchant = ScriptLibrary.PlayerData.Weapons[value].Buffs and ScriptLibrary.PlayerData.Weapons[value].Buffs.Enchantment or "None"
+
+                SelectedWeaponName:SetText('Name >> ' .. name)
+                SelectedWeaponEnchant:SetText('ENCHANT >> ' .. enchant)
+            end
+        end)
+    end
+})
+
+AutoWeaponBuffs:AddButton({
+    Text = 'Refresh Weapons',
+    Func = function()
+        local newOptions = {}
+
+        pcall(function()
+            if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Weapons then
+                local weaponData = AnimeGhosts.WeaponData or {}
+
+                for uuid, weapon in pairs(ScriptLibrary.PlayerData.Weapons) do
+                    local weaponId = weapon.Id or uuid
+                    local displayName = (weaponData[weaponId] and weaponData[weaponId].Name) or weaponId
+
+                    displayName = displayName:gsub("%s*%[.*%]", "")
+                    AnimeGhosts.WeaponNameLookup[displayName] = uuid
+
+                    if not table.find(newOptions, uuid) then
+                        table.insert(newOptions, uuid)
+                    end
+                end
+            end
+        end)
+
+        if #newOptions == 0 then
+            local inventory = GetInventoryData("Weapons")
+
+            for _, item in ipairs(inventory) do
+                if item.Name then
+                    local cleanName = item.Name:gsub("%s*%[.*%]", "")
+                    AnimeGhosts.WeaponNameLookup[cleanName] = item.RawName or item.Name
+                    table.insert(newOptions, item.cleanName)
+                end
+            end
+        end
+
+        if #newOptions == 0 then table.insert(newOptions, "None Found") end
+        if Options['selectedWeaponDropdown'] and Options['selectedWeaponDropdown'].SetValues and Options['selectedWeaponDropdown'].Refresh then
+            Options['selectedWeaponDropdown']:SetValues(newOptions)
+        end
+    end,
+    DoubleClick = false
+})
+
+AutoWeaponBuffs:AddDropdown('selectedWeaponEnchant', {
+    Values = EnchantList,
+    Default = settings['AutoSpin']['WeaponBuffs']['SelectedEnchant'], -- number index of the value / string
+    Multi = true, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Weapon Enchant',
+    Tooltip = 'Selected Enchant to Roll', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
+        settings['AutoSpin']['WeaponBuffs']['SelectedEnchant'] = value
+        SaveConfig()
+    end
+})
+
+AutoWeaponBuffs:AddToggle('enableSpinWeaponEnchant', {
+    Text = 'Spin Weapon Enchant',
+    Default = settings['AutoSpin']['WeaponBuffs']['Enchant'],
+
+    Callback = function(value)
+        settings['AutoSpin']['WeaponBuffs']['Enchant'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(1) and not Library.Unloaded do
+        if settings['AutoSpin']['WeaponBuffs']['Enchant'] then
+            local selectedEnchantWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
+
+            if not selectedEnchantWeapon or selectedEnchantWeapon == "None" then task.wait(1); continue end
+            if table.find(settings['AutoSpin']['WeaponBuffs']['SelectedEnchant'], "None") then task.wait(1); continue end
+
+            pcall(function()
+                local playerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local weapons = playerData and playerData.Weapons
+                local weaponData = weapons and weapons[selectedEnchantWeapon]
+                local currentEnchant = weaponData and weaponData.Buffs and weaponData.Buffs.Enchantment or "None"
+
+                local match = false
+                if currentEnchant and settings['AutoSpin']['WeaponBuffs']['SelectedEnchant'] then
+                    for _, targetEnchant in ipairs(settings['AutoSpin']['WeaponBuffs']['SelectedEnchant']) do
+                        if string.find(currentEnchant, targetEnchant) then match = true; break end
+                    end
+                end
+
+                if not match then
+                    FireBridge("GachaSystem", "Spin", "Enchantment", "Normal", UnifiedFilters, selectedEnchantWeapon)
+                else
+                    Library:Notify("Enchantment Hit!", 5)
+                    task.wait(0.2)
+                    Library:Notify("Matched: " .. tostring(currentEnchant), 5)
+                end
+            end)
+        end
     end
 end)
 
@@ -992,9 +1606,52 @@ ThemeManager:SetFolder('BeaastHub')
 local settingsRightBox = Tabs["UI Settings"]:AddRightGroupbox("Themes")
 ThemeManager:ApplyToGroupbox(settingsRightBox)
 
-game:GetService('Players').LocalPlayer.Idled:Connect(function()
-	VirtualUser:CaptureController()
-	VirtualUser:ClickButton2(Vector2.new())
+
+local lastActivityTime = tick()
+local antiAfkConnection = nil
+
+local function setupAntiAfk()
+    if antiAfkConnection then
+        antiAfkConnection:Disconnect()
+    end
+    
+    antiAfkConnection = player.Idled:Connect(function(idleTime)
+        -- Reset idle time when detected
+        VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        task.wait(0.1)
+        VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        print("Anti-AFK triggered - prevented kick")
+    end)
+    
+    -- Additional heartbeat check for activity
+    RunService.Heartbeat:Connect(function()
+        if tick() - lastActivityTime > 600 then -- 10 minutes safety check
+            -- Simulate activity
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton1(Vector2.new(0,0))
+            lastActivityTime = tick()
+            print("Anti-AFK heartbeat triggered")
+        end
+    end)
+end
+
+local function updateActivity()
+    lastActivityTime = tick()
+end
+
+task.spawn(function()
+    while task.wait(0.1) do
+        updateActivity()
+    end
+end)
+
+pcall(function()
+    for _, connection in ipairs(getconnections(player.Idled)) do
+        if connection['Disable'] then
+            connection:Disable()
+        end
+    end
 end)
 
 Initialize()
+setupAntiAfk()
