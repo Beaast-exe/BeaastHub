@@ -65,7 +65,8 @@ local defaultSettings = {
     ['Misc'] = {
         ['BackPosition'] = nil,
         ['BackWorld'] = '1',
-        ['TeleportBack'] = false
+        ['TeleportBack'] = false,
+        ['TimeRewards'] = false
     },
     ['AutoSpin'] = {
         ['Avatar'] = false,
@@ -129,6 +130,7 @@ local ffrostflame_bridgenet2 = ReplicatedStorage:FindFirstChild("ffrostflame_bri
 local dataRemoteEvent = ffrostflame_bridgenet2:FindFirstChild("dataRemoteEvent")
 
 local ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
+local GeneralTimeRewards = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("TimeRewardData"):WaitForChild("General"))
 
 local playerMap = "1"
 local playerMode = nil
@@ -901,6 +903,52 @@ task.spawn(function()
     end
 end)
 
+Misc:AddToggle('enableAutoClaimTimeRewards', {
+    Text = 'Auto Claim Time Rewards',
+    Default = settings['Misc']['TimeRewards'],
+
+    Callback = function(value)
+        settings['Misc']['TimeRewards'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['Misc']['TimeRewards'] then
+            local GeneralRewards = GeneralTimeRewards.Rewards
+            local playerRewardsTime = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.TimeRewards and ScriptLibrary.PlayerData.TimeRewards.General and ScriptLibrary.PlayerData.TimeRewards.General.Time
+
+            if GeneralRewards then
+                for i, v in pairs(GeneralRewards) do
+                    local canClaimReward = playerRewardsTime - v.Time > 5
+
+                    if canClaimReward then
+                        FireBridge("TimeRewardSystem", "Claim", "General", tonumber(i))
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- task.spawn(function()
+--     while task.wait() and not Library.Unloaded do
+--         if settings['Misc']['TimeRewards'] then
+--             local claimedPlayerRewards = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.TimeRewards and ScriptLibrary.PlayerData.TimeRewards.General and ScriptLibrary.PlayerData.TimeRewards.General.Claimed
+--             local rewardsLeftToClaim = false
+
+--             for i, v in pairs(claimedPlayerRewards) do
+--                 print(i, v)
+--                 if not v then rewardsLeftToClaim = true end
+--             end
+
+--             if not rewardsLeftToClaim then
+                
+--             end
+--         end
+--     end
+-- end)
 
 local AutoDungeon = Tabs['Main']:AddRightGroupbox('Auto Dungeon')
 AutoDungeon:AddDropdown('selectedDungeonMap', {
@@ -1350,21 +1398,15 @@ AutoGacha:AddToggle('enableDeleteSpinAnimation', {
 })
 
 task.spawn(function()
-    while task.wait() do
+    while task.wait() and not Library.Unloaded do
         pcall(function()
-            local GachaAnimation = player.PlayerGui:FindFirstChild("GachaAnimation")
-            if GachaAnimation then
-                if settings['AutoSpin']['RemoveAnimation'] and not Library.Unloaded then
+            if settings['AutoSpin']['RemoveAnimation'] and not Library.Unloaded then
+                local GachaAnimation = player.PlayerGui:FindFirstChild("GachaAnimation")
+                if GachaAnimation then
                     GachaAnimation.Enabled = false
                     local root = GachaAnimation:FindFirstChild("Root")
                     if root then
                         root.Visible = false
-                    end
-                elseif not settings['AutoSpin']['RemoveAnimation'] or Library.Unloaded then
-                    GachaAnimation.Enabled = true
-                    local root = GachaAnimation:FindFirstChild("Root")
-                    if root then
-                        root.Visible = true
                     end
                 end
             end
