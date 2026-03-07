@@ -6,7 +6,7 @@ local GitHub = 'https://raw.githubusercontent.com/Beaast-exe/BeaastHub/master/sc
 local VirtualUser = game:GetService('VirtualUser')
 game:GetService('Players').LocalPlayer.Idled:Connect(function()
 	VirtualUser:CaptureController()
-	VirtualUser:ClickButton2(Vector2.new())
+	VirtualUser:ClickButton2(Vector2.new(0, 0))
 end)
 
 function execute(rawScriptPath)
