@@ -71,6 +71,7 @@ local defaultSettings = {
         ['Avatar'] = false,
         ['Weapons'] = false,
         ['Traits'] = false,
+        ['RemoveAnimation'] = false,
         ['WeaponBuffs'] = {
             ['SelectedWeapon'] = '',
             ['SelectedEnchant'] = {"Blessed","Haunt","Ruin","Electric"},
@@ -200,24 +201,6 @@ task.spawn(function()
         PlayerGui:FindFirstChild('Transition').Enabled = false
         playerMap = tostring(ScriptLibrary.PlayerData.CurrentMap)
         playerMode = player:GetAttribute('Mode') or nil
-
-        -- pcall(function()
-        --     local ga = player.PlayerGui:FindFirstChild("GachaAnimation")
-        --     if ga then
-        --         ga.Enabled = false
-        --         local root = ga:FindFirstChild("Root")
-        --         if root then
-        --             root.Visible = false
-        --         end
-        --     end
-        -- end)
-
-        -- pcall(function()
-        --     local sga = game:GetService("StarterGui"):FindFirstChild("GachaAnimation")
-        --     if sga then
-        --         sga:Destroy()
-        --     end
-        -- end)
     end
 end)
 
@@ -1355,6 +1338,48 @@ local UnifiedFilters = {
     Mist = true,
     Flame = true
 }
+
+AutoGacha:AddToggle('enableDeleteSpinAnimation', {
+    Text = 'Remove Spin Animation',
+    Default = settings['AutoSpin']['RemoveAnimation'],
+
+    Callback = function(value)
+        settings['AutoSpin']['RemoveAnimation'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() do
+        pcall(function()
+            local GachaAnimation = player.PlayerGui:FindFirstChild("GachaAnimation")
+            if GachaAnimation then
+                if settings['AutoSpin']['RemoveAnimation'] and not Library.Unloaded then
+                    GachaAnimation.Enabled = false
+                    local root = GachaAnimation:FindFirstChild("Root")
+                    if root then
+                        root.Visible = false
+                    end
+                elseif not settings['AutoSpin']['RemoveAnimation'] or Library.Unloaded then
+                    GachaAnimation.Enabled = true
+                    local root = GachaAnimation:FindFirstChild("Root")
+                    if root then
+                        root.Visible = true
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            local StarterGachaAnimation = game:GetService("StarterGui"):FindFirstChild("GachaAnimation")
+            if StarterGachaAnimation then
+                StarterGachaAnimation:Destroy()
+            end
+        end)
+    end
+end)
+
+AutoGacha:AddDivider()
 
 AutoGacha:AddToggle('enableAutoSpinAvatar', {
     Text = 'Spin Avatar',
