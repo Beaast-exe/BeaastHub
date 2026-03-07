@@ -1424,8 +1424,8 @@ PetBuffs:AddDropdown('selectedPetDropdown', {
 
         pcall(function()
             if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Pets then
-                local name = AnimeGhosts.AvatarData[ScriptLibrary.PlayerData.Pets[value].Id].Name
-                local passive = ScriptLibrary.PlayerData.Pets[value].Buffs and ScriptLibrary.PlayerData.Pets[value].Buffs.Passive
+                local name = ScriptLibrary.PlayerData.Pets[value].Id --AnimeGhosts.AvatarData[ScriptLibrary.PlayerData.Pets[value].Id].Name
+                local passive = ScriptLibrary.PlayerData.Pets[value].Buffs and ScriptLibrary.PlayerData.Pets[value].Buffs.Passive or 'None'
             
                 SelectedPetName:SetText("NAME >> ".. name)
                 SelectedPetPassive:SetText("PASSIVE >> " .. passive)
@@ -1479,6 +1479,64 @@ PetBuffs:AddButton({
     end,
     DoubleClick = false
 })
+
+PetBuffs:AddDropdown('selectedPetPassive', {
+    Values = PassiveList,
+    Default = settings['AutoSpin']['PetBuffs']['SelectedPassive'], -- number index of the value / string
+    Multi = true, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Pet Passive',
+    Tooltip = 'Selected Passive to Roll', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
+        settings['AutoSpin']['PetBuffs']['SelectedPassive'] = value
+        SaveConfig()
+    end
+})
+
+PetBuffs:AddToggle('enableSpinPetPassive', {
+    Text = 'Spin Pet Passive',
+    Default = settings['AutoSpin']['PetBuffs']['Passive'],
+
+    Callback = function(value)
+        settings['AutoSpin']['PetBuffs']['Passive'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoSpin']['PetBuffs']['Passive'] then
+            local selectedPassivePet = settings['AutoSpin']['PetBuffs']['SelectedPet']
+
+            if not selectedPassivePet or selectedPassivePet == "None" then task.wait(1); continue end
+            if table.find(settings['AutoSpin']['PetBuffs']['SelectedPassive'], "None") then task.wait(1); continue end
+
+            pcall(function()
+                local playerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local pets = playerData and playerData.Pets
+                local petData = pets and pets[selectedPassivePet]
+                local currentPassive = petData and petData.Buffs and petData.Buffs.Passive or "None"
+
+                local match = false
+                if currentPassive and settings['AutoSpin']['PetBuffs']['SelectedPassive'] then
+                    for _, targetPassive in ipairs(settings['AutoSpin']['PetBuffs']['SelectedPassive']) do
+                        if string.find(currentPassive, targetPassive) then match = true; break end
+                    end
+                end
+
+                if not match then
+                    FireBridge("GachaSystem", "Spin", "Passive", "Normal", UnifiedFilters, selectedPassivePet)
+                else
+                    Library:Notify("Passive Hit!", 5)
+                    task.wait(0.2)
+                    Library:Notify("Matched: " .. tostring(currentPassive), 5)
+                end
+            end)
+        end
+    end
+end)
 
 local AutoWeaponBuffs = Tabs['Gachas']:AddRightGroupbox("Weapon Buffs")
 
