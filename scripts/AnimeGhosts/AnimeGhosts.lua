@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(3)
+task.wait(10)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -131,6 +131,8 @@ local dataRemoteEvent = ffrostflame_bridgenet2:FindFirstChild("dataRemoteEvent")
 
 local ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
 local GeneralTimeRewards = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("TimeRewardData"):WaitForChild("General"))
+
+if not ScriptLibrary then repeat task.wait() until ScriptLibrary.PlayerData end
 
 local playerMap = "1"
 local playerMode = nil
