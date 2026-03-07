@@ -68,6 +68,11 @@ local defaultSettings = {
         ['TeleportBack'] = false,
         ['TimeRewards'] = false
     },
+    ['AutoPotions'] = {
+        ['SelectedPotions'] = {"EnergyPotion1"},
+        ['Enabled'] = false,
+        ['OnlyWhenFull'] = false
+    },
     ['AutoSpin'] = {
         ['Avatar'] = false,
         ['Weapons'] = false,
@@ -418,6 +423,16 @@ local function hasTokenAmountToRoll(token)
         return true
     else
         return false
+    end
+end
+
+local function getItemAmount(item)
+    local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+    local VIPGamepass = PlayerData and PlayerData.Gamepasses and PlayerData.Gamepasses.VIPGamepass
+    local inventory = PlayerData and PlayerData.Inventory
+
+    if inventory[item] then
+        return inventory[item]
     end
 end
 
@@ -819,6 +834,58 @@ task.spawn(function()
     end
 end)
 
+local PotionsList = {"EnergyPotion1", "EnergyPotion2", "EnergyPotion3", "DamagePotion1", "DamagePotion2", "DamagePotion3", "DropPotion1", "DropPotion2", "DropPotion3", "GhostPotion1", "GhostPotion2", "GhostPotion3", "LuckPotion1", "LuckPotion2", "LuckPotion3"}
+local AutoPotions = Tabs['Main']:AddLeftGroupbox('Auto Potions')
+AutoPotions:AddDropdown('selectedPotions', {
+    Values = PotionsList,
+    Default = settings['AutoPotions']['SelectedPotions'], -- number index of the value / string
+    Multi = true, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Potions',
+    Tooltip = 'Selected Potions to use', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoPotions']['SelectedPotions'] = value
+        SaveConfig()
+    end
+})
+
+AutoPotions:AddToggle('enableAutoPotions', {
+    Text = 'Auto Use Potions',
+    Default = settings['AutoPotions']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoPotions']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+AutoPotions:AddToggle('enableAutoPotionsOnlyWhenFull', {
+    Text = 'Only When Full',
+    Default = settings['AutoPotions']['OnlyWhenFull'],
+
+    Callback = function(value)
+        settings['AutoPotions']['OnlyWhenFull'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.2) and not Library.Unloaded do
+        if settings['AutoPotions']['Enabled'] then
+            for _, potion in pairs(settings['AutoPotions']['SelectedPotions']) do
+                if settings['AutoPotions']['OnlyWhenFull'] then
+                    if getItemAmount(potion) > 90 then
+                        FireBridge("PotionSystem", "Use", tostring(potion))
+                    end
+                else
+                    FireBridge("PotionSystem", "Use", tostring(potion))
+                end
+            end
+        end
+    end
+end)
+
 local Misc = Tabs['Main']:AddLeftGroupbox('Miscellaneous')
 local ignoredBackWorlds = {"Gamemode"}
 local selectBackPosition = Misc:AddButton({
@@ -949,24 +1016,6 @@ task.spawn(function()
         end
     end
 end)
-
--- task.spawn(function()
---     while task.wait() and not Library.Unloaded do
---         if settings['Misc']['TimeRewards'] then
---             local claimedPlayerRewards = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.TimeRewards and ScriptLibrary.PlayerData.TimeRewards.General and ScriptLibrary.PlayerData.TimeRewards.General.Claimed
---             local rewardsLeftToClaim = false
-
---             for i, v in pairs(claimedPlayerRewards) do
---                 print(i, v)
---                 if not v then rewardsLeftToClaim = true end
---             end
-
---             if not rewardsLeftToClaim then
-                
---             end
---         end
---     end
--- end)
 
 local AutoDungeon = Tabs['Main']:AddRightGroupbox('Auto Dungeon')
 AutoDungeon:AddDropdown('selectedDungeonMap', {
