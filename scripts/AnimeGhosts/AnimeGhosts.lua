@@ -1253,16 +1253,6 @@ task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         if settings['InfinityCastle']['InfinityCastle'] then
             startInfinityCastle2()
-
-            -- local raidName = getPlayerGamemode()
-            -- if raidName and settings['AutoRaid']['AutoLeave'] then
-            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-            --     if Gamemode:FindFirstChild(raidName.Name) then
-            --         if Gamemode:FindFirstChild(raidName.Name):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
-            --            teleportToSavedPosition()
-            --         end
-            --     end
-            -- end
         end
     end
 end)
@@ -1272,7 +1262,6 @@ task.spawn(function()
         local infCastleName = getPlayerGamemode()
 
         if settings['InfinityCastle']['AutoLeave'] and infCastleName then
-
             local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
             if Gamemode:FindFirstChild(infCastleName.Name) and Gamemode:FindFirstChild(infCastleName.Name):GetAttribute('ModeId') == 'Infinity Castle' then
                 if Gamemode:FindFirstChild(infCastleName.Name):GetAttribute('Stage') >= settings['InfinityCastle']['LeaveWave'] then
