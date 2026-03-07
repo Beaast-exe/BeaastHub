@@ -75,8 +75,8 @@ local defaultSettings = {
         ['RemoveAnimation'] = false,
         ['WeaponBuffs'] = {
             ['SelectedWeapon'] = '',
-            ['SelectedEnchant'] = {"Blessed","Haunt","Ruin","Electric"},
-            ['SelectedBreathing'] = {'Mist', 'Flame', 'Insect'},
+            ['SelectedEnchant'] = {"Electric6"},
+            ['SelectedBreathing'] = {'Mist'},
             ['Enchant'] = false,
             ['Breathing'] = false
         },
@@ -1615,6 +1615,8 @@ AutoWeaponBuffs:AddDivider()
 
 local WeaponList = {'None'}
 local EnchantList = {'None', 'Blessed6', 'Blessed5', 'Haunt6', 'Haunt5', 'Ruin6', 'Ruin5', 'Electric6', 'Electric5'}
+local BreathingList = {'None', 'Mist', 'Flame', 'Insect', 'Lightning', 'Water', 'Beast'}
+
 AutoWeaponBuffs:AddDropdown('selectedWeaponDropdown', {
     Values = WeaponList,
     Default = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'], -- number index of the value / string
@@ -1743,7 +1745,21 @@ task.spawn(function()
     end
 end)
 
-local BreathingList = {'None', 'Mist', 'Flame', 'Insect', 'Lightning', 'Water', 'Beast'}
+-- AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
+--     Values = BreathingList,
+--     Default = settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'], -- number index of the value / string
+--     Multi = true, -- true / false, allows multiple choices to be selected
+
+--     Text = 'Selected Weapon Breathing',
+--     Tooltip = 'Selected Breathing to Roll', -- Information shown when you hover over the dropdown
+
+--     Callback = function(value)
+--         --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
+--         settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'] = value
+--         SaveConfig()
+--     end
+-- })
+
 AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
     Values = BreathingList,
     Default = settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'], -- number index of the value / string
