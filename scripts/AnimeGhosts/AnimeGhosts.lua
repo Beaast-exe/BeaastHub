@@ -74,7 +74,14 @@ local defaultSettings = {
         ['WeaponBuffs'] = {
             ['SelectedWeapon'] = '',
             ['SelectedEnchant'] = {"Blessed","Haunt","Ruin","Electric"},
-            ['Enchant'] = false
+            ['SelectedBreathing'] = {'Mist', 'Flame', 'Insect'},
+            ['Enchant'] = false,
+            ['Breathing'] = false
+        },
+        ['PetBuffs'] = {
+            ['SelectedPet'] = '',
+            ['SelectedPassive'] = {'Phantom', 'Holy', 'Whisper', 'Fated'},
+            ['Passive'] = false
         }
     },
     ['Keybinds'] = {
@@ -194,23 +201,23 @@ task.spawn(function()
         playerMap = tostring(ScriptLibrary.PlayerData.CurrentMap)
         playerMode = player:GetAttribute('Mode') or nil
 
-        pcall(function()
-            local ga = player.PlayerGui:FindFirstChild("GachaAnimation")
-            if ga then
-                ga.Enabled = false
-                local root = ga:FindFirstChild("Root")
-                if root then
-                    root.Visible = false
-                end
-            end
-        end)
+        -- pcall(function()
+        --     local ga = player.PlayerGui:FindFirstChild("GachaAnimation")
+        --     if ga then
+        --         ga.Enabled = false
+        --         local root = ga:FindFirstChild("Root")
+        --         if root then
+        --             root.Visible = false
+        --         end
+        --     end
+        -- end)
 
-        pcall(function()
-            local sga = game:GetService("StarterGui"):FindFirstChild("GachaAnimation")
-            if sga then
-                sga:Destroy()
-            end
-        end)
+        -- pcall(function()
+        --     local sga = game:GetService("StarterGui"):FindFirstChild("GachaAnimation")
+        --     if sga then
+        --         sga:Destroy()
+        --     end
+        -- end)
     end
 end)
 
@@ -1406,15 +1413,90 @@ task.spawn(function()
     end
 end)
 
+local PetBuffs = Tabs['Gachas']:AddLeftGroupbox("Pet Buffs")
+PetBuffs:AddLabel("SELECTED PET INFO")
+local SelectedPetName = PetBuffs:AddLabel("NAME >> ", true)
+local SelectedPetPassive = PetBuffs:AddLabel("PASSIVE >> ", true)
+PetBuffs:AddDivider()
+
+local PetList = {'None'}
+local PassiveList = {'None', 'Fated', 'Whisper', 'Holy', 'Phantom'}
+PetBuffs:AddDropdown('selectedPetDropdown', {
+    Values = PetList,
+    Default = settings['AutoSpin']['PetBuffs']['SelectedPet'],
+    Multi = false,
+
+    Text = 'Selected Pet',
+    Tooltip = 'Selected Pet to Roll',
+
+    Callback = function(value)
+        settings['AutoSpin']['PetBuffs']['SelectedPet'] = AnimeGhosts.HeroNameLookup[value] or value
+        SaveConfig()
+
+        pcall(function()
+            if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Pets then
+                local name = AnimeGhosts.AvatarData[ScriptLibrary.PlayerData.Pets[value].Id].Name
+                local passive = ScriptLibrary.PlayerData.Pets[value].Buffs and ScriptLibrary.PlayerData.Pets[value].Buffs.Passive
+            
+                SelectedPetName:SetText("NAME >> ".. name)
+                SelectedPetPassive:SetText("PASSIVE >> " .. passive)
+            end
+        end)
+    end
+})
+
+PetBuffs:AddButton({
+    Text = 'Refresh Pets',
+    Func = function()
+        local newOptions = {}
+
+        pcall(function()
+            if ScriptLibrary and ScriptLibrary.PlayerData then
+                local pets = ScriptLibrary.PlayerData.Pets
+                local avatarData = AnimeGhosts.AvatarData or {}
+
+                if pets then
+                    for uuid, avatar in pairs(pets) do
+                        local avatarId = avatar.Id or uuid
+                        local displayName = (avatarData[avatarId] and avatarData[avatarId].Name) or avatarId
+
+                        displayName = displayName:gsub("%s*%[.*%]", "")
+                        AnimeGhosts.HeroNameLookup[displayName] = uuid
+
+                        if not table.find(newOptions, uuid) then
+                            table.insert(newOptions, uuid)
+                        end
+                    end
+                end
+            end
+        end)
+
+        if #newOptions == 0 then
+            local inventory = GetInventoryData("Pets")
+
+            for _, item in ipairs(inventory) do
+                if item.Name then
+                    local cleanName = item.Name:gsub("%s*%[.*%]", "")
+                    AnimeGhosts.HeroNameLookup[cleanName] = item.RawName or item.Name
+                    table.insert(newOptions, item.cleanName)
+                end
+            end
+        end
+
+        if #newOptions == 0 then table.insert(newOptions, "None Found") end
+        if Options['selectedPetDropdown'] and Options['selectedPetDropdown'].SetValues and Options['selectedPetDropdown'].Refresh then
+            Options['selectedPetDropdown']:SetValues(newOptions)
+        end
+    end,
+    DoubleClick = false
+})
+
 local AutoWeaponBuffs = Tabs['Gachas']:AddRightGroupbox("Weapon Buffs")
 
 AutoWeaponBuffs:AddLabel("SELECTED WEAPON INFO")
--- AutoWeaponBuffs:AddDivider()
--- local SelectedWeaponUuid = AutoWeaponBuffs:AddLabel("UUID >> \n", true)
---AutoWeaponBuffs:AddDivider()
-local SelectedWeaponName = AutoWeaponBuffs:AddLabel("NAME >> \n", true)
---AutoWeaponBuffs:AddDivider()
-local SelectedWeaponEnchant = AutoWeaponBuffs:AddLabel("ENCHANT >> \n", true)
+local SelectedWeaponName = AutoWeaponBuffs:AddLabel("NAME >> ", true)
+local SelectedWeaponEnchant = AutoWeaponBuffs:AddLabel("ENCHANT >> ", true)
+local SelectedWeaponBreathing = AutoWeaponBuffs:AddLabel("BREATHING >> ", true)
 AutoWeaponBuffs:AddDivider()
 
 local WeaponList = {'None'}
@@ -1436,9 +1518,11 @@ AutoWeaponBuffs:AddDropdown('selectedWeaponDropdown', {
             if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Weapons then
                 local name = AnimeGhosts.WeaponData[ScriptLibrary.PlayerData.Weapons[value].Id].Name
                 local enchant = ScriptLibrary.PlayerData.Weapons[value].Buffs and ScriptLibrary.PlayerData.Weapons[value].Buffs.Enchantment or "None"
+                local breathing = ScriptLibrary.PlayerData.Weapons[value].Buffs and ScriptLibrary.PlayerData.Weapons[value].Buffs.Breathing or "None"
 
                 SelectedWeaponName:SetText('Name >> ' .. name)
                 SelectedWeaponEnchant:SetText('ENCHANT >> ' .. enchant)
+                SelectedWeaponBreathing:SetText('BREATHING >> ' .. breathing)
             end
         end)
     end
@@ -1513,7 +1597,7 @@ AutoWeaponBuffs:AddToggle('enableSpinWeaponEnchant', {
 })
 
 task.spawn(function()
-    while task.wait(1) and not Library.Unloaded do
+    while task.wait(0.5) and not Library.Unloaded do
         if settings['AutoSpin']['WeaponBuffs']['Enchant'] then
             local selectedEnchantWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
 
@@ -1539,6 +1623,65 @@ task.spawn(function()
                     Library:Notify("Enchantment Hit!", 5)
                     task.wait(0.2)
                     Library:Notify("Matched: " .. tostring(currentEnchant), 5)
+                end
+            end)
+        end
+    end
+end)
+
+local BreathingList = {'None', 'Mist', 'Flame', 'Insect', 'Lightning', 'Water', 'Beast'}
+AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
+    Values = BreathingList,
+    Default = settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'], -- number index of the value / string
+    Multi = true, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Weapon Breathing',
+    Tooltip = 'Selected Breathing to Roll', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
+        settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'] = value
+        SaveConfig()
+    end
+})
+
+AutoWeaponBuffs:AddToggle('enableSpinWeaponBreathing', {
+    Text = 'Spin Weapon Enchant',
+    Default = settings['AutoSpin']['WeaponBuffs']['Breathing'],
+
+    Callback = function(value)
+        settings['AutoSpin']['WeaponBuffs']['Breathing'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoSpin']['WeaponBuffs']['Breathing'] then
+            local selectedEnchantWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
+
+            if not selectedEnchantWeapon or selectedEnchantWeapon == "None" then task.wait(1); continue end
+            if table.find(settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'], "None") then task.wait(1); continue end
+
+            pcall(function()
+                local playerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local weapons = playerData and playerData.Weapons
+                local weaponData = weapons and weapons[selectedEnchantWeapon]
+                local currentBreathing = weaponData and weaponData.Buffs and weaponData.Buffs.Breathing or "None"
+
+                local match = false
+                if currentBreathing and settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'] then
+                    for _, targetBreathing in ipairs(settings['AutoSpin']['WeaponBuffs']['SelectedBreathing']) do
+                        if string.find(currentBreathing, targetBreathing) then match = true; break end
+                    end
+                end
+
+                if not match then
+                    FireBridge("GachaSystem", "Spin", "Breathing", "Normal", UnifiedFilters, selectedEnchantWeapon)
+                else
+                    Library:Notify("Breathing Hit!", 5)
+                    task.wait(0.2)
+                    Library:Notify("Matched: " .. tostring(currentBreathing), 5)
                 end
             end)
         end
