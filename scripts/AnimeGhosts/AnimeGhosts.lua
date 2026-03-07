@@ -405,6 +405,22 @@ local function GetInventoryData(categoryName)
     return formattedItems
 end
 
+local function hasTokenAmountToRoll(token)
+    local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+    local VIPGamepass = PlayerData and PlayerData.Gamepasses and PlayerData.Gamepasses.VIPGamepass
+    local inventory = PlayerData and PlayerData.Inventory
+
+    local amountNeeded = 10
+    if VIPGamepass then amountNeeded = 7 else amountNeeded = 10 end
+
+    local tokenAmount = inventory[token]
+    if tokenAmount >= amountNeeded then
+        return true
+    else
+        return false
+    end
+end
+
 task.spawn(function()
     local enemyDataModule = ReplicatedStorage:FindFirstChild("Framework") and ReplicatedStorage.Framework:FindFirstChild("Modules") and ReplicatedStorage.Framework.Modules:FindFirstChild("Data") and ReplicatedStorage.Framework.Modules.Data:FindFirstChild("EnemyData")
     if enemyDataModule then
@@ -1458,15 +1474,21 @@ AutoGacha:AddToggle('enableAutoSpinTraits', {
 task.spawn(function()
     while task.wait(0.5) and not Library.Unloaded do
         if settings['AutoSpin']['Avatar'] then
-            FireBridge("GachaSystem", "Spin", "Avatar", "Classic", UnifiedFilters)
+            if hasTokenAmountToRoll("AvatarTokens") then
+                FireBridge("GachaSystem", "Spin", "Avatar", "Classic", UnifiedFilters)
+            end
         end
 
         if settings['AutoSpin']['Weapons'] then
-            FireBridge("GachaSystem", "Spin", "Weapon", "Blood-Red", UnifiedFilters)
+            if hasTokenAmountToRoll("WeaponTokens") then
+                FireBridge("GachaSystem", "Spin", "Weapon", "Blood-Red", UnifiedFilters)
+            end
         end
 
         if settings['AutoSpin']['Traits'] then
-            FireBridge("ItemSystem", "RollTrait", "Trait")
+            if hasTokenAmountToRoll("TraitShards") then
+                FireBridge("ItemSystem", "RollTrait", "Trait")
+            end
         end
     end
 end)
@@ -1596,7 +1618,9 @@ task.spawn(function()
                 end
 
                 if not match then
-                    FireBridge("GachaSystem", "Spin", "Passive", "Normal", UnifiedFilters, selectedPassivePet)
+                    if hasTokenAmountToRoll("PassiveTokens") then
+                        FireBridge("GachaSystem", "Spin", "Passive", "Normal", UnifiedFilters, selectedPassivePet)
+                    end
                 else
                     Library:Notify("Passive Hit!", 5)
                     task.wait(0.2)
@@ -1736,7 +1760,9 @@ task.spawn(function()
                 end
 
                 if not match then
-                    FireBridge("GachaSystem", "Spin", "Enchantment", "Normal", UnifiedFilters, selectedEnchantWeapon)
+                    if hasTokenAmountToRoll("EnchantmentTokens") then
+                        FireBridge("GachaSystem", "Spin", "Enchantment", "Normal", UnifiedFilters, selectedEnchantWeapon)
+                    end
                 else
                     Library:Notify("Enchantment Hit!", 5)
                     task.wait(0.2)
@@ -1809,7 +1835,9 @@ task.spawn(function()
                 end
 
                 if not match then
-                    FireBridge("GachaSystem", "Spin", "Breathing", "Normal", UnifiedFilters, selectedEnchantWeapon)
+                    if hasTokenAmountToRoll("BreathingTokens") then
+                        FireBridge("GachaSystem", "Spin", "Breathing", "Normal", UnifiedFilters, selectedEnchantWeapon)
+                    end
                 else
                     Library:Notify("Breathing Hit!", 5)
                     task.wait(0.2)
