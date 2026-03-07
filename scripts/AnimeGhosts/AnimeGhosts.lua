@@ -914,7 +914,7 @@ Misc:AddToggle('enableAutoClaimTimeRewards', {
 })
 
 task.spawn(function()
-    while task.wait() and not Library.Unloaded do
+    while task.wait(3) and not Library.Unloaded do
         if settings['Misc']['TimeRewards'] then
             local GeneralRewards = GeneralTimeRewards.Rewards
             local playerRewardsTime = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.TimeRewards and ScriptLibrary.PlayerData.TimeRewards.General and ScriptLibrary.PlayerData.TimeRewards.General.Time
@@ -1760,7 +1760,7 @@ AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
 })
 
 AutoWeaponBuffs:AddToggle('enableSpinWeaponBreathing', {
-    Text = 'Spin Weapon Enchant',
+    Text = 'Spin Weapon Breathing',
     Default = settings['AutoSpin']['WeaponBuffs']['Breathing'],
 
     Callback = function(value)
