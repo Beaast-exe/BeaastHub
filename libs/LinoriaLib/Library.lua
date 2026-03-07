@@ -84,7 +84,8 @@ table.insert(
 )
 
 local function GetResizeUI()
-	local X, Y = 550, 600
+	--local X, Y = 550, 600
+	local X, Y = 850, 900
 	local offset = 20
 	local camX, camY = camera.ViewportSize.X, camera.ViewportSize.Y
 	if camY < Y + offset then
