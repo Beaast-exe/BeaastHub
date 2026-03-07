@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
--- task.wait(3)
+task.wait(3)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -668,7 +668,7 @@ local function getCurrentWorld()
 end
 
 local function getDungeonCooldown()
-    local DungeonDelay = ScriptLibrary.PlayerData.Delay.Dungeon
+    local DungeonDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay.Dungeon
     if DungeonDelay == nil then return end
 
     local Time = ReplicatedStorage:GetAttribute('Time')
@@ -724,7 +724,7 @@ local function startDungeon2()
 end
 
 local function getRaidCooldown()
-    local RaidDelay = ScriptLibrary.PlayerData.Delay.Raid
+    local RaidDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay.Raid
     if RaidDelay == nil then return end
 
     local Time = ReplicatedStorage:GetAttribute('Time')
@@ -1188,7 +1188,7 @@ AutoInfinityCastle:AddToggle('enableInfinityCastleAutoLeave', {
 })
 
 local function getInfinityCastleCooldown()
-    local InfinityCastleDelay = ScriptLibrary.PlayerData.Delay['Infinity Castle']
+    local InfinityCastleDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay['Infinity Castle']
     if InfinityCastleDelay == nil then return end
 
     local Time = ReplicatedStorage:GetAttribute('Time')
@@ -1283,7 +1283,7 @@ local infCastleMessage = 'INF CASTLE  >> '
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        local RaidDelay = ScriptLibrary.PlayerData.Delay.Raid
+        local RaidDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay.Raid
         if RaidDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
 
@@ -1299,7 +1299,7 @@ end)
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        local DungeonDelay = ScriptLibrary.PlayerData.Delay.Dungeon
+        local DungeonDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay.Dungeon
         if DungeonDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
 
@@ -1315,7 +1315,7 @@ end)
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        local InfinityCastleDelay = ScriptLibrary.PlayerData.Delay['Infinity Castle']
+        local InfinityCastleDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay['Infinity Castle']
 
         if InfinityCastleDelay == nil then return end
         local Time = ReplicatedStorage:GetAttribute('Time')
