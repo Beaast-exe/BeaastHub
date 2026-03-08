@@ -1017,6 +1017,17 @@ task.spawn(function()
     end
 end)
 
+task.spawn(function()
+    while task.wait(3) and not Library.Unloaded do
+        if settings['Misc']['TimeRewards'] then
+            local button = PlayerGui.CenterGUI.TimeRewards.Main.Content.Reset.Button
+            if button and button.Visible then
+                FireBridge("TimeRewardSystem", "Reset", "General")
+            end
+        end
+    end
+end)
+
 local AutoDungeon = Tabs['Main']:AddRightGroupbox('Auto Dungeon')
 AutoDungeon:AddDropdown('selectedDungeonMap', {
     Values = dungeonMaps,
