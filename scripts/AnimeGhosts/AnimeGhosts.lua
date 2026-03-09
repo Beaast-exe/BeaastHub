@@ -1178,7 +1178,7 @@ AutoRaid:AddSlider('raidLeaveWaveSlider', {
     Text = 'Raid Leave Wave',
     Default = settings['AutoRaid']['LeaveWave'],
     Min = 1,
-    Max = 50,
+    Max = 100,
     Rounding = 0,
     Compact = false,
 
