@@ -699,9 +699,9 @@ local function getDungeonCooldown()
 end
 
 local function createDungeon(difficulty)
-    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Dungeon", settings['AutoDungeon']['Map'], difficulty, n = 6}, "\002" }}))
+    FireBridge("GamemodeSystem", "Create", "Dungeon", settings['AutoDungeon']['Map'], settings['AutoDungeon']['Difficulty'])
     task.wait(5)
-    dataRemoteEvent:FireServer(unpack({{{ "GamemodeSystem", "Start", "Dungeon", player.UserId, n = 4 }, "\002"}}))
+    FireBridge("GamemodeSystem", "Start", "Dungeon", player.UserId)
 end
 
 local function getPlayerGamemode()
@@ -755,9 +755,9 @@ local function getRaidCooldown()
 end
 
 local function createRaid()
-    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Raid", "TitanTown", "Easy", n = 6 }, "\002" }}))
+    FireBridge("GamemodeSystem", "Create", "Raid", "TitanTown", "Easy")
     task.wait(5)
-    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Start", "Raid", player.UserId, n = 4 }, "\002"}}))
+    FireBridge("GamemodeSystem", "Start", "Raid", player.UserId)
 end
 
 local function startRaid()
@@ -1310,9 +1310,9 @@ local function getInfinityCastleCooldown()
 end
 
 local function createInfinityCastle()
-    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Create", "Infinity Castle", "Act1", "Easy", n = 6 }, "\002" }}))
+    FireBridge("GamemodeSystem", "Create", "Infinity Castle", "Act1", "Easy")
     task.wait(5)
-    dataRemoteEvent:FireServer(unpack({{{"GamemodeSystem", "Start", "Infinity Castle", player.UserId, n = 4 }, "\002"}}))
+    FireBridge("GamemodeSystem", "Start", "Infinity Castle", player.UserId)
 end
 
 local function startInfinityCastle()
