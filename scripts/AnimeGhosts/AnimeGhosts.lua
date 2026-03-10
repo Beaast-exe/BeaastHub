@@ -876,10 +876,10 @@ task.spawn(function()
             for _, potion in pairs(settings['AutoPotions']['SelectedPotions']) do
                 if settings['AutoPotions']['OnlyWhenFull'] then
                     if getItemAmount(potion) > 90 then
-                        FireBridge("PotionSystem", "Use", tostring(potion))
+                        FireBridge("ItemSystem", "Use", tostring(potion))
                     end
                 else
-                    FireBridge("PotionSystem", "Use", tostring(potion))
+                    FireBridge("ItemSystem", "Use", tostring(potion))
                 end
             end
         end
