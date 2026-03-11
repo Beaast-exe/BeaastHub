@@ -1879,7 +1879,6 @@ task.spawn(function()
                     if UpgradePrice > 3000 then UpgradePrice = 3000 end
 
                     if PlayerUpgradeLevel < DungeonUpgradesData[upgrade].MaxLevel then
-                        print(upgrade, PlayerUpgradeLevel, UpgradePrice)
                         if getItemAmount("DungeonShards") >= UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Dungeon", upgrade)
                         end
