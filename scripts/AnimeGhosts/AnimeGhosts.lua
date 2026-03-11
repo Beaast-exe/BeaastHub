@@ -32,12 +32,12 @@ local saveFileName = game:GetService('Players').LocalPlayer.Name .. '.json'
 local saveFile = saveFolderName .. '/' .. gameFolderName .. '/' .. saveFileName
 
 local defaultSettings = {
-    ['AutoFarm'] = {
-        ['Enabled'] = false,
-        ['TeleportToEnemies'] = false,
-        ['World'] = 'Loading Docks',
-        ['Enemies'] = {''}
-    },
+    -- ['AutoFarm'] = {
+    --     ['Enabled'] = false,
+    --     ['TeleportToEnemies'] = false,
+    --     ['World'] = 'Loading Docks',
+    --     ['Enemies'] = {''}
+    -- },
     ['AutoDungeon'] = {
         ['Enabled'] = false,
         ['AutoDungeon'] = false,
@@ -85,9 +85,9 @@ local defaultSettings = {
             ['Enabled'] = false
         }
     },
-    ['Exchange'] = {
-        ['Potions'] = {''}
-    }
+    -- ['Exchange'] = {
+    --     ['Potions'] = {''}
+    -- },
     ['AutoSpin'] = {
         ['Avatar'] = false,
         ['Weapons'] = false,
@@ -109,8 +109,8 @@ local defaultSettings = {
     ['Keybinds'] = {
 		['menuKeybind'] = 'LeftShift'
 	},
-    ['GachaDelay'] = 0.5,
-	watermark = false
+    -- ['GachaDelay'] = 0.5,
+	-- watermark = false
 }
 
 if not isfolder(saveFolderName) then makefolder(saveFolderName) end
