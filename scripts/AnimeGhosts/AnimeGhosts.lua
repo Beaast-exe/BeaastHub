@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(10)
+--task.wait(10)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -21,6 +21,8 @@ local Window = Library:CreateWindow({ Title = 'Beaast Hub | Anime Ghosts', Cente
 local Tabs = {
 	['Main'] = Window:AddTab('Main'),
     ['Gachas'] = Window:AddTab('Gachas'),
+    ['Shops'] = Window:AddTab('Shops'),
+    ['Upgrades'] = Window:AddTab('Upgrades'),
 	['UI Settings'] = Window:AddTab('UI Settings')
 }
 
@@ -73,6 +75,19 @@ local defaultSettings = {
         ['Enabled'] = false,
         ['OnlyWhenFull'] = false
     },
+    ['DungeonShop'] = {
+        ['SelectedItems'] = {'Gems', 'DungeonTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
+        ['Enabled'] = false
+    },
+    ['AutoUpgrades'] = {
+        ['Dungeon'] = {
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'},
+            ['Enabled'] = false
+        }
+    },
+    ['Exchange'] = {
+        ['Potions'] = {''}
+    }
     ['AutoSpin'] = {
         ['Avatar'] = false,
         ['Weapons'] = false,
@@ -1833,17 +1848,119 @@ task.spawn(function()
     end
 end)
 
--- AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
---     Values = BreathingList,
---     Default = settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'], -- number index of the value / string
---     Multi = true, -- true / false, allows multiple choices to be selected
+local DungeonUpgradesList = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'}
+local AutoUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Dungeon Upgrades')
+AutoUpgrades:AddDropdown('selectedDungeonUpgrades', {
+    Values = DungeonUpgradesList,
+    Default = settings['AutoUpgrades']['Dungeon']['SelectedUpgrades'],
+    Multi = true,
 
---     Text = 'Selected Weapon Breathing',
---     Tooltip = 'Selected Breathing to Roll', -- Information shown when you hover over the dropdown
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Dungeon Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Dungeon']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+AutoUpgrades:AddToggle('enableAutoUpgradesDungeon', {
+    Text = 'Auto Buy Items',
+    Default = settings['AutoUpgrades']['Dungeon']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Dungeon']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Dungeon']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local DungeonUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Dungeon")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and DungeonUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Dungeon']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Dungeon_' .. upgrade]
+                    local UpgradePrice = DungeonUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if UpgradePrice > 3000 then UpgradePrice = 3000 end
+
+                    if PlayerUpgradeLevel < DungeonUpgradesData[upgrade].MaxLevel then
+                        print(upgrade, PlayerUpgradeLevel, UpgradePrice)
+                        if getItemAmount("DungeonShards") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Dungeon", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local DungeonShopItems = {'Gems', 'DungeonTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
+local DungeonShop = Tabs['Shops']:AddLeftGroupbox('Dungeon Shop')
+DungeonShop:AddDropdown('selectedItems', {
+    Values = DungeonShopItems,
+    Default = settings['DungeonShop']['SelectedItems'],
+    Multi = true,
+
+    Text = 'Selected Items to Buy',
+    Tooltip = 'Selected Items to Buy from Dungeon Shop',
+
+    Callback = function(value)
+        settings['DungeonShop']['SelectedItems'] = value
+        SaveConfig()
+    end
+})
+
+DungeonShop:AddToggle('enableAutoDungeonShop', {
+    Text = 'Auto Buy Items',
+    Default = settings['DungeonShop']['Enabled'],
+
+    Callback = function(value)
+        settings['DungeonShop']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+-- DungeonShards
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['DungeonShop']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local DungeonStockShop = PlayerData and PlayerData.StockShops and PlayerData.StockShops.Dungeon and PlayerData.StockShops.Dungeon.Items
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local DungeonShopData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StockShopData"):WaitForChild("Dungeon"))
+
+            if DungeonStockShop and DungeonShopData and PlayerInventory then
+                for _, item in pairs(settings['DungeonShop']['SelectedItems']) do
+                    local itemPrice = DungeonShopData.Items[item].Price
+
+                    if getItemAmount("DungeonShards") >= itemPrice and DungeonStockShop[item] > 0 then
+                        FireBridge("StockShopSystem", "Buy", "Dungeon", item, 0)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+
+-- local PotionExchange = Tabs['Shops']:AddRightGroupbox('Potion Exchange')
+-- PotionExchange:AddDropdown('selectedExchangePotions', {
+--     Values = PotionExchangeList,
+--     Default = settings['Exchange']['Potions']['SelectedPotions'],
+--     Multi = true,
+
+--     Text = 'Selected Potions to Exchange',
+--     Tooltip = 'Selected Potions to Exchange',
 
 --     Callback = function(value)
---         --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
---         settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'] = value
+--         settings['Exchange']['Potions']['SelectedPotions'] = value
 --         SaveConfig()
 --     end
 -- })
