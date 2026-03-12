@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
---task.wait(10)
+task.wait(10)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -2012,16 +2012,33 @@ PotionExchange:AddToggle('enableExchangePotionsOnlyWhenFull', {
     end
 })
 
+local PotionResults = {
+    ["Tier1"] = {
+        ["EnergyPotion1"] = "EnergyPotion2",
+        ["DamagePotion1"] = "DamagePotion2",
+        ["LuckPotion1"] = "LuckPotion2",
+        ["GhostPotion1"] = "GhostPotion2",
+        ["DropPotion1"] = "DropPotion2"
+    },
+    ["Tier2"] = {
+        ["EnergyPotion2"] = "EnergyPotion3",
+        ["DamagePotion2"] = "DamagePotion3",
+        ["LuckPotion2"] = "LuckPotion3",
+        ["GhostPotion2"] = "GhostPotion3",
+        ["DropPotion2"] = "DropPotion3"
+    }
+}
+
 task.spawn(function()
     while task.wait(0.2) and not Library.Unloaded do
         if settings['Exchange']['Potions']['Tier1']['Enabled'] then
             for _, potion in pairs(settings['Exchange']['Potions']['Tier1']['SelectedPotions']) do
                 if settings['Exchange']['Potions']['OnlyWhenFull'] then
-                    if getItemAmount(potion) >= 95 then
+                    if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier1'][potion]) < 99  then
                         FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
                     end
                 else
-                    if getItemAmount(potion) >= 5 then
+                    if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier1'][potion]) < 99 then
                         FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
                     end
                 end
@@ -2031,11 +2048,11 @@ task.spawn(function()
         if settings['Exchange']['Potions']['Tier2']['Enabled'] then
             for _, potion in pairs(settings['Exchange']['Potions']['Tier2']['SelectedPotions']) do
                 if settings['Exchange']['Potions']['OnlyWhenFull'] then
-                    if getItemAmount(potion) >= 95 then
+                    if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier2'][potion]) < 99 then
                         FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
                     end
                 else
-                    if getItemAmount(potion) >= 5 then
+                    if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier2'][potion]) < 99 then
                         FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
                     end
                 end
@@ -2112,6 +2129,9 @@ local Clip = true
 function Initialize()
 	Library:Notify(string.format('Script Loaded in %.2f second(s)!', tick() - StartTick), 5)
 	print("[BeaastHub] Anime Ghosts Loaded")
+
+    ScriptLibrary = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
+    GeneralTimeRewards = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("TimeRewardData"):WaitForChild("General"))
 end
 
 task.spawn(function()
