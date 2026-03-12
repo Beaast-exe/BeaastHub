@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(10)
+--task.wait(10)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -77,6 +77,19 @@ local defaultSettings = {
         ['Dungeon'] = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'},
             ['Enabled'] = false
+        }
+    },
+    ['Exchange'] = {
+        ['Potions'] = {
+            ['Tier1'] = {
+                ['SelectedPotions'] = {'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'},
+                ['Enabled'] = false
+            },
+            ['Tier2'] = {
+                ['SelectedPotions'] = {'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
+                ['Enabled'] = false
+            },
+            ['OnlyWhenFull'] = false
         }
     },
     ['AutoSpin'] = {
@@ -1938,20 +1951,98 @@ task.spawn(function()
 end)
 
 
--- local PotionExchange = Tabs['Shops']:AddRightGroupbox('Potion Exchange')
--- PotionExchange:AddDropdown('selectedExchangePotions', {
---     Values = PotionExchangeList,
---     Default = settings['Exchange']['Potions']['SelectedPotions'],
---     Multi = true,
+local PotionExchangeListT1 = {'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
+local PotionExchangeListT2 = {'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
+local PotionExchange = Tabs['Shops']:AddRightGroupbox('Potion Exchange')
+PotionExchange:AddDropdown('selectedExchangePotionsT1', {
+    Values = PotionExchangeListT1,
+    Default = settings['Exchange']['Potions']['Tier1']['SelectedPotions'],
+    Multi = true,
 
---     Text = 'Selected Potions to Exchange',
---     Tooltip = 'Selected Potions to Exchange',
+    Text = 'Selected Tier 1 Potions',
+    Tooltip = 'Selected Potions to Sacrifice',
 
---     Callback = function(value)
---         settings['Exchange']['Potions']['SelectedPotions'] = value
---         SaveConfig()
---     end
--- })
+    Callback = function(value)
+        settings['Exchange']['Potions']['Tier1']['SelectedPotions'] = value
+        SaveConfig()
+    end
+})
+
+PotionExchange:AddDropdown('selectedExchangePotionsT2', {
+    Values = PotionExchangeListT2,
+    Default = settings['Exchange']['Potions']['Tier2']['SelectedPotions'],
+    Multi = true,
+
+    Text = 'Selected Tier 2 Potions',
+    Tooltip = 'Selected Potions to Sacrifice',
+
+    Callback = function(value)
+        settings['Exchange']['Potions']['Tier2']['SelectedPotions'] = value
+        SaveConfig()
+    end
+})
+
+PotionExchange:AddToggle('enableAutoExchangePotionsT1', {
+    Text = 'Exchange Potions (Tier 1)',
+    Default = settings['Exchange']['Potions']['Tier1']['Enabled'],
+
+    Callback = function(value)
+        settings['Exchange']['Potions']['Tier1']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+PotionExchange:AddToggle('enableAutoExchangePotionsT2', {
+    Text = 'Exchange Potions (Tier 2)',
+    Default = settings['Exchange']['Potions']['Tier2']['Enabled'],
+
+    Callback = function(value)
+        settings['Exchange']['Potions']['Tier2']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+PotionExchange:AddToggle('enableExchangePotionsOnlyWhenFull', {
+    Text = 'Only When Full',
+    Default = settings['Exchange']['Potions']['OnlyWhenFull'],
+
+    Callback = function(value)
+        settings['Exchange']['Potions']['OnlyWhenFull'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.2) and not Library.Unloaded do
+        if settings['Exchange']['Potions']['Tier1']['Enabled'] then
+            for _, potion in pairs(settings['Exchange']['Potions']['Tier1']['SelectedPotions']) do
+                if settings['Exchange']['Potions']['OnlyWhenFull'] then
+                    if getItemAmount(potion) >= 95 then
+                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
+                    end
+                else
+                    if getItemAmount(potion) >= 5 then
+                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
+                    end
+                end
+            end
+        end
+
+        if settings['Exchange']['Potions']['Tier2']['Enabled'] then
+            for _, potion in pairs(settings['Exchange']['Potions']['Tier2']['SelectedPotions']) do
+                if settings['Exchange']['Potions']['OnlyWhenFull'] then
+                    if getItemAmount(potion) >= 95 then
+                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
+                    end
+                else
+                    if getItemAmount(potion) >= 5 then
+                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
+                    end
+                end
+            end
+        end
+    end
+end)
 
 AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
     Values = BreathingList,
