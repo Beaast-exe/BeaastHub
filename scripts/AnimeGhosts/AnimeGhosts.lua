@@ -43,6 +43,7 @@ local defaultSettings = {
     ['AutoRaid'] = {
         ['Enabled'] = false,
         ['AutoRaid'] = false,
+        ['Map'] = 'TitanTown',
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
@@ -73,10 +74,17 @@ local defaultSettings = {
         ['SelectedItems'] = {'Gems', 'DungeonTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
         ['Enabled'] = false
     },
+    ['RaidShop'] = {
+        ['SelectedItems'] = {'Gems', 'RaidTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
+        ['Enabled'] = false
+    },
     ['AutoUpgrades'] = {
         ['Dungeon'] = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'},
             ['Enabled'] = false
+        },
+        ['Raid'] = {
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'GachaSpins'}
         }
     },
     ['Exchange'] = {
@@ -172,7 +180,8 @@ local worldsNames = {
     "Spirit Town",
     "Double Dungeon",
     "Egg Island",
-    "Demon District"
+    "Demon District",
+    "Kaiju City"
 }
 
 local worldsTable = {
@@ -181,7 +190,8 @@ local worldsTable = {
 	["Spirit Town"] = "3",
 	["Double Dungeon"] = "4",
     ["Egg Island"] = "5",
-    ["Demon District"] = "6"
+    ["Demon District"] = "6",
+    ["Kaiju City"] = "7"
 }
 
 local worldsTableNumbers = {
@@ -190,7 +200,8 @@ local worldsTableNumbers = {
     ["Spirit Town"] = 3,
     ["Double Dungeon"] = 4,
     ["Egg Island"] = 5,
-    ["Demon District"] = 6
+    ["Demon District"] = 6,
+    ["Kaiju City"] = 7
 }
 
 local numbersToWorlds = {
@@ -199,7 +210,8 @@ local numbersToWorlds = {
     [3] = "Spirit Town",
     [4] = "Double Dungeon",
     [5] = "Egg Island",
-    [6] = "Demon District"
+    [6] = "Demon District",
+    [7] = "Kaiju City"
 }
 
 local scrolls = {
@@ -208,7 +220,8 @@ local scrolls = {
     'Spiritual Scroll',
     'Solo Scroll',
     'Punk Scroll',
-    'Slayer Scroll'
+    'Slayer Scroll',
+    'Kaiju Scroll'
 }
 
 local dungeonMaps = {
@@ -772,7 +785,7 @@ local function getRaidCooldown()
 end
 
 local function createRaid()
-    FireBridge("GamemodeSystem", "Create", "Raid", "TitanTown", "Easy")
+    FireBridge("GamemodeSystem", "Create", "Raid", settings['AutoRaid']['Map'], "Easy")
     task.wait(5)
     FireBridge("GamemodeSystem", "Start", "Raid", player.UserId)
 end
@@ -1169,7 +1182,22 @@ task.spawn(function()
     end
 end)
 
+local raidMaps = {"TitanTown", "HollowDimension"}
 local AutoRaid = Tabs['Main']:AddRightGroupbox('Auto Raid')
+AutoRaid:AddDropdown('selectedRaidMap', {
+    Values = raidMaps,
+    Default = settings['AutoRaid']['Map'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Raid Map',
+    Tooltip = 'Selected Auto Raid Map', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['AutoRaid']['Map'] = value
+        SaveConfig()
+    end
+})
+
 AutoRaid:AddToggle('enableAutoRaid', {
     Text = 'Auto Create Raid',
     Default = settings['AutoRaid']['Enabled'],
@@ -1851,8 +1879,8 @@ task.spawn(function()
 end)
 
 local DungeonUpgradesList = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'}
-local AutoUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Dungeon Upgrades')
-AutoUpgrades:AddDropdown('selectedDungeonUpgrades', {
+local DungeonUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Dungeon Upgrades')
+DungeonUpgrades:AddDropdown('selectedDungeonUpgrades', {
     Values = DungeonUpgradesList,
     Default = settings['AutoUpgrades']['Dungeon']['SelectedUpgrades'],
     Multi = true,
@@ -1866,7 +1894,7 @@ AutoUpgrades:AddDropdown('selectedDungeonUpgrades', {
     end
 })
 
-AutoUpgrades:AddToggle('enableAutoUpgradesDungeon', {
+DungeonUpgrades:AddToggle('enableAutoUpgradesDungeon', {
     Text = 'Auto Buy Items',
     Default = settings['AutoUpgrades']['Dungeon']['Enabled'],
 
@@ -1894,6 +1922,58 @@ task.spawn(function()
                     if PlayerUpgradeLevel < DungeonUpgradesData[upgrade].MaxLevel then
                         if getItemAmount("DungeonShards") >= UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Dungeon", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local RaidUpgradesList = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'GachaSpins'}
+local RaidUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Raid Upgrades')
+RaidUpgrades:AddDropdown('selectedDungeonUpgrades', {
+    Values = RaidUpgradesList,
+    Default = settings['AutoUpgrades']['Raid']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Raid Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Raid']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+RaidUpgrades:AddToggle('enableAutoUpgradesDungeon', {
+    Text = 'Auto Buy Items',
+    Default = settings['AutoUpgrades']['Raid']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Raid']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Raid']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local RaidUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Raid")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and RaidUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Raid']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Raid_' .. upgrade]
+                    local UpgradePrice = RaidUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if UpgradePrice > 3000 and upgrade ~= "GachaSpins" then UpgradePrice = 3000 end
+
+                    if PlayerUpgradeLevel < RaidUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("RaidShards") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Raid", upgrade)
                         end
                     end
                 end
@@ -1950,6 +2030,53 @@ task.spawn(function()
     end
 end)
 
+local RaidShopItems = {'Gems', 'RaidTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
+local RaidShop = Tabs['Shops']:AddLeftGroupbox('Raid Shop')
+RaidShop:AddDropdown('selectedItems', {
+    Values = RaidShopItems,
+    Default = settings['RaidShop']['SelectedItems'],
+    Multi = true,
+
+    Text = 'Selected Items to Buy',
+    Tooltip = 'Selected Items to Buy from Raid Shop',
+
+    Callback = function(value)
+        settings['RaidShop']['SelectedItems'] = value
+        SaveConfig()
+    end
+})
+
+RaidShop:AddToggle('enableAutoDungeonShop', {
+    Text = 'Auto Buy Items',
+    Default = settings['RaidShop']['Enabled'],
+
+    Callback = function(value)
+        settings['RaidShop']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+-- RaidShards
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['RaidShop']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local DungeonStockShop = PlayerData and PlayerData.StockShops and PlayerData.StockShops.Raid and PlayerData.StockShops.Raid.Items
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local RaidShopData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StockShopData"):WaitForChild("Raid"))
+
+            if DungeonStockShop and RaidShopData and PlayerInventory then
+                for _, item in pairs(settings['RaidShop']['SelectedItems']) do
+                    local itemPrice = RaidShopData.Items[item].Price
+
+                    if getItemAmount("RaidShards") >= itemPrice and DungeonStockShop[item] > 0 then
+                        FireBridge("StockShopSystem", "Buy", "Raid", item, 0)
+                    end
+                end
+            end
+        end
+    end
+end)
 
 local PotionExchangeListT1 = {'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
 local PotionExchangeListT2 = {'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
