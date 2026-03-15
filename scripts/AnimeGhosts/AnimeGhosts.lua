@@ -106,7 +106,7 @@ local defaultSettings = {
         ['Traits'] = false,
         ['RemoveAnimation'] = false,
         ['WeaponBuffs'] = {
-            ['SelectedWeapon'] = '',
+            ['SelectedWeapon'] = 'None',
             ['SelectedEnchant'] = {"Electric6"},
             ['SelectedBreathing'] = {'Mist'},
             ['Enchant'] = false,
@@ -1883,14 +1883,16 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Pets and ScriptLibrary.PlayerData.Weapons then
             local selectedPet = settings['AutoSpin']['PetBuffs']['SelectedPet']
-            if selectedPet == 'None' then return end
+            local selectedWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
+
+            if selectedPet == 'None' or selectedWeapon == 'None' then return end
+
             local selectedPetName = ScriptLibrary.PlayerData.Pets[selectedPet].Id
             local selectedPetPassive = ScriptLibrary.PlayerData.Pets[selectedPet].Buffs and ScriptLibrary.PlayerData.Pets[selectedPet].Buffs.Passive or 'None'
 
             SelectedPetName:SetText("NAME >> ".. selectedPetName)
             SelectedPetPassive:SetText("PASSIVE >> " .. selectedPetPassive)
 
-            local selectedWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
             local selectedWeaponName = AnimeGhosts.WeaponData[ScriptLibrary.PlayerData.Weapons[selectedWeapon].Id].Name
             local selectedWeaponEnchant = ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs and ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs.Enchantment or "None"
             local selectedWeaponBreathing = ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs and ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs.Breathing or "None"
