@@ -113,7 +113,7 @@ local defaultSettings = {
             ['Breathing'] = false
         },
         ['PetBuffs'] = {
-            ['SelectedPet'] = '',
+            ['SelectedPet'] = 'None',
             ['SelectedPassive'] = {'Phantom'},
             ['Passive'] = false
         }
@@ -1883,6 +1883,7 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Pets and ScriptLibrary.PlayerData.Weapons then
             local selectedPet = settings['AutoSpin']['PetBuffs']['SelectedPet']
+            if selectedPet == 'None' then return end
             local selectedPetName = ScriptLibrary.PlayerData.Pets[selectedPet].Id
             local selectedPetPassive = ScriptLibrary.PlayerData.Pets[selectedPet].Buffs and ScriptLibrary.PlayerData.Pets[selectedPet].Buffs.Passive or 'None'
 
