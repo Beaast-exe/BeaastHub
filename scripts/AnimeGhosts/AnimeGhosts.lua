@@ -1633,7 +1633,7 @@ PetBuffs:AddDropdown('selectedPetDropdown', {
 PetBuffs:AddButton({
     Text = 'Refresh Pets',
     Func = function()
-        local newOptions = {}
+        local newOptions = {"None"}
 
         pcall(function()
             if ScriptLibrary and ScriptLibrary.PlayerData then
@@ -1656,7 +1656,7 @@ PetBuffs:AddButton({
             end
         end)
 
-        if #newOptions == 0 then
+        if #newOptions == 1 then
             local inventory = GetInventoryData("Pets")
 
             for _, item in ipairs(inventory) do
@@ -1668,7 +1668,7 @@ PetBuffs:AddButton({
             end
         end
 
-        if #newOptions == 0 then table.insert(newOptions, "None Found") end
+        if #newOptions == 1 then table.insert(newOptions, "None Found") end
         if Options['selectedPetDropdown'] and Options['selectedPetDropdown'].SetValues and Options['selectedPetDropdown'].Refresh then
             Options['selectedPetDropdown']:SetValues(newOptions)
         end
@@ -1777,7 +1777,7 @@ AutoWeaponBuffs:AddDropdown('selectedWeaponDropdown', {
 AutoWeaponBuffs:AddButton({
     Text = 'Refresh Weapons',
     Func = function()
-        local newOptions = {}
+        local newOptions = {"None"}
 
         pcall(function()
             if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Weapons then
@@ -1797,7 +1797,7 @@ AutoWeaponBuffs:AddButton({
             end
         end)
 
-        if #newOptions == 0 then
+        if #newOptions == 1 then
             local inventory = GetInventoryData("Weapons")
 
             for _, item in ipairs(inventory) do
@@ -1809,7 +1809,7 @@ AutoWeaponBuffs:AddButton({
             end
         end
 
-        if #newOptions == 0 then table.insert(newOptions, "None Found") end
+        if #newOptions == 1 then table.insert(newOptions, "None Found") end
         if Options['selectedWeaponDropdown'] and Options['selectedWeaponDropdown'].SetValues and Options['selectedWeaponDropdown'].Refresh then
             Options['selectedWeaponDropdown']:SetValues(newOptions)
         end
