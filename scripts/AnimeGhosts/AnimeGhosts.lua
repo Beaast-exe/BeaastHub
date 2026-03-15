@@ -114,7 +114,7 @@ local defaultSettings = {
         },
         ['PetBuffs'] = {
             ['SelectedPet'] = '',
-            ['SelectedPassive'] = {'Phantom', 'Holy', 'Whisper', 'Fated'},
+            ['SelectedPassive'] = {'Phantom'},
             ['Passive'] = false
         }
     },
@@ -1676,16 +1676,15 @@ PetBuffs:AddButton({
     DoubleClick = false
 })
 
-PetBuffs:AddDropdown('selectedPetPassive', {
+PetBuffs:AddDropdown('selectedPetPassiveToRoll', {
     Values = PassiveList,
     Default = settings['AutoSpin']['PetBuffs']['SelectedPassive'], -- number index of the value / string
     Multi = true, -- true / false, allows multiple choices to be selected
 
     Text = 'Selected Pet Passive',
-    Tooltip = 'Selected Passive to Roll', -- Information shown when you hover over the dropdown
+    Tooltip = 'Selected Pet Passive to Roll', -- Information shown when you hover over the dropdown
 
     Callback = function(value)
-        --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
         settings['AutoSpin']['PetBuffs']['SelectedPassive'] = value
         SaveConfig()
     end
@@ -1874,6 +1873,30 @@ task.spawn(function()
                     Library:Notify("Matched: " .. tostring(currentEnchant), 5)
                 end
             end)
+        end
+    end
+end)
+
+
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Pets and ScriptLibrary.PlayerData.Weapons then
+            local selectedPet = settings['AutoSpin']['PetBuffs']['SelectedPet']
+            local selectedPetName = ScriptLibrary.PlayerData.Pets[selectedPet].Id
+            local selectedPetPassive = ScriptLibrary.PlayerData.Pets[selectedPet].Buffs and ScriptLibrary.PlayerData.Pets[selectedPet].Buffs.Passive or 'None'
+
+            SelectedPetName:SetText("NAME >> ".. selectedPetName)
+            SelectedPetPassive:SetText("PASSIVE >> " .. selectedPetPassive)
+
+            local selectedWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
+            local selectedWeaponName = AnimeGhosts.WeaponData[ScriptLibrary.PlayerData.Weapons[selectedWeapon].Id].Name
+            local selectedWeaponEnchant = ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs and ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs.Enchantment or "None"
+            local selectedWeaponBreathing = ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs and ScriptLibrary.PlayerData.Weapons[selectedWeapon].Buffs.Breathing or "None"
+
+            SelectedWeaponName:SetText('Name >> ' .. selectedWeaponName)
+            SelectedWeaponEnchant:SetText('ENCHANT >> ' .. selectedWeaponEnchant)
+            SelectedWeaponBreathing:SetText('BREATHING >> ' .. selectedWeaponBreathing)
         end
     end
 end)
