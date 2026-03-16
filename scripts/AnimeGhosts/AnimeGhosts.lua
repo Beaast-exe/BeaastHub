@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--ask.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -84,7 +84,21 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Raid'] = {
-            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'GachaSpins'}
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'GachaSpins'},
+            ['Enabled'] = false
+        },
+        ['Division'] = {
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'AtkSPD'},
+            ['Enabled'] = false
+        },
+        ['CrewMastery'] = {
+            ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'EggLuck', 'GachaLuck', 'AtkSPD'},
+            ['Enabled'] = false
+        },
+        ['Relics'] = {
+            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask'},
+            ['Enabled'] = false,
+            ['SmartEvolve'] = false
         }
     },
     ['Exchange'] = {
@@ -1921,7 +1935,7 @@ DungeonUpgrades:AddDropdown('selectedDungeonUpgrades', {
 })
 
 DungeonUpgrades:AddToggle('enableAutoUpgradesDungeon', {
-    Text = 'Auto Buy Items',
+    Text = 'Auto Buy Dungeon Upgrades',
     Default = settings['AutoUpgrades']['Dungeon']['Enabled'],
 
     Callback = function(value)
@@ -1958,7 +1972,7 @@ end)
 
 local RaidUpgradesList = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'GachaSpins'}
 local RaidUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Raid Upgrades')
-RaidUpgrades:AddDropdown('selectedDungeonUpgrades', {
+RaidUpgrades:AddDropdown('selectedRaidUpgrades', {
     Values = RaidUpgradesList,
     Default = settings['AutoUpgrades']['Raid']['SelectedUpgrades'],
     Multi = true,
@@ -1972,8 +1986,8 @@ RaidUpgrades:AddDropdown('selectedDungeonUpgrades', {
     end
 })
 
-RaidUpgrades:AddToggle('enableAutoUpgradesDungeon', {
-    Text = 'Auto Buy Items',
+RaidUpgrades:AddToggle('enableAutoUpgradesRaid', {
+    Text = 'Auto Buy Raid Upgrades',
     Default = settings['AutoUpgrades']['Raid']['Enabled'],
 
     Callback = function(value)
@@ -2000,6 +2014,183 @@ task.spawn(function()
                     if PlayerUpgradeLevel < RaidUpgradesData[upgrade].MaxLevel then
                         if getItemAmount("RaidShards") >= UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Raid", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local DivisionUpgradesList = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'AtkSPD'}
+local DivisionUpgrades = Tabs['Upgrades']:AddRightGroupbox('Division Upgrades')
+DivisionUpgrades:AddDropdown('selectedDivisionUpgrades', {
+    Values = DivisionUpgradesList,
+    Default = settings['AutoUpgrades']['Division']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Division Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Division']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+DivisionUpgrades:AddToggle('enableAutoUpgradesDivision', {
+    Text = 'Auto Buy Division Upgrades',
+    Default = settings['AutoUpgrades']['Division']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Division']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Division']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local DivisionUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Division")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and DivisionUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Division']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Division_' .. upgrade]
+                    local UpgradePrice = DivisionUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if UpgradePrice > 2500 then UpgradePrice = 2500 end
+
+                    if PlayerUpgradeLevel < DivisionUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("DivisionTokens") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Division", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local CrewMasteryUpgradesList = {'Start', 'Energy', 'Damage', 'Ghost', 'EggLuck', 'GachaLuck', 'AtkSPD'}
+local CrewMasteryUpgrades = Tabs['Upgrades']:AddRightGroupbox('Crew Mastery Upgrades')
+CrewMasteryUpgrades:AddDropdown('selectedCrewMasteryUpgrades', {
+    Values = CrewMasteryUpgradesList,
+    Default = settings['AutoUpgrades']['CrewMastery']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Crew Mastery Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['CrewMastery']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+CrewMasteryUpgrades:AddToggle('enableAutoUpgradesCrewMastery', {
+    Text = 'Auto Buy Crew Mastery Upgrades',
+    Default = settings['AutoUpgrades']['CrewMastery']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['CrewMastery']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['CrewMastery']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local CrewMasteryUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Crew Mastery")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and CrewMasteryUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['CrewMastery']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Crew Mastery_' .. upgrade]
+                    local UpgradePrice = CrewMasteryUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if UpgradePrice > 10000 then UpgradePrice = 10000 end
+
+                    if PlayerUpgradeLevel < CrewMasteryUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("CrewTokens") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Crew Mastery", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask'}
+local RelicsUpgrades = Tabs['Upgrades']:AddRightGroupbox('Relics Upgrades')
+RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
+    Values = RelicsList,
+    Default = settings['AutoUpgrades']['Relics']['SelectedRelics'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Crew Mastery Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Relics']['SelectedRelics'] = value
+        SaveConfig()
+    end
+})
+
+RelicsUpgrades:AddToggle('enableAutoUpgradesRelics', {
+    Text = 'Auto Upgrade Relics',
+    Default = settings['AutoUpgrades']['Relics']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Relics']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+RelicsUpgrades:AddToggle('enableAutoSmartEvolveRelics', {
+    Text = 'Evolve with enough tokens',
+    Tooltip = 'Evolve only with 25k tokens',
+    Default = settings['AutoUpgrades']['Relics']['SmartEvolve'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Relics']['SmartEvolve'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['AutoUpgrades']['Relics']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerRelics = PlayerData and PlayerData.Relics
+            local CrewMasteryUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Crew Mastery")).Targets
+            
+            if PlayerInventory and PlayerRelics and CrewMasteryUpgradesData then
+                for _, relic in pairs(settings['AutoUpgrades']['Relics']['SelectedRelics']) do
+                    if PlayerRelics[relic] then
+                        local relicTier = PlayerRelics[relic].Tier
+                        local relicLevel = PlayerRelics[relic].Level
+
+                        if relicLevel == 100 and relicTier < 7 then
+                            if settings['AutoUpgrades']['Relics']['SmartEvolve'] then
+                                if getItemAmount("RelicShards") >= 25000 then
+                                    FireBridge("RelicSystem", "Evolve", tostring(relic))
+                                end
+                            else
+                                FireBridge("RelicSystem", "Evolve", tostring(relic))
+                            end
+                        end
+
+                        if relicLevel < 100 then
+                            if getItemAmount("RelicShards") >= 250 then
+                                FireBridge("RelicSystem", "Upgrade", tostring(relic))
+                            end
                         end
                     end
                 end
