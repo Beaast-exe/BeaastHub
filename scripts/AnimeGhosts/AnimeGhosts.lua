@@ -116,7 +116,10 @@ local defaultSettings = {
     },
     ['AutoSpin'] = {
         ['Avatar'] = false,
-        ['Weapons'] = false,
+        ['Weapons'] = {
+            ["Blood-Red"] = false,
+            ["Dark Blade"] = false
+        },
         ['Traits'] = false,
         ['RemoveAnimation'] = false,
         ['WeaponBuffs'] = {
@@ -1571,11 +1574,21 @@ AutoGacha:AddToggle('enableAutoSpinAvatar', {
 })
 
 AutoGacha:AddToggle('enableAutoSpinWeapons', {
-    Text = 'Spin Weapons',
-    Default = settings['AutoSpin']['Weapons'],
+    Text = 'Spin Weapons (Blood-Red)',
+    Default = settings['AutoSpin']['Weapons']['Blood-Red'],
 
     Callback = function(value)
-        settings['AutoSpin']['Weapons'] = value
+        settings['AutoSpin']['Weapons']['Blood-Red'] = value
+        SaveConfig()
+    end
+})
+
+AutoGacha:AddToggle('enableAutoSpinWeapons2', {
+    Text = 'Spin Weapons (Dark Blade)',
+    Default = settings['AutoSpin']['Weapons']['Dark Blade'],
+
+    Callback = function(value)
+        settings['AutoSpin']['Weapons']['Dark Blade'] = value
         SaveConfig()
     end
 })
@@ -1598,9 +1611,15 @@ task.spawn(function()
             end
         end
 
-        if settings['AutoSpin']['Weapons'] then
+        if settings['AutoSpin']['Weapons']['Blood-Red'] then
             if hasTokenAmountToRoll("WeaponTokens") then
                 FireBridge("GachaSystem", "Spin", "Weapon", "Blood-Red", UnifiedFilters)
+            end
+        end
+
+        if settings['AutoSpin']['Weapons']['Dark Blade'] then
+            if hasTokenAmountToRoll("WeaponTokens") then
+                FireBridge("GachaSystem", "Spin", "Weapon", "Dark Blade", UnifiedFilters)
             end
         end
 
