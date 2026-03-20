@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -52,7 +52,14 @@ local defaultSettings = {
         ['Enabled'] = false,
         ['InfinityCastle'] = false,
         ['Difficulty'] = 'Easy',
-        ['Autoleave'] = false,
+        ['AutoLeave'] = false,
+        ['LeaveWave'] = 50
+    },
+    ['DefenseMode'] = {
+        ['Enabled'] = false,
+        ['DefenseMode'] = false,
+        ['Difficulty'] = 'Easy',
+        ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
     ['AutoScroll'] = {
@@ -99,6 +106,10 @@ local defaultSettings = {
             ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask'},
             ['Enabled'] = false,
             ['SmartEvolve'] = false
+        },
+        ['StandMastery'] = {
+            ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'CritDMG', 'Drop', 'WalkSPD'},
+            ['Enabled'] = false
         }
     },
     ['Exchange'] = {
@@ -198,7 +209,8 @@ local worldsNames = {
     "Double Dungeon",
     "Egg Island",
     "Demon District",
-    "Kaiju City"
+    "Kaiju City",
+    "Bizarre Desert"
 }
 
 local worldsTable = {
@@ -208,7 +220,8 @@ local worldsTable = {
 	["Double Dungeon"] = "4",
     ["Egg Island"] = "5",
     ["Demon District"] = "6",
-    ["Kaiju City"] = "7"
+    ["Kaiju City"] = "7",
+    ["Bizarre Desert"] = "8"
 }
 
 local worldsTableNumbers = {
@@ -218,7 +231,8 @@ local worldsTableNumbers = {
     ["Double Dungeon"] = 4,
     ["Egg Island"] = 5,
     ["Demon District"] = 6,
-    ["Kaiju City"] = 7
+    ["Kaiju City"] = 7,
+    ["Bizarre Desert"] = 8
 }
 
 local numbersToWorlds = {
@@ -228,7 +242,8 @@ local numbersToWorlds = {
     [4] = "Double Dungeon",
     [5] = "Egg Island",
     [6] = "Demon District",
-    [7] = "Kaiju City"
+    [7] = "Kaiju City",
+    [8] = "Bizarre Desert"
 }
 
 local scrolls = {
@@ -238,7 +253,8 @@ local scrolls = {
     'Solo Scroll',
     'Punk Scroll',
     'Slayer Scroll',
-    'Kaiju Scroll'
+    'Kaiju Scroll',
+    'Bizarre Scroll'
 }
 
 local dungeonMaps = {
@@ -1323,7 +1339,6 @@ AutoInfinityCastle:AddToggle('enableAutoInfinityCastle', {
     end
 })
 
-
 AutoInfinityCastle:AddToggle('enableAutoDoInfinityCastle', {
     Text = 'Auto do Infinity Castle',
     Default = settings['InfinityCastle']['InfinityCastle'],
@@ -1443,14 +1458,146 @@ task.spawn(function()
     end
 end)
 
+local AutoDefenseMode = Tabs['Main']:AddRightGroupbox('Auto Defense Mode')
+AutoDefenseMode:AddToggle('enableAutoDefenseMode', {
+    Text = 'Auto Create Defense Mode',
+    Default = settings['DefenseMode']['Enabled'],
+
+    Callback = function(value)
+        settings['DefenseMode']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+AutoDefenseMode:AddToggle('enableAutoDoDefenseMode', {
+    Text = 'Auto do Defense Mode',
+    Default = settings['DefenseMode']['DefenseMode'],
+
+    Callback = function(value)
+        settings['DefenseMode']['DefenseMode'] = value
+        SaveConfig()
+    end
+})
+
+AutoDefenseMode:AddSlider('defenseModeLeaveWaveSlider', {
+    Text = 'Defense Mode Leave Wave',
+    Default = settings['DefenseMode']['LeaveWave'],
+    Min = 1,
+    Max = 50,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['DefenseMode']['LeaveWave'] = value
+        SaveConfig()
+    end
+})
+
+AutoDefenseMode:AddToggle('enableDefenseModeAutoLeave', {
+    Text = 'Auto Leave Defense Mode',
+    Default = settings['DefenseMode']['AutoLeave'],
+
+    Callback = function(value)
+        settings['DefenseMode']['AutoLeave'] = value
+        SaveConfig()
+    end
+})
+
+local function getDefenseModeCooldown()
+    local DefenseModeDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay['Defense Mode']
+    if DefenseModeDelay == nil then return end
+
+    local Time = ReplicatedStorage:GetAttribute('Time')
+
+    if Time < DefenseModeDelay then
+        return true
+    else
+        return false
+    end
+end
+
+local function createDefenseMode()
+    FireBridge("GamemodeSystem", "Create", "Defense Mode", "BizarreDesert", "Easy")
+    task.wait(5)
+    FireBridge("GamemodeSystem", "Start", "Defense Mode", player.UserId)
+end
+
+local function startDefenseMode()
+    if getDefenseModeCooldown() then return end
+    if playerMode == nil then
+        createDefenseMode()
+        task.wait(3)
+    elseif checkDungeon() == 'Defense Mode' or playerMode == 'Defense Mode' then
+        --teleportToEnemyInMap('Gamemode')
+        task.wait()
+    end
+end
+
+local function startDefenseMode2()
+    if getDefenseModeCooldown() then return end
+
+    if checkDungeon() == 'Defense Mode' or playerMode == 'Defense Mode' then
+        local gamemode = getPlayerGamemode()
+        if gamemode then
+            if gamemode:GetAttribute('ModeId') == 'Defense Mode' then
+                teleportToEnemyInGamemode(gamemode)
+                task.wait()
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['DefenseMode']['Enabled'] then
+            startDefenseMode()
+            local raidName = "Defense Mode_" .. player.UserId
+
+            if settings['DefenseMode']['AutoLeave'] and playerMode == 'Defense Mode' then
+                local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+                if Gamemode:FindFirstChild(raidName) then
+                    if Gamemode:FindFirstChild(raidName):GetAttribute('Stage') >= settings['DefenseMode']['LeaveWave'] then
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['DefenseMode']['DefenseMode'] then
+            startDefenseMode2()
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        local defModeName = getPlayerGamemode()
+
+        if settings['DefenseMode']['AutoLeave'] and defModeName then
+            local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            if Gamemode:FindFirstChild(defModeName.Name) and Gamemode:FindFirstChild(defModeName.Name):GetAttribute('ModeId') == 'Defense Mode' then
+                if Gamemode:FindFirstChild(defModeName.Name):GetAttribute('Stage') >= settings['DefenseMode']['LeaveWave'] then
+                    teleportToSavedPosition()
+                end
+            end
+        end
+    end
+end)
+
 local Timers = Tabs['Main']:AddLeftGroupbox('Timers')
 local DungeonCooldown = Timers:AddLabel("DUNGEON     >> ", true)
 local RaidCooldown = Timers:AddLabel("RAID        >> ", true)
 local InfCastleCooldown = Timers:AddLabel("INF CASTLE  >> ", true)
+local DefModeCooldown = Timers:AddLabel("DEF MODE    >> ", true)
 
 local dungeonMessage = 'DUNGEON     >> '
 local raidMessage = 'RAID        >> '
 local infCastleMessage = 'INF CASTLE  >> '
+local defModeMessage = 'DEF MODE    >> '
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
@@ -1498,6 +1645,23 @@ task.spawn(function()
         end
 
         InfCastleCooldown:SetText('INF CASTLE  >> ' .. infCastleMessage)
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local DefenseModeDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay['Defense Mode']
+
+        if DefenseModeDelay == nil then return end
+        local Time = ReplicatedStorage:GetAttribute('Time')
+
+        if Time < DefenseModeDelay then
+            defModeMessage = "in " .. tostring(getTime(DefenseModeDelay - Time))
+        else
+            defModeMessage = 'READY !'
+        end
+
+        DefModeCooldown:SetText('DEF MODE    >> ' .. defModeMessage)
     end
 end)
 
@@ -2137,6 +2301,58 @@ task.spawn(function()
                     if PlayerUpgradeLevel < CrewMasteryUpgradesData[upgrade].MaxLevel then
                         if getItemAmount("CrewTokens") >= UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Crew Mastery", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local StandMasteryUpgradesList = {'Start', 'Energy', 'Damage', 'Ghost', 'CritDMG', 'Drop', 'WalkSPD'}
+local StandMasteryUpgrades = Tabs['Upgrades']:AddRightGroupbox('Stand Mastery Upgrades')
+StandMasteryUpgrades:AddDropdown('selectedStandMasteryUpgrades', {
+    Values = StandMasteryUpgradesList,
+    Default = settings['AutoUpgrades']['StandMastery']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Stand Mastery Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['StandMastery']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+StandMasteryUpgrades:AddToggle('enableAutoUpgradesStandMastery', {
+    Text = 'Auto Buy Stand Mastery Upgrades',
+    Default = settings['AutoUpgrades']['StandMastery']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['StandMastery']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['StandMastery']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local StandMasteryUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Stand Mastery")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and StandMasteryUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['StandMastery']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Stand Mastery_' .. upgrade]
+                    local UpgradePrice = StandMasteryUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if UpgradePrice > 10000 then UpgradePrice = 10000 end
+
+                    if PlayerUpgradeLevel < StandMasteryUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("StandMasteryTokens") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Stand Mastery", upgrade)
                         end
                     end
                 end
