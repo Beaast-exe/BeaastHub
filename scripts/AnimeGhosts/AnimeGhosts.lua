@@ -103,7 +103,7 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Relics'] = {
-            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask'},
+            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner'},
             ['Enabled'] = false,
             ['SmartEvolve'] = false
         },
@@ -2361,7 +2361,7 @@ task.spawn(function()
     end
 end)
 
-local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask'}
+local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner'}
 local RelicsUpgrades = Tabs['Upgrades']:AddRightGroupbox('Relics Upgrades')
 RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
     Values = RelicsList,
