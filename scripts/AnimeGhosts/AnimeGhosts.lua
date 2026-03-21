@@ -1165,7 +1165,7 @@ AutoDungeon:AddToggle('enableDungeonAutoLeave', {
 })
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['AutoDungeon']['Enabled'] then
             startDungeon(settings['AutoDungeon']['Difficulty'])
             -- local dungeonName = "Dungeon_" .. player.UserId
@@ -1183,7 +1183,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['AutoDungeon']['AutoDungeon'] then
             startDungeon2()
 
@@ -1277,7 +1277,7 @@ AutoRaid:AddToggle('enableRaidAutoLeave', {
 })
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['AutoRaid']['Enabled'] then
             startRaid()
             local raidName = "Raid_" .. player.UserId
@@ -1295,7 +1295,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['AutoRaid']['AutoRaid'] then
             startRaid2()
 
@@ -1436,7 +1436,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['InfinityCastle']['InfinityCastle'] then
             startInfinityCastle2()
         end
@@ -1444,7 +1444,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         local infCastleName = getPlayerGamemode()
 
         if settings['InfinityCastle']['AutoLeave'] and infCastleName then
@@ -1548,7 +1548,7 @@ local function startDefenseMode2()
 end
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['DefenseMode']['Enabled'] then
             startDefenseMode()
             local raidName = "Defense Mode_" .. player.UserId
@@ -1566,7 +1566,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait() and not Library.Unloaded do
         if settings['DefenseMode']['DefenseMode'] then
             startDefenseMode2()
         end
