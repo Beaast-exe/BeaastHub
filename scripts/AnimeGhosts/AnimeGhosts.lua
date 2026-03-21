@@ -2348,7 +2348,8 @@ task.spawn(function()
                     local PlayerUpgradeLevel = PlayerUpgrades['Stand Mastery_' .. upgrade]
                     local UpgradePrice = StandMasteryUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
 
-                    if UpgradePrice > 10000 then UpgradePrice = 10000 end
+                    if UpgradePrice > 10000 and not StandMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 10000 end
+                    print(upgrade, UpgradePrice)
 
                     if PlayerUpgradeLevel < StandMasteryUpgradesData[upgrade].MaxLevel then
                         if getItemAmount("StandMasteryTokens") >= UpgradePrice then
