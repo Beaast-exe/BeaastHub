@@ -183,12 +183,12 @@ end
 walkTable(settings, defaultSettings)
 SaveConfig()
 
-task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
-        settings = HttpService:JSONDecode(readfile(saveFile))
-        SaveConfig()
-    end
-end)
+-- task.spawn(function()
+--     while task.wait(0.1) and not Library.Unloaded do
+--         settings = HttpService:JSONDecode(readfile(saveFile))
+--         SaveConfig()
+--     end
+-- end)
 
 -- // VARIABLES
 local HttpService = game:GetService('HttpService')
