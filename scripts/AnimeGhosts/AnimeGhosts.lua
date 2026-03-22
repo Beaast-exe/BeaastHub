@@ -171,6 +171,13 @@ local function SaveConfig()
 	writefile(saveFile, HttpService:JSONEncode(settings))
 end
 
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        settings = HttpService:JSONDecode(readfile(saveFile))
+        SaveConfig()
+    end
+end)
+
 local function walkTable(path, table)
     for i, v in pairs(table) do
         path[i] = path[i] or v
