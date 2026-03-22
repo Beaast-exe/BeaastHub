@@ -2850,6 +2850,7 @@ task.spawn(function()
 	while not Library.Unloaded do
 		task.wait(0.1)
 
+        settings = HttpService:JSONDecode(readfile(saveFile))
 		minute = os.date("%M")
 		unixTimestamp = os.time(os.date("!*t"))
 	end
