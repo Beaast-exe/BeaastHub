@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -23,6 +23,7 @@ local Tabs = {
     ['Gachas'] = Window:AddTab('Gachas'),
     ['Shops'] = Window:AddTab('Shops'),
     ['Upgrades'] = Window:AddTab('Upgrades'),
+    -- ['Testing'] = Window:AddTab('Testing'),
 	['UI Settings'] = Window:AddTab('UI Settings')
 }
 
@@ -72,6 +73,16 @@ local defaultSettings = {
         ['TeleportBack'] = false,
         ['TimeRewards'] = false
     },
+    -- ['Testing'] = {
+    --     ['Selected'] = {
+    --         ["_item1"] = true,
+    --         ["_item2"] = false,
+    --         ["_item3"] = true,
+    --         ["_item4"] = false,
+    --         ["_item5"] = true
+    --     },
+    --     ['Selected2'] = {"_item1", "_item2", "_item4"}
+    -- },
     ['AutoPotions'] = {
         ['SelectedPotions'] = {"EnergyPotion1"},
         ['Enabled'] = false,
@@ -1483,7 +1494,7 @@ AutoDefenseMode:AddSlider('defenseModeLeaveWaveSlider', {
     Text = 'Defense Mode Leave Wave',
     Default = settings['DefenseMode']['LeaveWave'],
     Min = 1,
-    Max = 50,
+    Max = 100,
     Rounding = 0,
     Compact = false,
 
@@ -2699,6 +2710,23 @@ task.spawn(function()
         end
     end
 end)
+
+-- local Testing = Tabs['Testing']:AddRightGroupbox('Testing')
+
+-- local TestingValues = {"_item1", "_item2", "_item3", "_item4", "_item5"}
+-- Testing:AddDropdown('selectedTestingValues', {
+--     Values = TestingValues,
+--     Default = settings['Testing']['Selected2'], -- number index of the value / string
+--     Multi = true, -- true / false, allows multiple choices to be selected
+
+--     Text = 'Selected Testing Values',
+--     Tooltip = 'Selected Values for Testing', -- Information shown when you hover over the dropdown
+
+--     Callback = function(value)
+--         settings['Testing']['Selected2'] = value
+--         SaveConfig()
+--     end
+-- })
 
 local minute = os.date("%M")
 local unixTimestamp
