@@ -73,16 +73,6 @@ local defaultSettings = {
         ['TeleportBack'] = false,
         ['TimeRewards'] = false
     },
-    -- ['Testing'] = {
-    --     ['Selected'] = {
-    --         ["_item1"] = true,
-    --         ["_item2"] = false,
-    --         ["_item3"] = true,
-    --         ["_item4"] = false,
-    --         ["_item5"] = true
-    --     },
-    --     ['Selected2'] = {"_item1", "_item2", "_item4"}
-    -- },
     ['AutoPotions'] = {
         ['SelectedPotions'] = {"EnergyPotion1"},
         ['Enabled'] = false,
@@ -96,6 +86,10 @@ local defaultSettings = {
         ['SelectedItems'] = {'Gems', 'RaidTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
         ['Enabled'] = false
     },
+    ['DefenseShop'] = {
+        ['SelectedItems'] = {'Gems', 'DefenseTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
+        ['Enabled'] = false
+    },
     ['AutoUpgrades'] = {
         ['Dungeon'] = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'},
@@ -103,6 +97,10 @@ local defaultSettings = {
         },
         ['Raid'] = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'GachaSpins'},
+            ['Enabled'] = false
+        },
+        ['Defense'] = {
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'},
             ['Enabled'] = false
         },
         ['Division'] = {
@@ -2223,6 +2221,58 @@ task.spawn(function()
     end
 end)
 
+local DefenseUpgradesList = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'}
+local DefenseUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Stand Mastery Upgrades')
+DefenseUpgrades:AddDropdown('selectedDefenseUpgrades', {
+    Values = DefenseUpgradesList,
+    Default = settings['AutoUpgrades']['Defense']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Defense Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Defense']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+DefenseUpgrades:AddToggle('enableAutoUpgradesDefense', {
+    Text = 'Auto Buy Defense Upgrades',
+    Default = settings['AutoUpgrades']['Defense']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Defense']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Defense']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local DefenseUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Defense")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and DefenseUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Defense']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Defense_' .. upgrade]
+                    local UpgradePrice = DefenseUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if UpgradePrice > 3000 and not DefenseUpgradesData[upgrade].MaxPrice then UpgradePrice = 3000 end
+
+                    if PlayerUpgradeLevel < DefenseUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("DefenseShards") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Defense", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
 local DivisionUpgradesList = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'AtkSPD'}
 local DivisionUpgrades = Tabs['Upgrades']:AddRightGroupbox('Division Upgrades')
 DivisionUpgrades:AddDropdown('selectedDivisionUpgrades', {
@@ -2502,7 +2552,7 @@ end)
 
 local RaidShopItems = {'Gems', 'RaidTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
 local RaidShop = Tabs['Shops']:AddLeftGroupbox('Raid Shop')
-RaidShop:AddDropdown('selectedItems', {
+RaidShop:AddDropdown('selectedRaidShopItems', {
     Values = RaidShopItems,
     Default = settings['RaidShop']['SelectedItems'],
     Multi = true,
@@ -2516,7 +2566,7 @@ RaidShop:AddDropdown('selectedItems', {
     end
 })
 
-RaidShop:AddToggle('enableAutoDungeonShop', {
+RaidShop:AddToggle('enableAutoRaidShop', {
     Text = 'Auto Buy Items',
     Default = settings['RaidShop']['Enabled'],
 
@@ -2541,6 +2591,54 @@ task.spawn(function()
 
                     if getItemAmount("RaidShards") >= itemPrice and DungeonStockShop[item] > 0 then
                         FireBridge("StockShopSystem", "Buy", "Raid", item, 0)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local DefenseShopItems = {'Gems', 'DefenseTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
+local DefenseShop = Tabs['Shops']:AddLeftGroupbox('Defense Shop')
+
+DefenseShop:AddDropdown('selectedDefenseShopItems', {
+    Values = DefenseShopItems,
+    Default = settings['DefenseShop']['SelectedItems'],
+    Multi = true,
+
+    Text = 'Selected Items to Buy',
+    Tooltip = 'Selected Items to Buy from Raid Shop',
+
+    Callback = function(value)
+        settings['DefenseShop']['SelectedItems'] = value
+        SaveConfig()
+    end
+})
+
+DefenseShop:AddToggle('enableAutoDefenseShop', {
+    Text = 'Auto Buy Items',
+    Default = settings['DefenseShop']['Enabled'],
+
+    Callback = function(value)
+        settings['DefenseShop']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['DefenseShop']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local DefenseStockShop = PlayerData and PlayerData.StockShops and PlayerData.StockShops.Defense and PlayerData.StockShops.Defense.Items
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local DefenseShopData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StockShopData"):WaitForChild("Defense"))
+
+            if DefenseStockShop and DefenseShopData and PlayerInventory then
+                for _, item in pairs(settings['DefenseShop']['SelectedItems']) do
+                    local itemPrice = DefenseShopData.Items[item].Price
+
+                    if getItemAmount("DefenseShards") >= itemPrice and DefenseStockShop[item] > 0 then
+                        FireBridge("StockShopSystem", "Buy", "Defense", item, 0)
                     end
                 end
             end
