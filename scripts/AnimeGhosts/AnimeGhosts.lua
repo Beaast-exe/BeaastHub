@@ -100,7 +100,7 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Defense'] = {
-            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'},
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'},
             ['Enabled'] = false
         },
         ['Division'] = {
@@ -2221,7 +2221,7 @@ task.spawn(function()
     end
 end)
 
-local DefenseUpgradesList = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'}
+local DefenseUpgradesList = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'ModeDelay', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'}
 local DefenseUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Defense Upgrades')
 DefenseUpgrades:AddDropdown('selectedDefenseUpgrades', {
     Values = DefenseUpgradesList,
