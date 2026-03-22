@@ -2222,7 +2222,7 @@ task.spawn(function()
 end)
 
 local DefenseUpgradesList = {'Energy', 'Damage', 'Ghost', 'AtkSPD', 'WarriorEquipTitan', 'WarriorEquipShadow', 'WarriorEquipStand'}
-local DefenseUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Stand Mastery Upgrades')
+local DefenseUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Defense Upgrades')
 DefenseUpgrades:AddDropdown('selectedDefenseUpgrades', {
     Values = DefenseUpgradesList,
     Default = settings['AutoUpgrades']['Defense']['SelectedUpgrades'],
