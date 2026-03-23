@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -71,7 +71,8 @@ local defaultSettings = {
         ['BackPosition'] = nil,
         ['BackWorld'] = '1',
         ['TeleportBack'] = false,
-        ['TimeRewards'] = false
+        ['TimeRewards'] = false,
+        ['AutoAttack'] = false
     },
     ['AutoPotions'] = {
         ['SelectedPotions'] = {"EnergyPotion1"},
@@ -583,9 +584,9 @@ local function checkEnemyInMap(map)
     local enemyFolder = nil
 
     for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetDescendants()) do
-        if folder:IsA('Folder') and folder.Name == map then
+        if folder:IsA('Folder') and folder.Name == tostring(playerMap) then
             for _, v in pairs(folder:GetChildren()) do
-                if v:IsA('Folder') and #v:GetChildren() > 0 and (v.Name == tostring("Dungeon_" .. player.UserId) or v.Name == tostring("Raid_" .. player.UserId)) then
+                if v:IsA('Folder') and #v:GetChildren() > 0 then
                     enemyFolder = v
                 end
             end
@@ -639,7 +640,8 @@ local function getEnemyInMap(map)
 
     for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
         if enemyFolder:IsA("Folder") then
-            local targetFolder = checkEnemyInMap(map)
+            local targetFolder = checkEnemyInMap(tostring(map))
+            --print(targetFolder)
             if targetFolder then
                 for _, v in ipairs(targetFolder:GetChildren()) do
                     local HP = v:GetAttribute('HP')
@@ -733,6 +735,85 @@ local function teleportToEnemyInGamemode(gamemode)
     if not HumanoidRootPart then return end
 
     local enemy = getEnemyInGamemode(gamemode)
+    if enemy then
+        HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
+    end
+end
+
+local function checkEnemyInDefense(defense)
+    local enemyFolder = nil
+
+    for _, folder in ipairs(Workspace['_ENEMIES']['Server']['Gamemode']:GetChildren()) do
+        if folder:IsA('Folder') and #folder:GetChildren() > 0 and folder.Name == defense.Name then
+            enemyFolder = folder
+        end
+    end
+
+    return enemyFolder
+end
+
+local function getEnemyInDefense(defense)
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local distance = math.huge
+    local enemy = nil
+
+    for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']['Gamemode']:GetChildren()) do
+        if enemyFolder:IsA("Folder") then
+            local targetFolder = checkEnemyInDefense(defense)
+
+            if targetFolder then
+                local mapFolder = Workspace:WaitForChild('_MAP'):WaitForChild('Gamemode'):WaitForChild(targetFolder.Name)
+                if mapFolder then
+                    local endpoint = mapFolder:WaitForChild('Spots'):WaitForChild('Endpoint1')
+                    if endpoint then
+                        for _, v in ipairs(targetFolder:GetChildren()) do
+                            local HP = v:GetAttribute('HP')
+                            local Shield = v:GetAttribute('Shield')
+
+                            if HP and HP > 0 and Shield ~= true then
+                                if v:IsA('Part') then
+                                    local magnitude = (endpoint.Position - v.Position).magnitude
+
+                                    if magnitude < distance then
+                                        distance = magnitude
+                                        enemy = v
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+
+                -- for _, v in ipairs(targetFolder:GetChildren()) do
+                --     local HP = v:GetAttribute('HP')
+                --     local Shield = v:GetAttribute('Shield')
+    
+                --     if HP and HP > 0 and Shield ~= true then
+                --         if v:IsA('Part') then
+                --             local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
+    
+                --             if magnitude < distance then
+                --                 distance = magnitude
+                --                 enemy = v
+                --             end
+                --         end
+                --     end
+                -- end
+            end
+        end
+    end
+
+    return enemy
+end
+
+local function teleportToEnemyInDefense(defense)
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local enemy = getEnemyInDefense(defense)
     if enemy then
         HumanoidRootPart.CFrame = enemy.CFrame * CFrame.new(0, 3, 5)
     end
@@ -905,7 +986,7 @@ task.spawn(function()
         if settings['AutoScroll']['Enabled'] then
             local playerGamemode = getPlayerGamemode()
 
-            if not playerGamemode and playerMode ~= 'Dungeon' and playerMode ~= 'Raid' then
+            if not playerGamemode and playerMode ~= 'Dungeon' and playerMode ~= 'Raid' and playerMode ~= 'Defense Mode' then
                 local args = {{{"PetSystem", "Open", settings['AutoScroll']['SelectedScroll'], "All", n = 4 }, "\002" }}
                 game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
             end
@@ -966,6 +1047,16 @@ task.spawn(function()
 end)
 
 local Misc = Tabs['Main']:AddLeftGroupbox('Miscellaneous')
+Misc:AddToggle('enableAutoAttack', {
+    Text = 'Auto Attack',
+    Default = settings['Misc']['AutoAttack'],
+
+    Callback = function(value)
+        settings['Misc']['AutoAttack'] = value
+        SaveConfig()
+    end
+})
+
 local ignoredBackWorlds = {"Gamemode"}
 local selectBackPosition = Misc:AddButton({
     Text = 'Save Back Position',
@@ -1556,7 +1647,8 @@ local function startDefenseMode2()
         local gamemode = getPlayerGamemode()
         if gamemode then
             if gamemode:GetAttribute('ModeId') == 'Defense Mode' then
-                teleportToEnemyInGamemode(gamemode)
+                --teleportToEnemyInGamemode(gamemode)
+                teleportToEnemyInDefense(gamemode)
                 task.wait()
             end
         end
@@ -2832,6 +2924,92 @@ end)
 --         SaveConfig()
 --     end
 -- })
+
+local function getEnemyFolderInCurrentMap()
+    local enemyFolder = nil
+
+    for _, folder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
+        if folder:IsA('Folder') and folder.Name == tostring(playerMap) and #folder:GetChildren() > 0 then
+            enemyFolder = folder
+        end
+    end
+
+    return enemyFolder
+end
+
+local function getEnemyInCurrentMap()
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local distance = math.huge
+    local enemy = nil
+
+    local targetFolder = getEnemyFolderInCurrentMap()
+    if targetFolder then
+        for _, v in ipairs(targetFolder:GetChildren()) do
+            local HP = v:GetAttribute('HP')
+            local Shield = v:GetAttribute('Shield')
+
+            if HP and HP > 0 and Shield ~= true then
+                if v:IsA('Part') then
+                    local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
+    
+                    if magnitude < distance then
+                        distance = magnitude
+                        enemy = v
+                    end
+                end
+            end
+        end
+    end
+
+    return enemy
+end
+
+local function attack(enemy)
+    if enemy then
+        FireBridge('ClickSystem', 'Execute', enemy)
+        ScriptLibrary.Target = enemy
+    else
+        FireBridge('ClickSystem', 'Execute')
+    end
+end
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['Misc']['AutoAttack'] then
+            local playerGamemode = getPlayerGamemode()
+
+            if not playerGamemode then
+                local enemyInMap = getEnemyInCurrentMap()
+
+                if enemyInMap then
+                    attack(enemyInMap.Name)
+                else
+                    attack()
+                end
+            else
+                local enemy = nil
+
+                if playerMode == 'Dungeon' then
+                    enemy = getEnemyInGamemode(playerGamemode)
+                elseif playerMode == 'Raid' then
+                    enemy = getEnemyInGamemode(playerGamemode)
+                elseif playerMode == 'Infinity Castle' then
+                    enemy = getEnemyInGamemode(playerGamemode)
+                elseif playerMode == 'Defense Mode' then
+                    enemy = getEnemyInDefense(playerGamemode)
+                end
+
+                if enemy then
+                    attack(enemy.Name)
+                else
+                    attack()
+                end
+            end
+        end
+    end
+end)
 
 local minute = os.date("%M")
 local unixTimestamp
