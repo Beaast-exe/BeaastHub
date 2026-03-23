@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -2508,9 +2508,15 @@ task.spawn(function()
                     local PlayerUpgradeLevel = PlayerUpgrades['Stand Mastery_' .. upgrade]
                     local UpgradePrice = StandMasteryUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
 
+                    if StandMasteryUpgradesData[upgrade].MaxPrice then
+                        if UpgradePrice > StandMasteryUpgradesData[upgrade].MaxPrice then
+                            UpgradePrice = StandMasteryUpgradesData[upgrade].MaxPrice
+                        end
+                    end
                     if UpgradePrice > 10000 and not StandMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 10000 end
 
                     if PlayerUpgradeLevel < StandMasteryUpgradesData[upgrade].MaxLevel then
+                        print(upgrade, UpgradePrice)
                         if getItemAmount("StandMasteryTokens") >= UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Stand Mastery", upgrade)
                         end
