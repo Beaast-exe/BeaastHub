@@ -52,6 +52,7 @@ local defaultSettings = {
     ['InfinityCastle'] = {
         ['Enabled'] = false,
         ['InfinityCastle'] = false,
+        ['Act'] = 'Act1',
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
@@ -1436,6 +1437,21 @@ task.spawn(function()
 end)
 
 local AutoInfinityCastle = Tabs['Main']:AddRightGroupbox('Auto Infinity Castle')
+local InfinityCastleActs = {'Act1', 'Act2'}
+AutoInfinityCastle:AddDropdown('selectedInfinityCastleAct', {
+    Values = {'Act1', 'Act2'},
+    Default = settings['InfinityCastle']['Act'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Act',
+    Tooltip = 'Selected Infinity Castle Act', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['InfinityCastle']['Act'] = value
+        SaveConfig()
+    end
+})
+
 AutoInfinityCastle:AddToggle('enableAutoInfinityCastle', {
     Text = 'Auto Create Infinity Castle',
     Default = settings['InfinityCastle']['Enabled'],
@@ -1494,7 +1510,7 @@ local function getInfinityCastleCooldown()
 end
 
 local function createInfinityCastle()
-    FireBridge("GamemodeSystem", "Create", "Infinity Castle", "Act1", "Easy")
+    FireBridge("GamemodeSystem", "Create", "Infinity Castle", settings['InfinityCastle']['Act'], "Easy")
     task.wait(5)
     FireBridge("GamemodeSystem", "Start", "Infinity Castle", player.UserId)
 end
