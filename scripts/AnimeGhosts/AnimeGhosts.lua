@@ -138,6 +138,16 @@ local defaultSettings = {
                 ['Enabled'] = false
             },
             ['OnlyWhenFull'] = false
+        },
+        ['Currency'] = {
+            ['Sell'] = {
+                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens'},
+                ['Enabled'] = false
+            },
+            ['Buy'] = {
+                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens'},
+                ['Enabled'] = false
+            }
         }
     },
     ['AutoSpin'] = {
@@ -2670,6 +2680,126 @@ task.spawn(function()
                             end
                         end
                     end
+                end
+            end
+        end
+    end
+end)
+
+local CurrencyTokensList = {
+    'PassiveTokens',
+    'WeaponTokens',
+    'AvatarTokens',
+    'TraitShards',
+    'MountTokens',
+    'EnchantmentTokens',
+    'SerumTokens',
+    'TitanTokens',
+    'BloodlineTokens',
+    'PsychicTokens',
+    'AlienTokens',
+    'PossessionTokens',
+    'ShinigamiTokens',
+    'ZanpakutoTokens',
+    'SoulTokens',
+    'ShadowTokens',
+    'HunterTokens',
+    'MonarchTokens',
+    'HakiColorTokens',
+    'MarineTokens',
+    'FruitTokens',
+    'CrewTokens',
+    'PirateTokens',
+    'SlayerTokens',
+    'DemonTokens',
+    'BlessingTokens',
+    'BreathingTokens'
+}
+
+local CurrencyExchange = Tabs['Shops']:AddLeftGroupbox('Currency Exchange')
+CurrencyExchange:AddDropdown('selectedTokensToSell', {
+    Values = CurrencyTokensList,
+    Default = settings['Exchange']['Currency']['Sell']['Tokens'],
+    Multi = true,
+
+    Text = 'Selected Items to Sell',
+    Tooltip = 'Selected Items to Sell for Exchange Tokens',
+
+    Callback = function(value)
+        settings['Exchange']['Currency']['Sell']['Tokens'] = value
+        SaveConfig()
+    end
+})
+
+CurrencyExchange:AddDropdown('selectedTokensToBuy', {
+    Values = CurrencyTokensList,
+    Default = settings['Exchange']['Currency']['Buy']['Tokens'],
+    Multi = true,
+
+    Text = 'Selected Items to Buy',
+    Tooltip = 'Selected Items to Buy with Exchange Tokens',
+
+    Callback = function(value)
+        settings['Exchange']['Currency']['Buy']['Tokens'] = value
+        SaveConfig()
+    end
+})
+
+CurrencyExchange:AddToggle('enableAutoExchangeSell', {
+    Text = 'Auto Sell Items',
+    Default = false, settings['Exchange']['Currency']['Sell']['Enabled'],
+
+    Callback = function(value)
+        settings['Exchange']['Currency']['Sell']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+CurrencyExchange:AddToggle('enableAutoExchangeBuy', {
+    Text = 'Auto Buy Items',
+    Default = false, --settings['Exchange']['Currency']['Buy']['Enabled'],
+
+    Callback = function(value)
+        settings['Exchange']['Currency']['Buy']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['Exchange']['Currency']['Sell']['Enabled'] and Toggles['enableAutoExchangeSell'].Value then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            if not PlayerInventory then return end
+
+            for _, currency in pairs(settings['Exchange']['Currency']['Sell']['Tokens']) do
+                local count = PlayerInventory[currency] or 0
+
+                if count >= 10 then
+                    local amountToExchange = math.floor(count / 10)
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Currency', currency, amountToExchange)
+                end
+            end
+        end
+
+        if settings['Exchange']['Currency']['Buy']['Enabled'] and Toggles['enableAutoExchangeBuy'].Value then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            if not PlayerInventory then return end
+
+            for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
+                if getItemAmount('ExchangeTokens') >= 1000 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
+                elseif getItemAmount('ExchangeTokens') >= 500 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
+                elseif getItemAmount('ExchangeTokens') >= 100 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
+                elseif getItemAmount('ExchangeTokens') >= 50 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
+                elseif getItemAmount('ExchangeTokens') >= 10 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
+                elseif getItemAmount('ExchangeTokens') >= 1 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
                 end
             end
         end
