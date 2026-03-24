@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -107,6 +107,10 @@ local defaultSettings = {
         },
         ['Division'] = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'AtkSPD'},
+            ['Enabled'] = false
+        },
+        ['Exchange'] = {
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'Drop', 'EggLuck', 'GachaLuck', 'EnemyRange'},
             ['Enabled'] = false
         },
         ['CrewMastery'] = {
@@ -2225,6 +2229,63 @@ task.spawn(function()
     end
 end)
 
+local ExchangeUpgradesList = {'Energy', 'Damage', 'Ghost', 'Drop', 'EggLuck', 'GachaLuck', 'EnemyRange'}
+local ExchangeUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Exchange Upgrades')
+ExchangeUpgrades:AddDropdown('selectedExchangeUpgrades', {
+    Values = ExchangeUpgradesList,
+    Default = settings['AutoUpgrades']['Exchange']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Exchange Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Exchange']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+ExchangeUpgrades:AddToggle('enableAutoUpgradesExchange', {
+    Text = 'Auto Buy Exchange Upgrades',
+    Default = settings['AutoUpgrades']['Exchange']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Exchange']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Exchange']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local ExchangeUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Exchange")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and ExchangeUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Exchange']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Exchange_' .. upgrade]
+                    local UpgradePrice = ExchangeUpgradesData[upgrade].Price * (1.5 ^ PlayerUpgradeLevel)
+
+                    if ExchangeUpgradesData[upgrade].MaxPrice then
+                        if UpgradePrice > ExchangeUpgradesData[upgrade].MaxPrice then
+                            UpgradePrice = ExchangeUpgradesData[upgrade].MaxPrice
+                        end
+                    end
+                    if UpgradePrice > 2500 and not ExchangeUpgradesData[upgrade].MaxPrice then UpgradePrice = 2500 end
+
+                    if PlayerUpgradeLevel < ExchangeUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("ExchangeTokens") >= UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Exchange", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
 local DungeonUpgradesList = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'}
 local DungeonUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Dungeon Upgrades')
 DungeonUpgrades:AddDropdown('selectedDungeonUpgrades', {
@@ -2532,7 +2593,6 @@ task.spawn(function()
                     if UpgradePrice > 10000 and not StandMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 10000 end
 
                     if PlayerUpgradeLevel < StandMasteryUpgradesData[upgrade].MaxLevel then
-                        print(upgrade, UpgradePrice)
                         if getItemAmount("StandMasteryTokens") >= UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Stand Mastery", upgrade)
                         end
