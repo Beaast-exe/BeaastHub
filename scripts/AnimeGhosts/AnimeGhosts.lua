@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
---task.wait(20)
+task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -1009,7 +1009,7 @@ task.spawn(function()
     end
 end)
 
-local PotionsList = {"EnergyPotion1", "EnergyPotion2", "EnergyPotion3", "DamagePotion1", "DamagePotion2", "DamagePotion3", "DropPotion1", "DropPotion2", "DropPotion3", "GhostPotion1", "GhostPotion2", "GhostPotion3", "LuckPotion1", "LuckPotion2", "LuckPotion3"}
+local PotionsList = {"EnergyPotion1", "EnergyPotion2", "EnergyPotion3", "EnergyPotion4", "DamagePotion1", "DamagePotion2", "DamagePotion3", "DamagePotion4", "DropPotion1", "DropPotion2", "DropPotion3", "DropPotion4", "GhostPotion1", "GhostPotion2", "GhostPotion3", "GhostPotion4", "LuckPotion1", "LuckPotion2", "LuckPotion3", "LuckPotion4"}
 local AutoPotions = Tabs['Main']:AddLeftGroupbox('Auto Potions')
 AutoPotions:AddDropdown('selectedPotions', {
     Values = PotionsList,
