@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
---task.wait(20)
+task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -2642,7 +2642,7 @@ task.spawn(function()
                             UpgradePrice = StandMasteryUpgradesData[upgrade].MaxPrice
                         end
                     end
-                    
+
                     if UpgradePrice > 10000 and not StandMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 10000 end
 
                     if PlayerUpgradeLevel < StandMasteryUpgradesData[upgrade].MaxLevel then
