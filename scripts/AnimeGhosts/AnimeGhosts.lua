@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -73,6 +73,7 @@ local defaultSettings = {
         ['BackWorld'] = '1',
         ['TeleportBack'] = false,
         ['TimeRewards'] = false,
+        ['DailyGems'] = false,
         ['AutoAttack'] = false
     },
     ['AutoPotions'] = {
@@ -1208,6 +1209,41 @@ task.spawn(function()
             local button = PlayerGui.CenterGUI.TimeRewards.Main.Content.Reset.Button
             if button and button.Visible then
                 FireBridge("TimeRewardSystem", "Reset", "General")
+            end
+        end
+    end
+end)
+
+Misc:AddToggle('enableAutoClaimDaily Gems', {
+    Text = 'Auto Claim Daily Gems',
+    Default = settings['Misc']['DailyGems'],
+
+    Callback = function(value)
+        settings['Misc']['DailyGems'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(3) and not Library.Unloaded do
+        if settings['Misc']['DailyGems'] then
+            local PlayerWeeklyRewards = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.WeeklyRewards and ScriptLibrary.PlayerData.WeeklyRewards.Gems
+            local ReplicatedTime = ReplicatedStorage:GetAttribute("Time")
+
+            if not PlayerWeeklyRewards then return end
+            if not ReplicatedTime then return end
+
+            local Times = {
+                ['HOUR_TIME'] = 3600,
+                ['DAILY_TIME'] = 86400
+            }
+
+            Times.WEEKLY_TIME = 7 * Times.DAILY_TIME
+            Times.EXTRA_TIME = -(1 * Times.DAILY_TIME) - 4 * Times.HOUR_TIME
+            local currentDay = math.floor((ReplicatedTime + Times.EXTRA_TIME) % Times.WEEKLY_TIME / Times.DAILY_TIME) + 1
+            
+            if not PlayerWeeklyRewards.Claimed[tostring(currentDay)] and Times.HOUR_TIME <= PlayerWeeklyRewards.Time then
+                FireBridge('WeeklyRewardSystem', 'Claim', 'Gems', currentDay)
             end
         end
     end
