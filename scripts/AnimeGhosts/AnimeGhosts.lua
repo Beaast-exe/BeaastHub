@@ -3353,7 +3353,7 @@ local function setupAntiAfk()
         if tick() - lastActivityTime > 600 then -- 10 minutes safety check
             -- Simulate activity
             VirtualUser:CaptureController()
-            VirtualUser:ClickButton1(Vector2.new(0,0))
+            VirtualUser:ClickButton1(Vector2.new(0, 0))
             lastActivityTime = tick()
             print("Anti-AFK heartbeat triggered")
         end
@@ -3365,8 +3365,23 @@ local function updateActivity()
 end
 
 task.spawn(function()
-    while task.wait(0.1) do
+        
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton1(Vector2.new(0, 0))
+    task.wait(0.1)
+    VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    task.wait(0.1)
+    VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+
+    while task.wait(60) do
         updateActivity()
+        
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton1(Vector2.new(0, 0))
+        task.wait(0.1)
+        VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        task.wait(0.1)
+        VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
     end
 end)
 
