@@ -3221,6 +3221,35 @@ local function getEnemyInCurrentMap()
     return enemy
 end
 
+local function getEnemyInGlobalBosses()
+    local HumanoidRootPart = player.Character and player.Character:FindFirstChild('HumanoidRootPart')
+    if not HumanoidRootPart then return end
+
+    local distance = math.huge
+    local enemy = nil
+
+    local targetFolder = Workspace['_ENEMIES']['Server']['GlobalBoss']
+    if targetFolder then
+        for _, v in ipairs(targetFolder:GetChildren()) do
+            local HP = v:GetAttribute('HP')
+            local Shield = v:GetAttribute('Shield')
+
+            if HP and HP > 0 and Shield ~= true then
+                if v:IsA('Part') then
+                    local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
+    
+                    if magnitude < distance then
+                        distance = magnitude
+                        enemy = v
+                    end
+                end
+            end
+        end
+    end
+
+    return enemy
+end
+
 local function attack(enemy)
     if enemy then
         FireBridge('ClickSystem', 'Execute', enemy)
@@ -3238,10 +3267,19 @@ task.spawn(function()
             if not playerGamemode then
                 local enemyInMap = getEnemyInCurrentMap()
 
-                if enemyInMap then
-                    attack(enemyInMap.Name)
+                if playerMap ~= "Lobby" then
+                    if enemyInMap then
+                        attack(enemyInMap.Name)
+                    else
+                        attack()
+                    end
                 else
-                    attack()
+                    local enemy = getEnemyInGlobalBosses()
+                    if enemy then
+                        attack(enemy)
+                    else
+                        attack()
+                    end
                 end
             else
                 local enemy = nil
