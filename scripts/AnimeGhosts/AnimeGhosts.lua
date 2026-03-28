@@ -129,8 +129,7 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Relics'] = {
-            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner'},
-            ['Enabled'] = false,
+            ['SelectedRelics'] = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'EvilBunny', 'EasterEgg'},
             ['SmartEvolve'] = false
         },
         ['StandMastery'] = {
@@ -2941,7 +2940,7 @@ task.spawn(function()
     end
 end)
 
-local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner'}
+local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'EvilBunny', 'EasterEgg'}
 local RelicsUpgrades = Tabs['Upgrades']:AddRightGroupbox('Relics Upgrades')
 RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
     Values = RelicsList,
@@ -2984,17 +2983,21 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerRelics = PlayerData and PlayerData.Relics
-            local CrewMasteryUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Crew Mastery")).Targets
+            local RelicsData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("RelicData"))
             
-            if PlayerInventory and PlayerRelics and CrewMasteryUpgradesData then
+            if PlayerInventory and PlayerRelics and RelicsData then
                 for _, relic in pairs(settings['AutoUpgrades']['Relics']['SelectedRelics']) do
                     if PlayerRelics[relic] then
                         local relicTier = PlayerRelics[relic].Tier
                         local relicLevel = PlayerRelics[relic].Level
+                        local relicCurrency = RelicsData[relic].Currency
 
                         if relicLevel == 100 and relicTier < 7 then
                             if settings['AutoUpgrades']['Relics']['SmartEvolve'] then
-                                if getItemAmount("RelicShards") >= 25000 then
+                                -- if getItemAmount("RelicShards") >= 25000 then
+                                --     FireBridge("RelicSystem", "Evolve", tostring(relic))
+                                -- end
+                                if getItemAmount(tostring(relicCurrency)) > 25000 then
                                     FireBridge("RelicSystem", "Evolve", tostring(relic))
                                 end
                             else
@@ -3003,7 +3006,7 @@ task.spawn(function()
                         end
 
                         if relicLevel < 100 then
-                            if getItemAmount("RelicShards") >= 250 then
+                            if getItemAmount(tostring(relicCurrency)) > 250 then
                                 FireBridge("RelicSystem", "Upgrade", tostring(relic))
                             end
                         end
@@ -3173,7 +3176,7 @@ task.spawn(function()
                 for _, item in pairs(settings['DungeonShop']['SelectedItems']) do
                     local itemPrice = DungeonShopData.Items[item].Price
 
-                    if getItemAmount("DungeonShards") >= itemPrice and DungeonStockShop[item] > 0 then
+                    if getItemAmount("DungeonShards") > itemPrice and DungeonStockShop[item] > 0 then
                         FireBridge("StockShopSystem", "Buy", "Dungeon", item, 0)
                     end
                 end
@@ -3221,7 +3224,7 @@ task.spawn(function()
                 for _, item in pairs(settings['RaidShop']['SelectedItems']) do
                     local itemPrice = RaidShopData.Items[item].Price
 
-                    if getItemAmount("RaidShards") >= itemPrice and DungeonStockShop[item] > 0 then
+                    if getItemAmount("RaidShards") > itemPrice and DungeonStockShop[item] > 0 then
                         FireBridge("StockShopSystem", "Buy", "Raid", item, 0)
                     end
                 end
@@ -3269,7 +3272,7 @@ task.spawn(function()
                 for _, item in pairs(settings['DefenseShop']['SelectedItems']) do
                     local itemPrice = DefenseShopData.Items[item].Price
 
-                    if getItemAmount("DefenseShards") >= itemPrice and DefenseStockShop[item] > 0 then
+                    if getItemAmount("DefenseShards") > itemPrice and DefenseStockShop[item] > 0 then
                         FireBridge("StockShopSystem", "Buy", "Defense", item, 0)
                     end
                 end
