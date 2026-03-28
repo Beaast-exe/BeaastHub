@@ -23,7 +23,6 @@ local Tabs = {
     ['Gachas'] = Window:AddTab('Gachas'),
     ['Shops'] = Window:AddTab('Shops'),
     ['Upgrades'] = Window:AddTab('Upgrades'),
-    -- ['Testing'] = Window:AddTab('Testing'),
 	['UI Settings'] = Window:AddTab('UI Settings')
 }
 
@@ -3450,23 +3449,6 @@ task.spawn(function()
         end
     end
 end)
-
--- local Testing = Tabs['Testing']:AddRightGroupbox('Testing')
-
--- local TestingValues = {"_item1", "_item2", "_item3", "_item4", "_item5"}
--- Testing:AddDropdown('selectedTestingValues', {
---     Values = TestingValues,
---     Default = settings['Testing']['Selected2'], -- number index of the value / string
---     Multi = true, -- true / false, allows multiple choices to be selected
-
---     Text = 'Selected Testing Values',
---     Tooltip = 'Selected Values for Testing', -- Information shown when you hover over the dropdown
-
---     Callback = function(value)
---         settings['Testing']['Selected2'] = value
---         SaveConfig()
---     end
--- })
 
 local function getEnemyFolderInCurrentMap()
     local enemyFolder = nil
