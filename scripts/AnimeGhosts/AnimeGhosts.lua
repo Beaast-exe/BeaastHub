@@ -348,7 +348,7 @@ function teleportToWorld(world, cframe)
     local hrp = player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    dataRemoteEvent:FireServer(unpack({{{"TeleportSystem", "To", tonumber(world), n = 3}, "\002"}}))
+    dataRemoteEvent:FireServer(unpack({{{"TeleportSystem", "To", world, n = 3}, "\002"}}))
     task.wait(1)
     hrp.CFrame = cframe
 end
