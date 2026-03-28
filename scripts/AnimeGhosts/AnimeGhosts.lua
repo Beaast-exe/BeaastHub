@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -64,6 +64,12 @@ local defaultSettings = {
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
+    ['EasterRaid'] = {
+        ['Enable'] = false,
+        ['EasterRaid'] = false,
+        ['AutoLeave'] = false,
+        ['LeaveWave'] = 50
+    },
     ['AutoScroll'] = {
         ['Enabled'] = false,
         ['SelectedScroll'] = 'Titan Scroll'
@@ -114,6 +120,10 @@ local defaultSettings = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'Drop', 'EggLuck', 'GachaLuck', 'EnemyRange'},
             ['Enabled'] = false
         },
+        ['Devil'] = {
+            ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'Drop', 'LevelingChance'},
+            ['Enabled'] = false
+        },
         ['CrewMastery'] = {
             ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'EggLuck', 'GachaLuck', 'AtkSPD'},
             ['Enabled'] = false
@@ -125,6 +135,10 @@ local defaultSettings = {
         },
         ['StandMastery'] = {
             ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'CritDMG', 'Drop', 'WalkSPD'},
+            ['Enabled'] = false
+        },
+        ['FiendMastery'] = {
+            ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'Drop', 'ShinyChance', 'RadiantChance'},
             ['Enabled'] = false
         }
     },
@@ -243,7 +257,8 @@ local worldsNames = {
     "Egg Island",
     "Demon District",
     "Kaiju City",
-    "Bizarre Desert"
+    "Bizarre Desert",
+    "Devil Town"
 }
 
 local worldsTable = {
@@ -254,7 +269,8 @@ local worldsTable = {
     ["Egg Island"] = "5",
     ["Demon District"] = "6",
     ["Kaiju City"] = "7",
-    ["Bizarre Desert"] = "8"
+    ["Bizarre Desert"] = "8",
+    ["Devil Town"] = "9"
 }
 
 local worldsTableNumbers = {
@@ -265,7 +281,8 @@ local worldsTableNumbers = {
     ["Egg Island"] = 5,
     ["Demon District"] = 6,
     ["Kaiju City"] = 7,
-    ["Bizarre Desert"] = 8
+    ["Bizarre Desert"] = 8,
+    ["Devil Town"] = 9
 }
 
 local numbersToWorlds = {
@@ -276,7 +293,8 @@ local numbersToWorlds = {
     [5] = "Egg Island",
     [6] = "Demon District",
     [7] = "Kaiju City",
-    [8] = "Bizarre Desert"
+    [8] = "Bizarre Desert",
+    [9] = "Devil Town"
 }
 
 local scrolls = {
@@ -287,7 +305,9 @@ local scrolls = {
     'Punk Scroll',
     'Slayer Scroll',
     'Kaiju Scroll',
-    'Bizarre Scroll'
+    'Bizarre Scroll',
+    'Devil Scroll',
+    'Easter 2026 Scroll'
 }
 
 local dungeonMaps = {
@@ -1762,16 +1782,148 @@ task.spawn(function()
     end
 end)
 
-local Timers = Tabs['Main']:AddLeftGroupbox('Timers')
-local DungeonCooldown = Timers:AddLabel("DUNGEON     >> ", true)
-local RaidCooldown = Timers:AddLabel("RAID        >> ", true)
-local InfCastleCooldown = Timers:AddLabel("INF CASTLE  >> ", true)
-local DefModeCooldown = Timers:AddLabel("DEF MODE    >> ", true)
+local AutoEasterRaid = Tabs['Main']:AddRightGroupbox('Auto Easter Raid')
+AutoEasterRaid:AddToggle('enableAutoEasterRaid', {
+    Text = 'Auto Create Easter Raid',
+    Default = settings['EasterRaid']['Enabled'],
 
-local dungeonMessage = 'DUNGEON     >> '
-local raidMessage = 'RAID        >> '
-local infCastleMessage = 'INF CASTLE  >> '
-local defModeMessage = 'DEF MODE    >> '
+    Callback = function(value)
+        settings['EasterRaid']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+AutoEasterRaid:AddToggle('enableAutoDoEasterRaid', {
+    Text = 'Auto do Easter Raid',
+    Default = settings['EasterRaid']['EasterRaid'],
+
+    Callback = function(value)
+        settings['EasterRaid']['EasterRaid'] = value
+        SaveConfig()
+    end
+})
+
+AutoEasterRaid:AddSlider('easterRaidLeaveWaveSlider', {
+    Text = 'Easter Raid Leave Wave',
+    Default = settings['EasterRaid']['LeaveWave'],
+    Min = 1,
+    Max = 100,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['EasterRaid']['LeaveWave'] = value
+        SaveConfig()
+    end
+})
+
+AutoEasterRaid:AddToggle('enableEasterRaidAutoLeave', {
+    Text = 'Auto Leave Easter Raid',
+    Default = settings['EasterRaid']['AutoLeave'],
+
+    Callback = function(value)
+        settings['EasterRaid']['AutoLeave'] = value
+        SaveConfig()
+    end
+})
+
+local function getEasterRaidCooldown()
+    local EasterRaidDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay['Easter Raid']
+    if EasterRaidDelay == nil then return end
+
+    local Time = ReplicatedStorage:GetAttribute('Time')
+
+    if Time < EasterRaidDelay then
+        return true
+    else
+        return false
+    end
+end
+
+local function createEasterRaid()
+    FireBridge("GamemodeSystem", "Create", "Easter Raid", "ChocolateKingdom", "Easy")
+    task.wait(5)
+    FireBridge("GamemodeSystem", "Start", "Easter Raid", player.UserId)
+end
+
+local function startEasterRaid()
+    if getEasterRaidCooldown() then return end
+    if playerMode == nil then
+        createEasterRaid()
+        task.wait(3)
+    elseif checkDungeon() == 'Easter Raid' or playerMode == 'Easter Raid' then
+        --teleportToEnemyInMap('Gamemode')
+        task.wait()
+    end
+end
+
+local function startEasterRaid2()
+    if getEasterRaidCooldown() then return end
+
+    if checkDungeon() == 'Easter Raid' or playerMode == 'Easter Raid' then
+        local gamemode = getPlayerGamemode()
+        if gamemode then
+            if gamemode:GetAttribute('ModeId') == 'Easter Raid' then
+                teleportToEnemyInGamemode(gamemode)
+                task.wait()
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['EasterRaid']['Enabled'] then
+            startEasterRaid()
+            local raidName = "Easter Raid_" .. player.UserId
+
+            if settings['EasterRaid']['AutoLeave'] and playerMode == 'Easter Raid' then
+                local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+                if Gamemode:FindFirstChild(raidName) then
+                    if Gamemode:FindFirstChild(raidName):GetAttribute('Stage') >= settings['EasterRaid']['LeaveWave'] then
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        if settings['EasterRaid']['EasterRaid'] then
+            startEasterRaid2()
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local infCastleName = getPlayerGamemode()
+
+        if settings['EasterRaid']['AutoLeave'] and infCastleName then
+            local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
+            if Gamemode:FindFirstChild(infCastleName.Name) and Gamemode:FindFirstChild(infCastleName.Name):GetAttribute('ModeId') == 'Easter Raid' then
+                if Gamemode:FindFirstChild(infCastleName.Name):GetAttribute('Stage') >= settings['EasterRaid']['LeaveWave'] then
+                    teleportToSavedPosition()
+                end
+            end
+        end
+    end
+end)
+
+local Timers = Tabs['Main']:AddLeftGroupbox('Timers')
+local DungeonCooldown = Timers:AddLabel("DUNGEON        >> ", true)
+local RaidCooldown = Timers:AddLabel("RAID           >> ", true)
+local InfCastleCooldown = Timers:AddLabel("INF CASTLE     >> ", true)
+local DefModeCooldown = Timers:AddLabel("DEF MODE       >> ", true)
+local EasterRaidCooldown = Timers:AddLabel("EASTER RAID    >> ", true)
+
+local dungeonMessage = 'DUNGEON        >> '
+local raidMessage = 'RAID           >> '
+local infCastleMessage = 'INF CASTLE     >> '
+local defModeMessage = 'DEF MODE       >> '
+local easterRaidMessage = 'EASTER RAID    >> '
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
@@ -1785,7 +1937,7 @@ task.spawn(function()
             raidMessage = 'READY !'
         end
 
-        RaidCooldown:SetText('RAID        >> ' .. raidMessage)
+        RaidCooldown:SetText('RAID           >> ' .. raidMessage)
     end
 end)
 
@@ -1801,7 +1953,7 @@ task.spawn(function()
             dungeonMessage = 'READY !'
         end
 
-        DungeonCooldown:SetText('DUNGEON     >> ' .. dungeonMessage)
+        DungeonCooldown:SetText('DUNGEON        >> ' .. dungeonMessage)
     end
 end)
 
@@ -1818,7 +1970,7 @@ task.spawn(function()
             infCastleMessage = 'READY !'
         end
 
-        InfCastleCooldown:SetText('INF CASTLE  >> ' .. infCastleMessage)
+        InfCastleCooldown:SetText('INF CASTLE     >> ' .. infCastleMessage)
     end
 end)
 
@@ -1835,7 +1987,24 @@ task.spawn(function()
             defModeMessage = 'READY !'
         end
 
-        DefModeCooldown:SetText('DEF MODE    >> ' .. defModeMessage)
+        DefModeCooldown:SetText('DEF MODE       >> ' .. defModeMessage)
+    end
+end)
+
+task.spawn(function()
+    while task.wait() and not Library.Unloaded do
+        local EasterRaidDelay = ScriptLibrary and ScriptLibrary.PlayerData and ScriptLibrary.PlayerData.Delay['Easter Raid']
+
+        if EasterRaidDelay == nil then return end
+        local Time = ReplicatedStorage:GetAttribute('Time')
+
+        if Time < EasterRaidDelay then
+            easterRaidMessage = "in " .. tostring(getTime(EasterRaidDelay - Time))
+        else
+            easterRaidMessage = 'READY !'
+        end
+
+        EasterRaidCooldown:SetText('EASTER RAID    >> ' .. easterRaidMessage)
     end
 end)
 
@@ -2322,7 +2491,7 @@ task.spawn(function()
                     if UpgradePrice > 2500 and not ExchangeUpgradesData[upgrade].MaxPrice then UpgradePrice = 2500 end
 
                     if PlayerUpgradeLevel < ExchangeUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("ExchangeTokens") >= UpgradePrice then
+                        if getItemAmount("ExchangeTokens") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Exchange", upgrade)
                         end
                     end
@@ -2374,7 +2543,7 @@ task.spawn(function()
                     if UpgradePrice > 3000 then UpgradePrice = 3000 end
 
                     if PlayerUpgradeLevel < DungeonUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DungeonShards") >= UpgradePrice then
+                        if getItemAmount("DungeonShards") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Dungeon", upgrade)
                         end
                     end
@@ -2426,7 +2595,7 @@ task.spawn(function()
                     if UpgradePrice > 3000 and upgrade ~= "GachaSpins" then UpgradePrice = 3000 end
 
                     if PlayerUpgradeLevel < RaidUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("RaidShards") >= UpgradePrice then
+                        if getItemAmount("RaidShards") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Raid", upgrade)
                         end
                     end
@@ -2484,7 +2653,7 @@ task.spawn(function()
                     if UpgradePrice > 3000 and not DefenseUpgradesData[upgrade].MaxPrice then UpgradePrice = 3000 end
 
                     if PlayerUpgradeLevel < DefenseUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DefenseShards") >= UpgradePrice then
+                        if getItemAmount("DefenseShards") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Defense", upgrade)
                         end
                     end
@@ -2536,7 +2705,7 @@ task.spawn(function()
                     if UpgradePrice > 2500 then UpgradePrice = 2500 end
 
                     if PlayerUpgradeLevel < DivisionUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DivisionTokens") >= UpgradePrice then
+                        if getItemAmount("DivisionTokens") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Division", upgrade)
                         end
                     end
@@ -2588,7 +2757,7 @@ task.spawn(function()
                     if UpgradePrice > 10000 then UpgradePrice = 10000 end
 
                     if PlayerUpgradeLevel < CrewMasteryUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("CrewTokens") >= UpgradePrice then
+                        if getItemAmount("CrewTokens") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Crew Mastery", upgrade)
                         end
                     end
@@ -2646,8 +2815,124 @@ task.spawn(function()
                     if UpgradePrice > 10000 and not StandMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 10000 end
 
                     if PlayerUpgradeLevel < StandMasteryUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("StandMasteryTokens") >= UpgradePrice then
+                        if getItemAmount("StandMasteryTokens") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Stand Mastery", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local FiendMasteryUpgradesList = {'Start', 'Energy', 'Damage', 'Ghost', 'Drop', 'ShinyChance', 'RadiantChance'}
+local FiendMasteryUpgrades = Tabs['Upgrades']:AddRightGroupbox('Fiend Mastery Upgrades')
+FiendMasteryUpgrades:AddDropdown('selectedFiendMasteryUpgrades', {
+    Values = FiendMasteryUpgradesList,
+    Default = settings['AutoUpgrades']['FiendMastery']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Fiend Mastery Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['FiendMastery']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+FiendMasteryUpgrades:AddToggle('enableAutoUpgradesFiendMastery', {
+    Text = 'Auto Buy Fiend Mastery Upgrades',
+    Default = settings['AutoUpgrades']['FiendMastery']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['FiendMastery']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['StandMastery']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local FiendMasteryUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Fiend Mastery")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and FiendMasteryUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['FiendMastery']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Fiend Mastery_' .. upgrade]
+                    local UpgradePrice = FiendMasteryUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if FiendMasteryUpgradesData[upgrade].MaxPrice then
+                        if UpgradePrice > FiendMasteryUpgradesData[upgrade].MaxPrice then
+                            UpgradePrice = FiendMasteryUpgradesData[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > 10000 and not FiendMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 10000 end
+
+                    if PlayerUpgradeLevel < FiendMasteryUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("FiendMasteryTokens") > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Fiend Mastery", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local DevilUpgradesList = {'Energy', 'Damage', 'Ghost', 'Drop', 'LevelingChance'}
+local DevilUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Devil Upgrades')
+DevilUpgrades:AddDropdown('selectedDevilUpgrades', {
+    Values = DevilUpgradesList,
+    Default = settings['AutoUpgrades']['Devil']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Devil Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Devil']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+DevilUpgrades:AddToggle('enableAutoUpgradesDevil', {
+    Text = 'Auto Buy Devil Upgrades',
+    Default = settings['AutoUpgrades']['Devil']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Devil']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Devil']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local DevilUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Devil")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and DevilUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Devil']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Devil_' .. upgrade]
+                    local UpgradePrice = DevilUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if DevilUpgradesData[upgrade].MaxPrice then
+                        if UpgradePrice > DevilUpgradesData[upgrade].MaxPrice then
+                            UpgradePrice = DevilUpgradesData[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > 5000 and not DevilUpgradesData[upgrade].MaxPrice then UpgradePrice = 5000 end
+
+                    if PlayerUpgradeLevel < DevilUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("DevilUpgradeTokens") > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Devil", upgrade)
                         end
                     end
                 end
@@ -3259,27 +3544,43 @@ local function attack(enemy)
     end
 end
 
+local function checkBunnyLeaderSpawned()
+    local globalBossesFolder = Workspace['_ENEMIES']['Server']['GlobalBoss']
+    local found = false
+
+    if globalBossesFolder then
+        for _, v in pairs(globalBossesFolder:GetChildren()) do
+            if v:GetAttribute("Id") == "Bunny Leader" then
+                found = true
+            end
+        end
+    end
+
+    return found
+end
+
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if settings['Misc']['AutoAttack'] then
             local playerGamemode = getPlayerGamemode()
 
             if not playerGamemode then
-                local enemyInMap = getEnemyInCurrentMap()
+                local enemy = nil
 
-                if playerMap ~= "Lobby" then
-                    if enemyInMap then
-                        attack(enemyInMap.Name)
+                if playerMap == "Easter 2026 Event" then
+                    if checkBunnyLeaderSpawned() then
+                        enemy = getEnemyInGlobalBosses()
                     else
-                        attack()
+                        enemy = getEnemyInCurrentMap()
                     end
                 else
-                    local enemy = getEnemyInGlobalBosses()
-                    if enemy then
-                        attack(enemy)
-                    else
-                        attack()
-                    end
+                    enemy = getEnemyInCurrentMap()
+                end
+
+                if enemy then
+                    attack(enemy.Name)
+                else
+                    attack()
                 end
             else
                 local enemy = nil
@@ -3292,6 +3593,8 @@ task.spawn(function()
                     enemy = getEnemyInGamemode(playerGamemode)
                 elseif playerMode == 'Defense Mode' then
                     enemy = getEnemyInDefense(playerGamemode)
+                elseif playerMode == 'Easter Raid' then
+                    enemy = getEnemyInGamemode(playerGamemode)
                 end
 
                 if enemy then
@@ -3403,23 +3706,14 @@ local function updateActivity()
 end
 
 task.spawn(function()
-        
     VirtualUser:CaptureController()
     VirtualUser:ClickButton1(Vector2.new(0, 0))
-    task.wait(0.1)
-    VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-    task.wait(0.1)
-    VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 
-    while task.wait(60) do
+    while task.wait(300) and not Library.Unloaded do
         updateActivity()
         
         VirtualUser:CaptureController()
         VirtualUser:ClickButton1(Vector2.new(0, 0))
-        task.wait(0.1)
-        VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-        task.wait(0.1)
-        VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
     end
 end)
 
