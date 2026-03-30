@@ -3788,7 +3788,8 @@ GachaSpinsW9:AddToggle('enableGachaSpinWorld8StandSkills', {
 })
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded and not settings['AutoSpin']['PauseSpins'] do
+    while task.wait(0.1) and not Library.Unloaded do
+        if settings['AutoSpin']['PauseSpins'] then return end
         if not ScriptLibrary then return end
         local PlayerGachaIndex = ScriptLibrary.PlayerData.GachaIndex
 
