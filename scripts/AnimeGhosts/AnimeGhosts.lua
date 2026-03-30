@@ -21,6 +21,7 @@ local Window = Library:CreateWindow({ Title = 'Beaast Hub | Anime Ghosts', Cente
 local Tabs = {
 	['Main'] = Window:AddTab('Main'),
     ['Gachas'] = Window:AddTab('Gachas'),
+    ['GachaSpins'] = Window:AddTab('Gacha Spins'),
     ['Shops'] = Window:AddTab('Shops'),
     ['Upgrades'] = Window:AddTab('Upgrades'),
 	['UI Settings'] = Window:AddTab('UI Settings')
@@ -182,6 +183,41 @@ local defaultSettings = {
             ['SelectedPet'] = 'None',
             ['SelectedPassive'] = {'Phantom'},
             ['Passive'] = false
+        }
+    },
+    ['GachaSpins'] = {
+        ['Lobby'] = {
+            ['Traits'] = false
+        },
+        ['World1'] = {
+            ['Bloodlines'] = false,
+            ['TitanSerums'] = false
+        },
+        ['World2'] = {
+            ['Possessions'] = false,
+            ['PsychicPowers'] = false
+        },
+        ['World3'] = {
+            ['PowerOfThePlanets'] = false,
+            ['SoulFundation'] = false,
+            ['Zanpakutos'] = false
+        },
+        ['World4'] = {
+            ['HunterRanks'] = false
+        },
+        ['World5'] = {
+            ['DevilFruits'] = false,
+            ['HakiColors'] = false
+        },
+        ['World7'] = {
+            ['KaijuCores'] = false,
+            ['KaijuPowers'] = false
+        },
+        ['World8'] = {
+            ['StandSkills'] = false
+        },
+        ['World9'] = {
+            ['DevilContracts'] = false
         }
     },
     ['Keybinds'] = {
@@ -3589,6 +3625,311 @@ task.spawn(function()
                 end
             end
         end
+    end
+end)
+
+local GachaSpins = Tabs['GachaSpins']:AddLeftGroupbox('Lobby')
+GachaSpins:AddToggle('enableGachaSpinLobbyTraits', {
+    Text = 'Spin Traits',
+    Default = settings['GachaSpins']['Lobby']['Traits'],
+
+    Callback = function(value)
+        settings['GachaSpins']['Lobby']['Traits'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW1 = Tabs['GachaSpins']:AddRightGroupbox('World 1')
+GachaSpinsW1:AddToggle('enableGachaSpinWorld1Bloodlines', {
+    Text = 'Spin Bloodlines',
+    Default = settings['GachaSpins']['World1']['Bloodlines'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World1']['Bloodlines'] = value
+        SaveConfig()
+    end
+})
+GachaSpinsW1:AddToggle('enableGachaSpinWorld1TitanSerums', {
+    Text = 'Spin Titan Serums',
+    Default = settings['GachaSpins']['World1']['TitanSerums'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World1']['TitanSerums'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW2 = Tabs['GachaSpins']:AddLeftGroupbox('World 2')
+GachaSpinsW2:AddToggle('enableGachaSpinWorld2Possessions', {
+    Text = 'Spin Possessions',
+    Default = settings['GachaSpins']['World2']['Possessions'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World2']['Possessions'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW3 = Tabs['GachaSpins']:AddRightGroupbox('World 3')
+GachaSpinsW3:AddToggle('enableGachaSpinWorld3PowerOfThePlanets', {
+    Text = 'Spin Power of the Planets',
+    Default = settings['GachaSpins']['World3']['PowerOfThePlanets'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World3']['PowerOfThePlanets'] = value
+        SaveConfig()
+    end
+})
+
+GachaSpinsW3:AddToggle('enableGachaSpinWorld3SoulFundation', {
+    Text = 'Spin Soul Fundation',
+    Default = settings['GachaSpins']['World3']['SoulFundation'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World3']['SoulFundation'] = value
+        SaveConfig()
+    end
+})
+
+GachaSpinsW3:AddToggle('enableGachaSpinWorld3SoulZanpakutos', {
+    Text = 'Spin Zanpakutos',
+    Default = settings['GachaSpins']['World3']['Zanpakutos'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World3']['Zanpakutos'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW4 = Tabs['GachaSpins']:AddLeftGroupbox('World 4')
+GachaSpinsW4:AddToggle('enableGachaSpinWorld4HunterRanks', {
+    Text = 'Spin Hunter Ranks',
+    Default = settings['GachaSpins']['World4']['HunterRanks'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World4']['HunterRanks'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW5 = Tabs['GachaSpins']:AddRightGroupbox('World 5')
+GachaSpinsW5:AddToggle('enableGachaSpinWorld5DevilFruits', {
+    Text = 'Spin Devil Fruits',
+    Default = settings['GachaSpins']['World5']['DevilFruits'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World5']['DevilFruits'] = value
+        SaveConfig()
+    end
+})
+
+GachaSpinsW5:AddToggle('enableGachaSpinWorld5HakiColors', {
+    Text = 'Spin Haki Colors',
+    Default = settings['GachaSpins']['World5']['HakiColors'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World5']['HakiColors'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW7 = Tabs['GachaSpins']:AddLeftGroupbox('World 7')
+GachaSpinsW7:AddToggle('enableGachaSpinWorld7KaijuCores', {
+    Text = 'Spin Kaiju Cores',
+    Default = settings['GachaSpins']['World7']['KaijuCores'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World7']['KaijuCores'] = value
+        SaveConfig()
+    end
+})
+
+GachaSpinsW7:AddToggle('enableGachaSpinWorld7KaijuPowers', {
+    Text = 'Spin Kaiju Powers',
+    Default = settings['GachaSpins']['World7']['KaijuPowers'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World7']['KaijuPowers'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW8 = Tabs['GachaSpins']:AddRightGroupbox('World 8')
+GachaSpinsW8:AddToggle('enableGachaSpinWorld8StandSkills', {
+    Text = 'Spin Stand Skills',
+    Default = settings['GachaSpins']['World8']['StandSkills'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World8']['StandSkills'] = value
+        SaveConfig()
+    end
+})
+
+local GachaSpinsW9 = Tabs['GachaSpins']:AddLeftGroupbox('World 9')
+GachaSpinsW9:AddToggle('enableGachaSpinWorld8StandSkills', {
+    Text = 'Spin Devil Contracts',
+    Default = settings['GachaSpins']['World9']['DevilContracts'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World9']['DevilContracts'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.1) and not Library.Unloaded do
+        if not ScriptLibrary then return end
+        local PlayerGachaIndex = ScriptLibrary.PlayerData.GachaIndex
+
+        pcall(function()
+            if settings['GachaSpins']['Lobby']['Traits'] then
+                if not PlayerGachaIndex['Trait']['Ethereal'] then
+                    if hasTokenAmountToRoll("TraitShards") then
+                        FireBridge("GachaSystem", "Spin", "Trait", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World1']['Bloodlines'] then
+                if not PlayerGachaIndex['Bloodline']['Fritz'] then
+                    if hasTokenAmountToRoll("BloodlineTokens") then
+                        FireBridge("GachaSystem", "Spin", "Bloodline", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World1']['TitanSerums'] then
+                if not PlayerGachaIndex['"Titan Serum"']['FounderSerum'] then
+                    if hasTokenAmountToRoll("SerumTokens") then
+                        FireBridge("GachaSystem", "Spin", "Titan Serum", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World2']['Possessions'] then
+                if not PlayerGachaIndex['Possession']['UmbrellaBoy'] then
+                    if hasTokenAmountToRoll("PossessionTokens") then
+                        FireBridge("GachaSystem", "Spin", "Possession", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World2']['PsychicPowers'] then
+                if not PlayerGachaIndex['Psychic Power']['Omnikinesis'] then
+                    if hasTokenAmountToRoll("PsychicTokens") then
+                        FireBridge("GachaSystem", "Spin", "Psychic Power", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World3']['PowerOfThePlanets'] then
+                if not PlayerGachaIndex['Power of the Planet']['Sun'] then
+                    if hasTokenAmountToRoll("ExchangeTokens") then
+                        FireBridge("GachaSystem", "Spin", "Power of the Planet", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World3']['SoulFundation'] then
+                if not PlayerGachaIndex['Power of the Planet']['Transcendent'] then
+                    if hasTokenAmountToRoll("SoulTokens") then
+                        FireBridge("GachaSystem", "Spin", "Soul Fundation", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World3']['Zanpakutos'] then
+                if not PlayerGachaIndex['Zanpakuto']['RyujinJakka'] then
+                    if hasTokenAmountToRoll("ZanpakutoTokens") then
+                        FireBridge("GachaSystem", "Spin", "Zanpakuto", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World4']['HunterRanks'] then
+                if not PlayerGachaIndex['Hunter Rank']['Monarch'] then
+                    if hasTokenAmountToRoll("HunterTokens") then
+                        FireBridge("GachaSystem", "Spin", "Hunter Rank", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World5']['DevilFruits'] then
+                if not PlayerGachaIndex['Devil Fruit']['SunGodFruit'] then
+                    if hasTokenAmountToRoll("FruitTokens") then
+                        FireBridge("GachaSystem", "Spin", "Devil Fruit", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World5']['HakiColors'] then
+                if not PlayerGachaIndex['Haki Color']['RainbowHaki'] then
+                    if hasTokenAmountToRoll("HakiColorTokens") then
+                        FireBridge("GachaSystem", "Spin", "Haki Color", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World7']['KaijuCores'] then
+                if not PlayerGachaIndex['Kaiju Core']['OGCore'] then
+                    if hasTokenAmountToRoll("KaijuCoreTokens") then
+                        FireBridge("GachaSystem", "Spin", "Kaiju Core", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World7']['KaijuPowers'] then
+                if not PlayerGachaIndex['Kaiju Power']['N8'] then
+                    if hasTokenAmountToRoll("KaijuPowerTokens") then
+                        FireBridge("GachaSystem", "Spin", "Kaiju Power", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World8']['StandSkills'] then
+                if not PlayerGachaIndex['Stand Skill']['InfiniteRotation'] then
+                    if hasTokenAmountToRoll("StandSkillTokens") then
+                        FireBridge("GachaSystem", "Spin", "Stand Skill", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World9']['DevilContracts'] then
+                if not PlayerGachaIndex['Devil Contract']['DarknessDevil'] then
+                    if hasTokenAmountToRoll("ContractTokens") then
+                        FireBridge("GachaSystem", "Spin", "Devil Contract", "Normal", UnifiedFilters)
+                    end
+                end
+            end
+        end)
     end
 end)
 
