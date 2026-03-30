@@ -172,6 +172,7 @@ local defaultSettings = {
         },
         ['Traits'] = false,
         ['RemoveAnimation'] = false,
+        ['PauseSpins'] = false,
         ['WeaponBuffs'] = {
             ['SelectedWeapon'] = 'None',
             ['SelectedEnchant'] = {"Electric6"},
@@ -2102,6 +2103,16 @@ task.spawn(function()
     end
 end)
 
+AutoGacha:AddToggle('enablePauseAllSpins', {
+    Text = 'Pause All Gacha Spins',
+    Default = settings['AutoSpin']['PauseSpins'],
+
+    Callback = function(value)
+        settings['AutoSpin']['PauseSpins'] = value
+        SaveConfig()
+    end
+})
+
 AutoGacha:AddDivider()
 
 AutoGacha:AddToggle('enableAutoSpinAvatar', {
@@ -3777,7 +3788,7 @@ GachaSpinsW9:AddToggle('enableGachaSpinWorld8StandSkills', {
 })
 
 task.spawn(function()
-    while task.wait(0.1) and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded and not settings['AutoSpin']['PauseSpins'] do
         if not ScriptLibrary then return end
         local PlayerGachaIndex = ScriptLibrary.PlayerData.GachaIndex
 
