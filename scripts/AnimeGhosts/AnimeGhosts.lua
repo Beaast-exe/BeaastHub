@@ -3681,6 +3681,16 @@ GachaSpinsW2:AddToggle('enableGachaSpinWorld2Possessions', {
     end
 })
 
+GachaSpinsW2:AddToggle('enableGachaSpinWorld2PsychicPowers', {
+    Text = 'Spin Psychic Powers',
+    Default = settings['GachaSpins']['World2']['PsychicPowers'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World2']['PsychicPowers'] = value
+        SaveConfig()
+    end
+})
+
 local GachaSpinsW3 = Tabs['GachaSpins']:AddRightGroupbox('World 3')
 GachaSpinsW3:AddToggle('enableGachaSpinWorld3PowerOfThePlanets', {
     Text = 'Spin Power of the Planets',
