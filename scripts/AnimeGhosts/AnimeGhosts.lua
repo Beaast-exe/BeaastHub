@@ -3814,7 +3814,7 @@ task.spawn(function()
         end)
 
         pcall(function()
-            if settings['GachaSpins']['World1']['TitanSerums'] and hasTokenAmountToRoll("SerumTokens") and not PlayerGachaIndex['"Titan Serum"']['FounderSerum'] and not settings['AutoSpin']['PauseSpins'] then
+            if settings['GachaSpins']['World1']['TitanSerums'] and hasTokenAmountToRoll("SerumTokens") and not PlayerGachaIndex['Titan Serum']['FounderSerum'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Titan Serum", "Normal", UnifiedFilters)
             end
         end)
