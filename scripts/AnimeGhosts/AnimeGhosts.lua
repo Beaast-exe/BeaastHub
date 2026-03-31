@@ -173,6 +173,7 @@ local defaultSettings = {
         ['Traits'] = false,
         ['RemoveAnimation'] = false,
         ['PauseSpins'] = false,
+        ['LogSpins'] = false,
         ['WeaponBuffs'] = {
             ['SelectedWeapon'] = 'None',
             ['SelectedEnchant'] = {"Electric6"},
@@ -2113,6 +2114,16 @@ AutoGacha:AddToggle('enablePauseAllSpins', {
     end
 })
 
+AutoGacha:AddToggle('enableLogSpins', {
+    Text = 'Log Spins to Console',
+    Default = settings['AutoSpin']['LogSpins'],
+
+    Callback = function(value)
+        settings['AutoSpin']['LogSpins'] = value
+        SaveConfig()
+    end
+})
+
 AutoGacha:AddDivider()
 
 AutoGacha:AddToggle('enableAutoSpinAvatar', {
@@ -3804,42 +3815,70 @@ task.spawn(function()
         pcall(function()
             if settings['GachaSpins']['Lobby']['Traits'] and hasTokenAmountToRoll("TraitShards") and not PlayerGachaIndex['Trait']['Ethereal'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Trait", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Traits")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World1']['Bloodlines'] and hasTokenAmountToRoll("BloodlineTokens") and not PlayerGachaIndex['Bloodline']['Fritz'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Bloodline", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Bloodlines")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World1']['TitanSerums'] and hasTokenAmountToRoll("SerumTokens") and not PlayerGachaIndex['Titan Serum']['FounderSerum'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Titan Serum", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Titan Serums")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World2']['Possessions']and hasTokenAmountToRoll("PossessionTokens") and not PlayerGachaIndex['Possession']['UmbrellaBoy'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Possession", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Possessions")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World2']['PsychicPowers'] and hasTokenAmountToRoll("PsychicTokens") and not PlayerGachaIndex['Psychic Power']['Omnikinesis'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Psychic Power", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Psychic Powers")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World3']['PowerOfThePlanets'] and hasTokenAmountToRoll("ExchangeTokens") and not PlayerGachaIndex['Power of the Planet']['Sun'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Power of the Planet", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Power of the Planets")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World3']['SoulFundation'] and hasTokenAmountToRoll("SoulTokens") and not PlayerGachaIndex['Power of the Planet']['Transcendent'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Soul Fundation", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Soul Fundation")
+                end
             end
         end)
 
@@ -3852,42 +3891,70 @@ task.spawn(function()
         pcall(function()
             if settings['GachaSpins']['World4']['HunterRanks'] and hasTokenAmountToRoll("HunterTokens") and not PlayerGachaIndex['Hunter Rank']['Monarch'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Hunter Rank", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Hunter Rank")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World5']['DevilFruits']and hasTokenAmountToRoll("FruitTokens") and not PlayerGachaIndex['Devil Fruit']['SunGodFruit'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Devil Fruit", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Devil Fruits")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World5']['HakiColors'] and hasTokenAmountToRoll("HakiColorTokens") and not PlayerGachaIndex['Haki Color']['RainbowHaki'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Haki Color", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Haki Colors")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World7']['KaijuCores'] and hasTokenAmountToRoll("KaijuCoreTokens") and not PlayerGachaIndex['Kaiju Core']['OGCore'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Kaiju Core", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Kaiju Cores")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World7']['KaijuPowers'] and hasTokenAmountToRoll("KaijuPowerTokens") and not PlayerGachaIndex['Kaiju Power']['N8'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Kaiju Power", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Kaiju Powers")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World8']['StandSkills'] and hasTokenAmountToRoll("StandSkillTokens") and not PlayerGachaIndex['Stand Skill']['InfiniteRotation'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Stand Skill", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Stand Skills")
+                end
             end
         end)
 
         pcall(function()
             if settings['GachaSpins']['World9']['DevilContracts'] and hasTokenAmountToRoll("ContractTokens") and not PlayerGachaIndex['Devil Contract']['DarknessDevil'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Devil Contract", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Devil Contracts")
+                end
             end
         end)
     end
