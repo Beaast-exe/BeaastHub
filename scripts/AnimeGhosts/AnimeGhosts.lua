@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -3049,7 +3049,7 @@ task.spawn(function()
                         local relicLevel = PlayerRelics[relic].Level
                         local relicCurrency = RelicsData[relic].Currency
 
-                        if relicLevel == 100 and relicTier < 7 then
+                        if relicLevel == 100 and relicTier < 8 then
                             if settings['AutoUpgrades']['Relics']['SmartEvolve'] then
                                 -- if getItemAmount("RelicShards") >= 25000 then
                                 --     FireBridge("RelicSystem", "Evolve", tostring(relic))
