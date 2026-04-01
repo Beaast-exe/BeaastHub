@@ -3936,7 +3936,7 @@ task.spawn(function()
         end)
 
         pcall(function()
-            if settings['GachaSpins']['World3']['SoulFundation'] and hasTokenAmountToRoll("SoulTokens") and not PlayerGachaIndex['Power of the Planet']['Transcendent'] and not settings['AutoSpin']['PauseSpins'] then
+            if settings['GachaSpins']['World3']['SoulFundation'] and hasTokenAmountToRoll("SoulTokens") and not PlayerGachaIndex['Soul Fundation']['Transcendent'] and not settings['AutoSpin']['PauseSpins'] then
                 FireBridge("GachaSystem", "Spin", "Soul Fundation", "Normal", UnifiedFilters)
                 
                 if settings['AutoSpin']['LogSpins'] then
