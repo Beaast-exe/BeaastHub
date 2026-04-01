@@ -99,6 +99,10 @@ local defaultSettings = {
         ['SelectedItems'] = {'Gems', 'DefenseTickets', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
         ['Enabled'] = false
     },
+    ['EasterShop'] = {
+        ['SelectedItems'] = {'Easter 2026', 'Gems', 'EasterTickets', 'EnergyPotion4', 'DamagePotion4', 'GhostPotion4', 'LuckPotion4', 'DropPotion4', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2', 'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'},
+        ['Enabled'] = false
+    },
     ['AutoUpgrades'] = {
         ['Dungeon'] = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG', 'ModeDelay', 'DungeonEnemyScale'},
@@ -219,7 +223,8 @@ local defaultSettings = {
             ['StandSkills'] = false
         },
         ['World9'] = {
-            ['DevilContracts'] = false
+            ['DevilContracts'] = false,
+            ['DevilSkills'] = false
         }
     },
     ['Keybinds'] = {
@@ -3338,6 +3343,54 @@ task.spawn(function()
     end
 end)
 
+local EasterShopItems = {'Easter 2026', 'Gems', 'EasterTickets', 'EnergyPotion4', 'DamagePotion4', 'GhostPotion4', 'LuckPotion4', 'DropPotion4', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2', 'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
+local EasterShop = Tabs['Shops']:AddLeftGroupbox('Easter Shop')
+
+EasterShop:AddDropdown('selectedEasterShopItems', {
+    Values = EasterShopItems,
+    Default = settings['EasterShop']['SelectedItems'],
+    Multi = true,
+
+    Text = 'Selected Items to Buy',
+    Tooltip = 'Selected Items to Buy from Raid Shop',
+
+    Callback = function(value)
+        settings['EasterShop']['SelectedItems'] = value
+        SaveConfig()
+    end
+})
+
+EasterShop:AddToggle('enableAutoEasterShop', {
+    Text = 'Auto Buy Items',
+    Default = settings['EasterShop']['Enabled'],
+
+    Callback = function(value)
+        settings['EasterShop']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['EasterShop']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local EasterStockShop = PlayerData and PlayerData.StockShops and PlayerData.StockShops.Easter and PlayerData.StockShops.Easter.Items
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local EasterShopData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StockShopData"):WaitForChild("Easter"))
+
+            if EasterStockShop and EasterShopData and PlayerInventory then
+                for _, item in pairs(settings['EasterShop']['SelectedItems']) do
+                    local itemPrice = EasterShopData.Items[item].Price
+
+                    if getItemAmount("EasterShards") > itemPrice and EasterStockShop[item] > 0 then
+                        FireBridge("StockShopSystem", "Buy", "Easter", item, 0)
+                    end
+                end
+            end
+        end
+    end
+end)
+
 local PotionExchangeListT1 = {'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
 local PotionExchangeListT2 = {'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
 local PotionExchange = Tabs['Shops']:AddRightGroupbox('Potion Exchange')
@@ -3798,12 +3851,22 @@ GachaSpinsW8:AddToggle('enableGachaSpinWorld8StandSkills', {
 })
 
 local GachaSpinsW9 = Tabs['GachaSpins']:AddLeftGroupbox('World 9')
-GachaSpinsW9:AddToggle('enableGachaSpinWorld8StandSkills', {
+GachaSpinsW9:AddToggle('enableGachaSpinWorld9DevilContracts', {
     Text = 'Spin Devil Contracts',
     Default = settings['GachaSpins']['World9']['DevilContracts'],
 
     Callback = function(value)
         settings['GachaSpins']['World9']['DevilContracts'] = value
+        SaveConfig()
+    end
+})
+
+GachaSpinsW9:AddToggle('enableGachaSpinWorld9DevilSkills', {
+    Text = 'Spin Devil Skills',
+    Default = settings['GachaSpins']['World9']['DevilSkills'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World9']['DevilSkills'] = value
         SaveConfig()
     end
 })
@@ -3954,6 +4017,16 @@ task.spawn(function()
                 
                 if settings['AutoSpin']['LogSpins'] then
                     print("Spinning: Devil Contracts")
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World9']['DevilSkills'] and hasTokenAmountToRoll("DevilSkillTokens") and not PlayerGachaIndex['Devil Skill']['Erasure'] and not settings['AutoSpin']['PauseSpins'] then
+                FireBridge("GachaSystem", "Spin", "Devil Skill", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Devil Skills")
                 end
             end
         end)
