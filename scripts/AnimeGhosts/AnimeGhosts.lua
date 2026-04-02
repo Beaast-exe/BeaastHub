@@ -3185,7 +3185,7 @@ task.spawn(function()
 
                 for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
                     if getItemAmount('ExchangeTokens') > 100000 and getItemAmount(currency) <= 900000 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10000)
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100000)
                     elseif getItemAmount('ExchangeTokens') > 50000 and getItemAmount(currency) <= 950000 then
                         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50000)
                     elseif getItemAmount('ExchangeTokens') > 10000 and getItemAmount(currency) <= 990000 then
