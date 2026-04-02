@@ -180,8 +180,8 @@ local defaultSettings = {
         ['LogSpins'] = false,
         ['WeaponBuffs'] = {
             ['SelectedWeapon'] = 'None',
-            ['SelectedEnchant'] = {"Electric6"},
-            ['SelectedBreathing'] = {'Mist'},
+            ['SelectedEnchant'] = {"Electric7"},
+            ['SelectedBreathing'] = {'Stone'},
             ['Enchant'] = false,
             ['Breathing'] = false
         },
@@ -2345,8 +2345,8 @@ local SelectedWeaponBreathing = AutoWeaponBuffs:AddLabel("BREATHING >> ", true)
 AutoWeaponBuffs:AddDivider()
 
 local WeaponList = {'None'}
-local EnchantList = {'None', 'Blessed6', 'Blessed5', 'Haunt6', 'Haunt5', 'Ruin6', 'Ruin5', 'Electric6', 'Electric5'}
-local BreathingList = {'None', 'Mist', 'Flame', 'Insect', 'Lightning', 'Water', 'Beast'}
+local EnchantList = {'None', 'Blessed7', 'Blessed6', 'Blessed5', 'Haunt7', 'Haunt6', 'Haunt5', 'Ruin7', 'Ruin6', 'Ruin5', 'Electric7', 'Electric6', 'Electric5'}
+local BreathingList = {'None', 'Stone', 'Mist', 'Flame', 'Insect', 'Lightning', 'Water', 'Beast'}
 
 AutoWeaponBuffs:AddDropdown('selectedWeaponDropdown', {
     Values = WeaponList,
