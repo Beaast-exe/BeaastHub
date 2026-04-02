@@ -3160,42 +3160,46 @@ CurrencyExchange:AddToggle('enableAutoExchangeBuy', {
 
 task.spawn(function()
     while task.wait() and not Library.Unloaded do
-        if settings['Exchange']['Currency']['Sell']['Enabled'] and Toggles['enableAutoExchangeSell'].Value then
-            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
-            local PlayerInventory = PlayerData and PlayerData.Inventory
-            if not PlayerInventory then return end
+        pcall(function()
+            if settings['Exchange']['Currency']['Sell']['Enabled'] and Toggles['enableAutoExchangeSell'].Value then
+                local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local PlayerInventory = PlayerData and PlayerData.Inventory
+                if not PlayerInventory then return end
 
-            for _, currency in pairs(settings['Exchange']['Currency']['Sell']['Tokens']) do
-                local count = PlayerInventory[currency] or 0
+                for _, currency in pairs(settings['Exchange']['Currency']['Sell']['Tokens']) do
+                    local count = PlayerInventory[currency] or 0
 
-                if count >= 10 then
-                    local amountToExchange = math.floor(count / 10)
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Currency', currency, amountToExchange)
+                    if count >= 10 then
+                        local amountToExchange = math.floor(count / 10)
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Currency', currency, amountToExchange)
+                    end
                 end
             end
-        end
+        end)
 
-        if settings['Exchange']['Currency']['Buy']['Enabled'] and Toggles['enableAutoExchangeBuy'].Value then
-            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
-            local PlayerInventory = PlayerData and PlayerData.Inventory
-            if not PlayerInventory then return end
+        pcall(function()
+            if settings['Exchange']['Currency']['Buy']['Enabled'] and Toggles['enableAutoExchangeBuy'].Value then
+                local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local PlayerInventory = PlayerData and PlayerData.Inventory
+                if not PlayerInventory then return end
 
-            for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
-                if getItemAmount('ExchangeTokens') >= 1000 then
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
-                elseif getItemAmount('ExchangeTokens') >= 500 then
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
-                elseif getItemAmount('ExchangeTokens') >= 100 then
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
-                elseif getItemAmount('ExchangeTokens') >= 50 then
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
-                elseif getItemAmount('ExchangeTokens') >= 10 then
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
-                elseif getItemAmount('ExchangeTokens') >= 1 then
-                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
+                for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
+                    if getItemAmount('ExchangeTokens') >= 1000 then
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
+                    elseif getItemAmount('ExchangeTokens') >= 500 then
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
+                    elseif getItemAmount('ExchangeTokens') >= 100 then
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
+                    elseif getItemAmount('ExchangeTokens') >= 50 then
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
+                    elseif getItemAmount('ExchangeTokens') >= 10 then
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
+                    elseif getItemAmount('ExchangeTokens') >= 1 then
+                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
+                    end
                 end
             end
-        end
+        end)
     end
 end)
 
