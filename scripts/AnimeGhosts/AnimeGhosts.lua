@@ -2161,18 +2161,18 @@ AutoGacha:AddToggle('enableAutoSpinWeapons2', {
     end
 })
 
-AutoGacha:AddToggle('enableAutoSpinTraits', {
-    Text = 'Spin Traits',
-    Default = settings['AutoSpin']['Traits'],
+-- AutoGacha:AddToggle('enableAutoSpinTraits', {
+--     Text = 'Spin Traits',
+--     Default = settings['AutoSpin']['Traits'],
 
-    Callback = function(value)
-        settings['AutoSpin']['Traits'] = value
-        SaveConfig()
-    end
-})
+--     Callback = function(value)
+--         settings['AutoSpin']['Traits'] = value
+--         SaveConfig()
+--     end
+-- })
 
 task.spawn(function()
-    while task.wait(0.5) and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoSpin']['Avatar'] then
             if hasTokenAmountToRoll("AvatarTokens") then
                 FireBridge("GachaSystem", "Spin", "Avatar", "Classic", UnifiedFilters)
@@ -2191,11 +2191,11 @@ task.spawn(function()
             end
         end
 
-        if settings['AutoSpin']['Traits'] then
-            if hasTokenAmountToRoll("TraitShards") then
-                FireBridge("ItemSystem", "RollTrait", "Trait")
-            end
-        end
+        -- if settings['AutoSpin']['Traits'] then
+        --     if hasTokenAmountToRoll("TraitShards") then
+        --         FireBridge("ItemSystem", "RollTrait", "Trait")
+        --     end
+        -- end
     end
 end)
 
@@ -2302,7 +2302,7 @@ PetBuffs:AddToggle('enableSpinPetPassive', {
 })
 
 task.spawn(function()
-    while task.wait(0.5) and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoSpin']['PetBuffs']['Passive'] then
             local selectedPassivePet = settings['AutoSpin']['PetBuffs']['SelectedPet']
 
@@ -2444,7 +2444,7 @@ AutoWeaponBuffs:AddToggle('enableSpinWeaponEnchant', {
 })
 
 task.spawn(function()
-    while task.wait(0.5) and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoSpin']['WeaponBuffs']['Enchant'] then
             local selectedEnchantWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
 
@@ -2486,7 +2486,7 @@ task.spawn(function()
             local selectedPet = settings['AutoSpin']['PetBuffs']['SelectedPet']
             local selectedWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
 
-            if selectedPet == 'None' or selectedWeapon == 'None' then return end
+            --if selectedPet == 'None' or selectedWeapon == 'None' then return end
 
             local selectedPetName = ScriptLibrary.PlayerData.Pets[selectedPet].Id
             local selectedPetPassive = ScriptLibrary.PlayerData.Pets[selectedPet].Buffs and ScriptLibrary.PlayerData.Pets[selectedPet].Buffs.Passive or 'None'
@@ -2532,7 +2532,7 @@ ExchangeUpgrades:AddToggle('enableAutoUpgradesExchange', {
 })
 
 task.spawn(function()
-    while task.wait(0.5) and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoUpgrades']['Exchange']['Enabled'] then
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
@@ -2914,7 +2914,7 @@ FiendMasteryUpgrades:AddToggle('enableAutoUpgradesFiendMastery', {
 
 task.spawn(function()
     while task.wait(0.5) and not Library.Unloaded do
-        if settings['AutoUpgrades']['StandMastery']['Enabled'] then
+        if settings['AutoUpgrades']['FiendMastery']['Enabled'] then
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
@@ -3371,7 +3371,7 @@ EasterShop:AddToggle('enableAutoEasterShop', {
 })
 
 task.spawn(function()
-    while task.wait(0.5) and not Library.Unloaded do
+    while task.wait(1) and not Library.Unloaded do
         if settings['EasterShop']['Enabled'] then
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local EasterStockShop = PlayerData and PlayerData.StockShops and PlayerData.StockShops.Easter and PlayerData.StockShops.Easter.Items
@@ -3527,7 +3527,7 @@ AutoWeaponBuffs:AddToggle('enableSpinWeaponBreathing', {
 })
 
 task.spawn(function()
-    while task.wait(0.5) and not Library.Unloaded do
+    while task.wait(0.1) and not Library.Unloaded do
         if settings['AutoSpin']['WeaponBuffs']['Breathing'] then
             local selectedEnchantWeapon = settings['AutoSpin']['WeaponBuffs']['SelectedWeapon']
 
