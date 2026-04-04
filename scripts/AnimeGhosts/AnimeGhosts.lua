@@ -3317,6 +3317,8 @@ task.spawn(function()
                 for _, currency in pairs(settings['Exchange']['Currency']['Sell']['Tokens']) do
                     local count = PlayerInventory[currency] or 0
 
+                    print(currency, count)
+
                     if count >= 10 then
                         local amountToExchange = math.floor(count / 10)
                         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Currency', currency, amountToExchange)
@@ -3331,29 +3333,53 @@ task.spawn(function()
                 local PlayerInventory = PlayerData and PlayerData.Inventory
                 if not PlayerInventory then return end
 
-                for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
-                    if getItemAmount('ExchangeTokens') > 100000 and getItemAmount(currency) <= 900000 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100000)
-                    elseif getItemAmount('ExchangeTokens') > 50000 and getItemAmount(currency) <= 950000 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50000)
-                    elseif getItemAmount('ExchangeTokens') > 10000 and getItemAmount(currency) <= 990000 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10000)
-                    elseif getItemAmount('ExchangeTokens') > 5000 and getItemAmount(currency) <= 995000 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 5000)
-                    elseif getItemAmount('ExchangeTokens') > 1000 and getItemAmount(currency) <= 999000 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
-                    elseif getItemAmount('ExchangeTokens') > 500 and getItemAmount(currency) <= 999500 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
-                    elseif getItemAmount('ExchangeTokens') > 100 and getItemAmount(currency) <= 999900 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
-                    elseif getItemAmount('ExchangeTokens') > 50 and getItemAmount(currency) <= 999950 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
-                    elseif getItemAmount('ExchangeTokens') > 10 and getItemAmount(currency) <= 999990 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
-                    elseif getItemAmount('ExchangeTokens') > 1  and getItemAmount(currency) <= 999999 then
-                        FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
-                    end
+                local currency = settings['Exchange']['Currency']['Buy']['Tokens']
+
+                if getItemAmount('ExchangeTokens') > 100000 and getItemAmount(currency) <= 900000 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100000)
+                elseif getItemAmount('ExchangeTokens') > 50000 and getItemAmount(currency) <= 950000 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50000)
+                elseif getItemAmount('ExchangeTokens') > 10000 and getItemAmount(currency) <= 990000 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10000)
+                elseif getItemAmount('ExchangeTokens') > 5000 and getItemAmount(currency) <= 995000 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 5000)
+                elseif getItemAmount('ExchangeTokens') > 1000 and getItemAmount(currency) <= 999000 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
+                elseif getItemAmount('ExchangeTokens') > 500 and getItemAmount(currency) <= 999500 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
+                elseif getItemAmount('ExchangeTokens') > 100 and getItemAmount(currency) <= 999900 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
+                elseif getItemAmount('ExchangeTokens') > 50 and getItemAmount(currency) <= 999950 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
+                elseif getItemAmount('ExchangeTokens') > 10 and getItemAmount(currency) <= 999990 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
+                elseif getItemAmount('ExchangeTokens') > 1  and getItemAmount(currency) <= 999999 then
+                    FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
                 end
+
+                -- for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
+                --     if getItemAmount('ExchangeTokens') > 100000 and getItemAmount(currency) <= 900000 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100000)
+                --     elseif getItemAmount('ExchangeTokens') > 50000 and getItemAmount(currency) <= 950000 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50000)
+                --     elseif getItemAmount('ExchangeTokens') > 10000 and getItemAmount(currency) <= 990000 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10000)
+                --     elseif getItemAmount('ExchangeTokens') > 5000 and getItemAmount(currency) <= 995000 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 5000)
+                --     elseif getItemAmount('ExchangeTokens') > 1000 and getItemAmount(currency) <= 999000 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
+                --     elseif getItemAmount('ExchangeTokens') > 500 and getItemAmount(currency) <= 999500 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
+                --     elseif getItemAmount('ExchangeTokens') > 100 and getItemAmount(currency) <= 999900 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
+                --     elseif getItemAmount('ExchangeTokens') > 50 and getItemAmount(currency) <= 999950 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
+                --     elseif getItemAmount('ExchangeTokens') > 10 and getItemAmount(currency) <= 999990 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
+                --     elseif getItemAmount('ExchangeTokens') > 1  and getItemAmount(currency) <= 999999 then
+                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
+                --     end
+                -- end
             end
         end)
     end
