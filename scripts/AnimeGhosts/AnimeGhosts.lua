@@ -3086,8 +3086,8 @@ task.spawn(function()
 end)
 
 local EasterUpgradesList = {'Easter2026Energy', 'Easter2026Damage', 'Easter2026Ghost', 'Energy', 'Damage', 'Ghost'}
-local DevilUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Easter Upgrades')
-DevilUpgrades:AddDropdown('selectedEasterUpgrades', {
+local EasterUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Easter Upgrades')
+EasterUpgrades:AddDropdown('selectedEasterUpgrades', {
     Values = EasterUpgradesList,
     Default = settings['AutoUpgrades']['Easter']['SelectedUpgrades'],
     Multi = true,
@@ -3101,7 +3101,7 @@ DevilUpgrades:AddDropdown('selectedEasterUpgrades', {
     end
 })
 
-DevilUpgrades:AddToggle('enableAutoUpgradesEaster', {
+EasterUpgrades:AddToggle('enableAutoUpgradesEaster', {
     Text = 'Auto Buy Easter Upgrades',
     Default = settings['AutoUpgrades']['Easter']['Enabled'],
 
