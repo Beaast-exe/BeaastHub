@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -172,7 +172,7 @@ local defaultSettings = {
                 ['Enabled'] = false
             },
             ['Buy'] = {
-                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens', 'KaijuPowerTokens', 'KaijuCoreTokens', 'DivisionTokens', 'StandTokens', 'StandLevelingTokens', 'StandMasteryTokens', 'StandSkillTokens'},
+                ['Tokens'] = 'PassiveTokens',
                 ['Enabled'] = false
             }
         }
