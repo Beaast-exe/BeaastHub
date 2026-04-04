@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -3122,7 +3122,7 @@ task.spawn(function()
             if PlayerInventory and PlayerUpgrades and EasterUpgradesData then
                 for _, upgrade in pairs(settings['AutoUpgrades']['Easter']['SelectedUpgrades']) do
                     local PlayerUpgradeLevel = PlayerUpgrades['Easter_' .. upgrade]
-                    local UpgradePrice = EasterUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+                    local UpgradePrice = EasterUpgradesData[upgrade].Price * (1.25 ^ PlayerUpgradeLevel)
 
                     if EasterUpgradesData[upgrade].MaxPrice then
                         if UpgradePrice > EasterUpgradesData[upgrade].MaxPrice then
@@ -3143,7 +3143,7 @@ task.spawn(function()
     end
 end)
 
-local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'EvilBunny', 'EasterEgg'}
+local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg'}
 local RelicsUpgrades = Tabs['Upgrades']:AddRightGroupbox('Relics Upgrades')
 RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
     Values = RelicsList,
