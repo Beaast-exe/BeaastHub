@@ -3275,7 +3275,7 @@ CurrencyExchange:AddDropdown('selectedTokensToSell', {
 CurrencyExchange:AddDropdown('selectedTokensToBuy', {
     Values = CurrencyTokensList,
     Default = settings['Exchange']['Currency']['Buy']['Tokens'],
-    Multi = true,
+    Multi = false,
 
     Text = 'Selected Items to Buy',
     Tooltip = 'Selected Items to Buy with Exchange Tokens',
