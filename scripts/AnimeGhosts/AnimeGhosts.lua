@@ -138,7 +138,7 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Relics'] = {
-            ['SelectedRelics'] = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'EvilBunny', 'EasterEgg'},
+            ['SelectedRelics'] = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg'},
             ['SmartEvolve'] = false
         },
         ['StandMastery'] = {
@@ -168,11 +168,11 @@ local defaultSettings = {
         },
         ['Currency'] = {
             ['Sell'] = {
-                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens'},
+                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens', 'KaijuPowerTokens', 'KaijuCoreTokens', 'DivisionTokens', 'StandTokens', 'StandLevelingTokens', 'StandMasteryTokens', 'StandSkillTokens'},
                 ['Enabled'] = false
             },
             ['Buy'] = {
-                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens'},
+                ['Tokens'] = {'PassiveTokens', 'WeaponTokens', 'AvatarTokens', 'TraitShards', 'MountTokens', 'EnchantmentTokens', 'SerumTokens', 'TitanTokens', 'BloodlineTokens', 'PsychicTokens', 'AlienTokens', 'PossessionTokens', 'ShinigamiTokens', 'ZanpakutoTokens', 'SoulTokens', 'ShadowTokens', 'HunterTokens', 'MonarchTokens', 'HakiColorTokens', 'MarineTokens', 'FruitTokens', 'CrewTokens', 'PirateTokens', 'SlayerTokens', 'DemonTokens', 'BlessingTokens', 'BreathingTokens', 'KaijuPowerTokens', 'KaijuCoreTokens', 'DivisionTokens', 'StandTokens', 'StandLevelingTokens', 'StandMasteryTokens', 'StandSkillTokens'},
                 ['Enabled'] = false
             }
         }
@@ -3247,7 +3247,14 @@ local CurrencyTokensList = {
     'SlayerTokens',
     'DemonTokens',
     'BlessingTokens',
-    'BreathingTokens'
+    'BreathingTokens',
+    'KaijuPowerTokens',
+    'KaijuCoreTokens',
+    'DivisionTokens',
+    'StandTokens',
+    'StandLevelingTokens',
+    'StandMasteryTokens',
+    'StandSkillTokens'
 }
 
 local CurrencyExchange = Tabs['Shops']:AddLeftGroupbox('Currency Exchange')
@@ -3856,8 +3863,8 @@ task.spawn(function()
     end
 end)
 
-local GachaSpins = Tabs['GachaSpins']:AddLeftGroupbox('Lobby')
-GachaSpins:AddToggle('enableGachaSpinLobbyTraits', {
+local GachaSpinsLobby = Tabs['GachaSpins']:AddLeftGroupbox('Lobby')
+GachaSpinsLobby:AddToggle('enableGachaSpinLobbyTraits', {
     Text = 'Spin Traits',
     Default = settings['GachaSpins']['Lobby']['Traits'],
 
