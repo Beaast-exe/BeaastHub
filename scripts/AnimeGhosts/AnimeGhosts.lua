@@ -201,7 +201,7 @@ local defaultSettings = {
         },
         ['PetBuffs'] = {
             ['SelectedPet'] = 'None',
-            ['SelectedPassive'] = {'Phantom'},
+            ['SelectedPassive'] = {'Undead'},
             ['Passive'] = false
         }
     },
@@ -2295,7 +2295,7 @@ local SelectedPetPassive = PetBuffs:AddLabel("PASSIVE >> ", true)
 PetBuffs:AddDivider()
 
 local PetList = {'None'}
-local PassiveList = {'None', 'Fated', 'Whisper', 'Holy', 'Phantom'}
+local PassiveList = {'None', 'Fated', 'Whisper', 'Holy', 'Phantom', 'Undead'}
 PetBuffs:AddDropdown('selectedPetDropdown', {
     Values = PetList,
     Default = settings['AutoSpin']['PetBuffs']['SelectedPet'],
