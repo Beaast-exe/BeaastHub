@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -38,6 +38,7 @@ local defaultSettings = {
         ['AutoDungeon'] = false,
         ['Map'] = 'CrystalCave',
         ['Difficulty'] = 'Easy',
+        ['UseTicket'] = false,
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
@@ -46,6 +47,7 @@ local defaultSettings = {
         ['AutoRaid'] = false,
         ['Map'] = 'TitanTown',
         ['Difficulty'] = 'Easy',
+        ['UseTicket'] = false,
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
@@ -54,6 +56,7 @@ local defaultSettings = {
         ['InfinityCastle'] = false,
         ['Act'] = 'Act1',
         ['Difficulty'] = 'Easy',
+        ['UseTicket'] = false,
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
@@ -62,12 +65,14 @@ local defaultSettings = {
         ['DefenseMode'] = false,
         ['Map'] = 'BizarreDesert',
         ['Difficulty'] = 'Easy',
+        ['UseTicket'] = false,
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
     ['EasterRaid'] = {
         ['Enable'] = false,
         ['EasterRaid'] = false,
+        ['UseTicket'] = false,
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
     },
@@ -1081,7 +1086,7 @@ task.spawn(function()
     end
 end)
 
-local PotionsList = {"EnergyPotion1", "EnergyPotion2", "EnergyPotion3", "EnergyPotion4", "DamagePotion1", "DamagePotion2", "DamagePotion3", "DamagePotion4", "DropPotion1", "DropPotion2", "DropPotion3", "DropPotion4", "GhostPotion1", "GhostPotion2", "GhostPotion3", "GhostPotion4", "LuckPotion1", "LuckPotion2", "LuckPotion3", "LuckPotion4"}
+local PotionsList = {"EasterPotion1", "EnergyPotion1", "EnergyPotion2", "EnergyPotion3", "EnergyPotion4", "DamagePotion1", "DamagePotion2", "DamagePotion3", "DamagePotion4", "DropPotion1", "DropPotion2", "DropPotion3", "DropPotion4", "GhostPotion1", "GhostPotion2", "GhostPotion3", "GhostPotion4", "LuckPotion1", "LuckPotion2", "LuckPotion3", "LuckPotion4"}
 local AutoPotions = Tabs['Main']:AddLeftGroupbox('Auto Potions')
 AutoPotions:AddDropdown('selectedPotions', {
     Values = PotionsList,
@@ -1369,6 +1374,16 @@ AutoDungeon:AddToggle('enableAutoDoDungeon', {
     end
 })
 
+AutoDungeon:AddToggle('enableAutoDungeonTicket', {
+    Text = 'Use Ticket',
+    Default = settings['AutoDungeon']['UseTicket'],
+
+    Callback = function(value)
+        settings['AutoDungeon']['UseTicket'] = value
+        SaveConfig()
+    end
+})
+
 AutoDungeon:AddSlider('dungeonLeaveWaveSlider', {
     Text = 'Dungeon Leave Wave',
     Default = settings['AutoDungeon']['LeaveWave'],
@@ -1397,16 +1412,6 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if settings['AutoDungeon']['Enabled'] then
             startDungeon(settings['AutoDungeon']['Difficulty'])
-            -- local dungeonName = "Dungeon_" .. player.UserId
-
-            -- if settings['AutoDungeon']['AutoLeave'] and playerMode == 'Dungeon' then
-            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-            --     if Gamemode:FindFirstChild(dungeonName) then
-            --         if Gamemode:FindFirstChild(dungeonName):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
-            --             teleportToSavedPosition()
-            --         end
-            --     end
-            -- end
         end
     end
 end)
@@ -1415,16 +1420,18 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if settings['AutoDungeon']['AutoDungeon'] then
             startDungeon2()
+        end
+    end
+end)
 
-            -- local dungeonName = getPlayerGamemode()
-            -- if dungeonName and settings['AutoDungeon']['AutoLeave'] then
-            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-            --     if Gamemode:FindFirstChild(dungeonName.Name) then
-            --         if Gamemode:FindFirstChild(dungeonName.Name):GetAttribute('Stage') >= settings['AutoDungeon']['LeaveWave'] then
-            --            teleportToSavedPosition()
-            --         end
-            --     end
-            -- end
+task.spawn(function()
+    while task.wait(3) and not Library.Unloaded do
+        if settings['AutoDungeon']['UseTicket'] then
+            if getDungeonCooldown() then
+                if not getPlayerGamemode() then
+                    FireBridge("ItemSystem", "Use", "DungeonTickets")
+                end
+            end
         end
     end
 end)
@@ -1470,13 +1477,22 @@ AutoRaid:AddToggle('enableAutoRaid', {
     end
 })
 
-
 AutoRaid:AddToggle('enableAutoDoRaid', {
     Text = 'Auto do Raids',
     Default = settings['AutoRaid']['AutoRaid'],
 
     Callback = function(value)
         settings['AutoRaid']['AutoRaid'] = value
+        SaveConfig()
+    end
+})
+
+AutoRaid:AddToggle('enableAutoRaidTicket', {
+    Text = 'Use Ticket',
+    Default = settings['AutoRaid']['UseTicket'],
+
+    Callback = function(value)
+        settings['AutoRaid']['UseTicket'] = value
         SaveConfig()
     end
 })
@@ -1527,16 +1543,18 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if settings['AutoRaid']['AutoRaid'] then
             startRaid2()
+        end
+    end
+end)
 
-            -- local raidName = getPlayerGamemode()
-            -- if raidName and settings['AutoRaid']['AutoLeave'] then
-            --     local Gamemode = ReplicatedStorage:WaitForChild('Server'):WaitForChild('Gamemode')
-            --     if Gamemode:FindFirstChild(raidName.Name) then
-            --         if Gamemode:FindFirstChild(raidName.Name):GetAttribute('Stage') >= settings['AutoRaid']['LeaveWave'] then
-            --            teleportToSavedPosition()
-            --         end
-            --     end
-            -- end
+task.spawn(function()
+    while task.wait(3) and not Library.Unloaded do
+        if settings['AutoRaid']['UseTicket'] then
+            if getRaidCooldown() then
+                if not getPlayerGamemode() then
+                    FireBridge("ItemSystem", "Use", "RaidTickets")
+                end
+            end
         end
     end
 end)
@@ -1738,6 +1756,16 @@ AutoDefenseMode:AddToggle('enableAutoDoDefenseMode', {
     end
 })
 
+AutoDefenseMode:AddToggle('enableAutoDefenseTicket', {
+    Text = 'Use Ticket',
+    Default = settings['DefenseMode']['UseTicket'],
+
+    Callback = function(value)
+        settings['DefenseMode']['UseTicket'] = value
+        SaveConfig()
+    end
+})
+
 AutoDefenseMode:AddSlider('defenseModeLeaveWaveSlider', {
     Text = 'Defense Mode Leave Wave',
     Default = settings['DefenseMode']['LeaveWave'],
@@ -1834,6 +1862,18 @@ task.spawn(function()
 end)
 
 task.spawn(function()
+    while task.wait(3) and not Library.Unloaded do
+        if settings['DefenseMode']['UseTicket'] then
+            if getDefenseModeCooldown() then
+                if not getPlayerGamemode() then
+                    FireBridge("ItemSystem", "Use", "DefenseTickets")
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         local defModeName = getPlayerGamemode()
 
@@ -1865,6 +1905,16 @@ AutoEasterRaid:AddToggle('enableAutoDoEasterRaid', {
 
     Callback = function(value)
         settings['EasterRaid']['EasterRaid'] = value
+        SaveConfig()
+    end
+})
+
+AutoEasterRaid:AddToggle('enableAutoEaterTicket', {
+    Text = 'Use Ticket',
+    Default = settings['EasterRaid']['UseTicket'],
+
+    Callback = function(value)
+        settings['EasterRaid']['UseTicket'] = value
         SaveConfig()
     end
 })
@@ -1959,6 +2009,20 @@ task.spawn(function()
     while task.wait() and not Library.Unloaded do
         if settings['EasterRaid']['EasterRaid'] then
             startEasterRaid2()
+        end
+    end
+end)
+
+
+
+task.spawn(function()
+    while task.wait(3) and not Library.Unloaded do
+        if settings['EasterRaid']['UseTicket'] then
+            if getEasterRaidCooldown() then
+                if not getPlayerGamemode() then
+                    FireBridge("ItemSystem", "Use", "EasterTickets")
+                end
+            end
         end
     end
 end)
