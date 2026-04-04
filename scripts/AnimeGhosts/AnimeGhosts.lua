@@ -60,6 +60,7 @@ local defaultSettings = {
     ['DefenseMode'] = {
         ['Enabled'] = false,
         ['DefenseMode'] = false,
+        ['Map'] = 'BizarreDesert',
         ['Difficulty'] = 'Easy',
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
@@ -100,7 +101,7 @@ local defaultSettings = {
         ['Enabled'] = false
     },
     ['EasterShop'] = {
-        ['SelectedItems'] = {'Easter 2026', 'Gems', 'EasterTickets', 'EnergyPotion4', 'DamagePotion4', 'GhostPotion4', 'LuckPotion4', 'DropPotion4', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2', 'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'},
+        ['SelectedItems'] = {'Easter 2026', 'Gems', 'EasterTickets', 'EasterPotion1','EnergyPotion4', 'DamagePotion4', 'GhostPotion4', 'LuckPotion4', 'DropPotion4', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2', 'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'},
         ['Enabled'] = false
     },
     ['AutoUpgrades'] = {
@@ -128,6 +129,10 @@ local defaultSettings = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'Drop', 'LevelingChance'},
             ['Enabled'] = false
         },
+        ['Easter'] = {
+            ['SelectedUpgrades'] = {'Easter2026Energy', 'Easter2026Damage', 'Easter2026Ghost', 'Energy', 'Damage', 'Ghost'},
+            ['Enabled'] = false
+        },
         ['CrewMastery'] = {
             ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'EggLuck', 'GachaLuck', 'AtkSPD'},
             ['Enabled'] = false
@@ -142,6 +147,10 @@ local defaultSettings = {
         },
         ['FiendMastery'] = {
             ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'Drop', 'ShinyChance', 'RadiantChance'},
+            ['Enabled'] = false
+        },
+        ['EasterMastery'] = {
+            ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'Drop', 'GachaSpeed', 'Easter2026Energy'},
             ['Enabled'] = false
         }
     },
@@ -225,6 +234,9 @@ local defaultSettings = {
         ['World9'] = {
             ['DevilContracts'] = false,
             ['DevilSkills'] = false
+        },
+        ['World10'] = {
+            ['CursedTechniques'] = false
         }
     },
     ['Keybinds'] = {
@@ -254,13 +266,6 @@ end
 
 walkTable(settings, defaultSettings)
 SaveConfig()
-
--- task.spawn(function()
---     while task.wait(0.1) and not Library.Unloaded do
---         settings = HttpService:JSONDecode(readfile(saveFile))
---         SaveConfig()
---     end
--- end)
 
 -- // VARIABLES
 local HttpService = game:GetService('HttpService')
@@ -299,7 +304,8 @@ local worldsNames = {
     "Demon District",
     "Kaiju City",
     "Bizarre Desert",
-    "Devil Town"
+    "Devil Town",
+    "Cursed District"
 }
 
 local worldsTable = {
@@ -311,7 +317,8 @@ local worldsTable = {
     ["Demon District"] = "6",
     ["Kaiju City"] = "7",
     ["Bizarre Desert"] = "8",
-    ["Devil Town"] = "9"
+    ["Devil Town"] = "9",
+    ["Cursed District"] = "10"
 }
 
 local worldsTableNumbers = {
@@ -323,7 +330,8 @@ local worldsTableNumbers = {
     ["Demon District"] = 6,
     ["Kaiju City"] = 7,
     ["Bizarre Desert"] = 8,
-    ["Devil Town"] = 9
+    ["Devil Town"] = 9,
+    ["Cursed District"] = 10
 }
 
 local numbersToWorlds = {
@@ -335,7 +343,8 @@ local numbersToWorlds = {
     [6] = "Demon District",
     [7] = "Kaiju City",
     [8] = "Bizarre Desert",
-    [9] = "Devil Town"
+    [9] = "Devil Town",
+    [10] = "Cursed District"
 }
 
 local scrolls = {
@@ -348,6 +357,7 @@ local scrolls = {
     'Kaiju Scroll',
     'Bizarre Scroll',
     'Devil Scroll',
+    'Cursed Scroll',
     'Easter 2026 Scroll'
 }
 
@@ -1692,7 +1702,22 @@ task.spawn(function()
     end
 end)
 
+local DefenseMaps = {'BizarreDesert', 'CursedZone'}
 local AutoDefenseMode = Tabs['Main']:AddRightGroupbox('Auto Defense Mode')
+AutoDefenseMode:AddDropdown('selectedDefenseMap', {
+    Values = DefenseMaps,
+    Default = settings['DefenseMode']['Map'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Defense Map',
+    Tooltip = 'Selected Auto Defense Map', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['DefenseMode']['Map'] = value
+        SaveConfig()
+    end
+})
+
 AutoDefenseMode:AddToggle('enableAutoDefenseMode', {
     Text = 'Auto Create Defense Mode',
     Default = settings['DefenseMode']['Enabled'],
@@ -1751,7 +1776,7 @@ local function getDefenseModeCooldown()
 end
 
 local function createDefenseMode()
-    FireBridge("GamemodeSystem", "Create", "Defense Mode", "BizarreDesert", "Easy")
+    FireBridge("GamemodeSystem", "Create", "Defense Mode", settings['DefenseMode']['Map'], "Easy")
     task.wait(5)
     FireBridge("GamemodeSystem", "Start", "Defense Mode", player.UserId)
 end
@@ -2944,6 +2969,64 @@ task.spawn(function()
     end
 end)
 
+local EasterMasteryUpgradesList = {'Start', 'Energy', 'Damage', 'Ghost', 'Drop', 'GachaSpeed', 'Easter2026Energy'}
+local EasterMasteryUpgrades = Tabs['Upgrades']:AddRightGroupbox('Easter Mastery Upgrades')
+EasterMasteryUpgrades:AddDropdown('selectedEasterMasteryUpgrades', {
+    Values = EasterMasteryUpgradesList,
+    Default = settings['AutoUpgrades']['EasterMastery']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Easter Mastery Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['EasterMastery']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+EasterMasteryUpgrades:AddToggle('enableAutoUpgradesEasterMastery', {
+    Text = 'Auto Buy Easter Mastery Upgrades',
+    Default = settings['AutoUpgrades']['EasterMastery']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['EasterMastery']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['EasterMastery']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local EasterMasteryUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter Mastery")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and EasterMasteryUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['EasterMastery']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Easter Mastery_' .. upgrade]
+                    local UpgradePrice = EasterMasteryUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if EasterMasteryUpgradesData[upgrade].MaxPrice then
+                        if UpgradePrice > EasterMasteryUpgradesData[upgrade].MaxPrice then
+                            UpgradePrice = EasterMasteryUpgradesData[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > 20000 and not EasterMasteryUpgradesData[upgrade].MaxPrice then UpgradePrice = 20000 end
+
+                    if PlayerUpgradeLevel < EasterMasteryUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("ChocolateTokens") > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Easter Mastery", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
 local DevilUpgradesList = {'Energy', 'Damage', 'Ghost', 'Drop', 'LevelingChance'}
 local DevilUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Devil Upgrades')
 DevilUpgrades:AddDropdown('selectedDevilUpgrades', {
@@ -2994,6 +3077,64 @@ task.spawn(function()
                     if PlayerUpgradeLevel < DevilUpgradesData[upgrade].MaxLevel then
                         if getItemAmount("DevilUpgradeTokens") > UpgradePrice then
                             FireBridge("UpgradeSystem", "Buy", "Devil", upgrade)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local EasterUpgradesList = {'Easter2026Energy', 'Easter2026Damage', 'Easter2026Ghost', 'Energy', 'Damage', 'Ghost'}
+local DevilUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Easter Upgrades')
+DevilUpgrades:AddDropdown('selectedEasterUpgrades', {
+    Values = EasterUpgradesList,
+    Default = settings['AutoUpgrades']['Easter']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Easter Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Easter']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+DevilUpgrades:AddToggle('enableAutoUpgradesEaster', {
+    Text = 'Auto Buy Easter Upgrades',
+    Default = settings['AutoUpgrades']['Easter']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Easter']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Easter']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local EasterUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter")).Targets
+            
+            if PlayerInventory and PlayerUpgrades and EasterUpgradesData then
+                for _, upgrade in pairs(settings['AutoUpgrades']['Easter']['SelectedUpgrades']) do
+                    local PlayerUpgradeLevel = PlayerUpgrades['Easter_' .. upgrade]
+                    local UpgradePrice = EasterUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+                    if EasterUpgradesData[upgrade].MaxPrice then
+                        if UpgradePrice > EasterUpgradesData[upgrade].MaxPrice then
+                            UpgradePrice = EasterUpgradesData[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > 25000 and not EasterUpgradesData[upgrade].MaxPrice then UpgradePrice = 25000 end
+
+                    if PlayerUpgradeLevel < EasterUpgradesData[upgrade].MaxLevel then
+                        if getItemAmount("BunnyTokens") > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", "Easter", upgrade)
                         end
                     end
                 end
@@ -3355,7 +3496,7 @@ task.spawn(function()
     end
 end)
 
-local EasterShopItems = {'Easter 2026', 'Gems', 'EasterTickets', 'EnergyPotion4', 'DamagePotion4', 'GhostPotion4', 'LuckPotion4', 'DropPotion4', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2', 'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
+local EasterShopItems = {'Easter 2026', 'Gems', 'EasterTickets', 'EasterPotion1', 'EnergyPotion4', 'DamagePotion4', 'GhostPotion4', 'LuckPotion4', 'DropPotion4', 'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3', 'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2', 'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
 local EasterShop = Tabs['Shops']:AddLeftGroupbox('Easter Shop')
 
 EasterShop:AddDropdown('selectedEasterShopItems', {
@@ -3883,6 +4024,17 @@ GachaSpinsW9:AddToggle('enableGachaSpinWorld9DevilSkills', {
     end
 })
 
+local GachaSpinsW10 = Tabs['GachaSpins']:AddLeftGroupbox('World 10')
+GachaSpinsW10:AddToggle('enableGachaSpinWorld10CursedTechniques', {
+    Text = 'Spin Cursed Techniques',
+    Default = settings['GachaSpins']['World10']['CursedTechniques'],
+
+    Callback = function(value)
+        settings['GachaSpins']['World10']['CursedTechniques'] = value
+        SaveConfig()
+    end
+})
+
 task.spawn(function()
     while task.wait(0.1) and not Library.Unloaded do
         local PlayerGachaIndex = ScriptLibrary.PlayerData.GachaIndex
@@ -4039,6 +4191,16 @@ task.spawn(function()
                 
                 if settings['AutoSpin']['LogSpins'] then
                     print("Spinning: Devil Skills")
+                end
+            end
+        end)
+
+        pcall(function()
+            if settings['GachaSpins']['World10']['CursedTechniques'] and hasTokenAmountToRoll("CursedTokens") and not PlayerGachaIndex['Cursed Technique']['MalevolentShrine'] and not settings['AutoSpin']['PauseSpins'] then
+                FireBridge("GachaSystem", "Spin", "Cursed Technique", "Normal", UnifiedFilters)
+                
+                if settings['AutoSpin']['LogSpins'] then
+                    print("Spinning: Cursed Techniques")
                 end
             end
         end)
