@@ -733,7 +733,6 @@ local function getEnemyInMap(map)
     for _, enemyFolder in ipairs(Workspace['_ENEMIES']['Server']:GetChildren()) do
         if enemyFolder:IsA("Folder") then
             local targetFolder = checkEnemyInMap(tostring(map))
-            --print(targetFolder)
             if targetFolder then
                 for _, v in ipairs(targetFolder:GetChildren()) do
                     local HP = v:GetAttribute('HP')
@@ -877,23 +876,6 @@ local function getEnemyInDefense(defense)
                         end
                     end
                 end
-
-
-                -- for _, v in ipairs(targetFolder:GetChildren()) do
-                --     local HP = v:GetAttribute('HP')
-                --     local Shield = v:GetAttribute('Shield')
-    
-                --     if HP and HP > 0 and Shield ~= true then
-                --         if v:IsA('Part') then
-                --             local magnitude = (HumanoidRootPart.Position - v.Position).magnitude
-    
-                --             if magnitude < distance then
-                --                 distance = magnitude
-                --                 enemy = v
-                --             end
-                --         end
-                --     end
-                -- end
             end
         end
     end
@@ -974,7 +956,6 @@ local function startDungeon(difficulty)
         createDungeon(difficulty)
         task.wait(3)
     elseif checkDungeon() == 'Dungeon' or playerMode == 'Dungeon' then
-        -- teleportToEnemyInMap('Gamemode')
         task.wait()
     end
 end
@@ -1018,7 +999,6 @@ local function startRaid()
         createRaid()
         task.wait(3)
     elseif checkDungeon() == 'Raid' or playerMode == 'Raid' then
-        --teleportToEnemyInMap('Gamemode')
         task.wait()
     end
 end
@@ -1036,17 +1016,6 @@ local function startRaid2()
         end
     end
 end
-
--- local AutoFarm = Tabs['Main']:AddLeftGroupbox('Auto Farm')
--- AutoFarm:AddToggle('enableAutoFarm', {
---     Text = 'Enable Auto Farm',
---     Default = settings['AutoFarm']['Enabled'],
-
---     Callback = function(value)
---         settings['AutoFarm']['Enabled'] = value
---         SaveConfig()
---     end
--- })
 
 local AutoScroll = Tabs['Main']:AddLeftGroupbox('Auto Scroll')
 AutoScroll:AddDropdown('selectedScroll', {
@@ -3401,9 +3370,6 @@ task.spawn(function()
 
                         if relicLevel == 100 and relicTier < 8 then
                             if settings['AutoUpgrades']['Relics']['SmartEvolve'] then
-                                -- if getItemAmount("RelicShards") >= 25000 then
-                                --     FireBridge("RelicSystem", "Evolve", tostring(relic))
-                                -- end
                                 if getItemAmount(tostring(relicCurrency)) > 25000 then
                                     FireBridge("RelicSystem", "Evolve", tostring(relic))
                                 end
@@ -3502,7 +3468,7 @@ CurrencyExchange:AddToggle('enableAutoExchangeSell', {
 
 CurrencyExchange:AddToggle('enableAutoExchangeBuy', {
     Text = 'Auto Buy Items',
-    Default = false, --settings['Exchange']['Currency']['Buy']['Enabled'],
+    Default = false,
 
     Callback = function(value)
         settings['Exchange']['Currency']['Buy']['Enabled'] = value
@@ -3560,30 +3526,6 @@ task.spawn(function()
                 elseif getItemAmount('ExchangeTokens') > 1  and getItemAmount(currency) <= 999999 then
                     FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
                 end
-
-                -- for _, currency in pairs(settings['Exchange']['Currency']['Buy']['Tokens']) do
-                --     if getItemAmount('ExchangeTokens') > 100000 and getItemAmount(currency) <= 900000 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100000)
-                --     elseif getItemAmount('ExchangeTokens') > 50000 and getItemAmount(currency) <= 950000 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50000)
-                --     elseif getItemAmount('ExchangeTokens') > 10000 and getItemAmount(currency) <= 990000 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10000)
-                --     elseif getItemAmount('ExchangeTokens') > 5000 and getItemAmount(currency) <= 995000 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 5000)
-                --     elseif getItemAmount('ExchangeTokens') > 1000 and getItemAmount(currency) <= 999000 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1000)
-                --     elseif getItemAmount('ExchangeTokens') > 500 and getItemAmount(currency) <= 999500 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 500)
-                --     elseif getItemAmount('ExchangeTokens') > 100 and getItemAmount(currency) <= 999900 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 100)
-                --     elseif getItemAmount('ExchangeTokens') > 50 and getItemAmount(currency) <= 999950 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 50)
-                --     elseif getItemAmount('ExchangeTokens') > 10 and getItemAmount(currency) <= 999990 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 10)
-                --     elseif getItemAmount('ExchangeTokens') > 1  and getItemAmount(currency) <= 999999 then
-                --         FireBridge('ExchangeSystem', 'Make', 'Currency', 'Exchange Tokens', tostring('ExchangeTokens' .. currency), 1)
-                --     end
-                -- end
             end
         end)
     end
@@ -3663,7 +3605,6 @@ RaidShop:AddToggle('enableAutoRaidShop', {
     end
 })
 
--- RaidShards
 task.spawn(function()
     while task.wait(0.5) and not Library.Unloaded do
         if settings['RaidShop']['Enabled'] then
@@ -3900,7 +3841,6 @@ AutoWeaponBuffs:AddDropdown('selectedWeaponBreathing', {
     Tooltip = 'Selected Breathing to Roll', -- Information shown when you hover over the dropdown
 
     Callback = function(value)
-        --settings['AutoSpin']['WeaponBuffs']['SelectedWeapon'] = value
         settings['AutoSpin']['WeaponBuffs']['SelectedBreathing'] = value
         SaveConfig()
     end
