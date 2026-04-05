@@ -3316,7 +3316,7 @@ task.spawn(function()
     end
 end)
 
-local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg'}
+local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg', 'SixEyes', 'CursedFinger', 'CursedKatana', 'CursedHammer', 'CursedGlasses'}
 local RelicsUpgrades = Tabs['Upgrades']:AddRightGroupbox('Relics Upgrades')
 RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
     Values = RelicsList,
