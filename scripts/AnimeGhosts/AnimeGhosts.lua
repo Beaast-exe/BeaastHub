@@ -143,7 +143,7 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Relics'] = {
-            ['SelectedRelics'] = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg'},
+            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg', 'SixEyes', 'CursedFinger', 'CursedKatana', 'CursedHammer', 'CursedGlasses'},
             ['SmartEvolve'] = false
         },
         ['StandMastery'] = {
