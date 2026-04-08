@@ -157,7 +157,11 @@ local defaultSettings = {
         ['EasterMastery'] = {
             ['SelectedUpgrades'] = {'Start', 'Energy', 'Damage', 'Ghost', 'Drop', 'GachaSpeed', 'Easter2026Energy'},
             ['Enabled'] = false
-        }
+        },
+        ['Cursed'] = {
+            ['SelectedUpgrades'] = {},
+            ['Enabled'] = false
+        },
     },
     ['Exchange'] = {
         ['Potions'] = {
@@ -3550,6 +3554,72 @@ task.spawn(function()
             --         end
             --     end
             -- end
+        end
+    end
+end)
+
+local CursedUpgradesList = {'Energy', 'Damage', 'Ghost', 'CritDMG'}
+local CursedUpgrades = Tabs['Upgrades']:AddLeftGroupbox('Cursed Upgrades')
+CursedUpgrades:AddDropdown('selectedCursedUpgrades', {
+    Values = CursedUpgradesList,
+    Default = settings['AutoUpgrades']['Cursed']['SelectedUpgrades'],
+    Multi = true,
+
+    Text = 'Selected Upgrades to Buy',
+    Tooltip = 'Selected Upgrades to Buy from Cursed Upgrades',
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Cursed']['SelectedUpgrades'] = value
+        SaveConfig()
+    end
+})
+
+CursedUpgrades:AddToggle('enableAutoUpgradesCursed', {
+    Text = 'Auto Buy Cursed Upgrades',
+    Default = settings['AutoUpgrades']['Cursed']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoUpgrades']['Cursed']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) and not Library.Unloaded do
+        if settings['AutoUpgrades']['Cursed']['Enabled'] then
+            local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            local PlayerInventory = PlayerData and PlayerData.Inventory
+            local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            local SelectedUpgrades = settings['AutoUpgrades']['Cursed']['SelectedUpgrades']
+            
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Cursed"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
+
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
+
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
+
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
+                        end
+                    end
+                end
+            end
         end
     end
 end)
