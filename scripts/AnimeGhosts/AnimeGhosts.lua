@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -2600,12 +2600,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Exchange']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Exchange"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Exchange")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -2691,12 +2692,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Dungeon']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Dungeon"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Dungeon")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -2777,12 +2779,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Raid']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Raid"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Raid")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -2863,12 +2866,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Defense']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Defense"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Defense")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -2955,12 +2959,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Division']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Division"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Division")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -3321,7 +3326,6 @@ task.spawn(function()
             local UpgradesName = UpgradesData.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-
             if PlayerInventory and PlayerUpgrades and UpgradesList then
                 for _, upgrade in pairs(SelectedUpgrades) do
                     local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
@@ -3408,12 +3412,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Devil']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Devil"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Devil")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -3500,12 +3505,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Easter']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
@@ -3592,12 +3598,13 @@ task.spawn(function()
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
             local SelectedUpgrades = settings['AutoUpgrades']['Cursed']['SelectedUpgrades']
             
-            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Cursed"))
+            local UpgradesDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Cursed")
+            local UpgradesData = require(UpgradesDataPath)
             local UpgradesList = UpgradesData.Targets
             local UpgradesMaxPrice = UpgradesData.MaxPrice
             local UpgradesPriceScale = UpgradesData.PriceScale
             local UpgradesCurrency = UpgradesData.Currency
-            local UpgradesName = UpgradesData.Name
+            local UpgradesName = UpgradesDataPath.Name
             local PlayerUpgradesPrefix = UpgradesName .. '_'
 
             if PlayerInventory and PlayerUpgrades and UpgradesList then
