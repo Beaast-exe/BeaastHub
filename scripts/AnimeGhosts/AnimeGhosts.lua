@@ -3,7 +3,7 @@ if game.placeId ~= placeId then return end
 repeat task.wait() until game:IsLoaded()
 if not game:IsLoaded() then game.Loaded:Wait() end
 local StartTick = tick()
-task.wait(20)
+--task.wait(20)
 
 local Players = game:GetService('Players')
 local player = Players.LocalPlayer
@@ -2594,27 +2594,61 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local ExchangeUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Exchange")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Exchange']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and ExchangeUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Exchange']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Exchange_' .. upgrade]
-                    local UpgradePrice = ExchangeUpgradesData[upgrade].Price * (1.5 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Exchange"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if ExchangeUpgradesData[upgrade].MaxPrice then
-                        if UpgradePrice > ExchangeUpgradesData[upgrade].MaxPrice then
-                            UpgradePrice = ExchangeUpgradesData[upgrade].MaxPrice
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
+
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
                         end
                     end
-                    if UpgradePrice > 2500 and not ExchangeUpgradesData[upgrade].MaxPrice then UpgradePrice = 2500 end
 
-                    if PlayerUpgradeLevel < ExchangeUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("ExchangeTokens") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Exchange", upgrade)
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
+
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local ExchangeUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Exchange")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and ExchangeUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Exchange']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Exchange_' .. upgrade]
+            --         local UpgradePrice = ExchangeUpgradesData[upgrade].Price * (1.5 ^ PlayerUpgradeLevel)
+
+            --         if ExchangeUpgradesData[upgrade].MaxPrice then
+            --             if UpgradePrice > ExchangeUpgradesData[upgrade].MaxPrice then
+            --                 UpgradePrice = ExchangeUpgradesData[upgrade].MaxPrice
+            --             end
+            --         end
+            --         if UpgradePrice > 2500 and not ExchangeUpgradesData[upgrade].MaxPrice then UpgradePrice = 2500 end
+
+            --         if PlayerUpgradeLevel < ExchangeUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("ExchangeTokens") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Exchange", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
@@ -2651,22 +2685,56 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local DungeonUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Dungeon")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Dungeon']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and DungeonUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Dungeon']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Dungeon_' .. upgrade]
-                    local UpgradePrice = DungeonUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Dungeon"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if UpgradePrice > 3000 then UpgradePrice = 3000 end
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
 
-                    if PlayerUpgradeLevel < DungeonUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DungeonShards") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Dungeon", upgrade)
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
+
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local DungeonUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Dungeon")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and DungeonUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Dungeon']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Dungeon_' .. upgrade]
+            --         local UpgradePrice = DungeonUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+            --         if UpgradePrice > 3000 then UpgradePrice = 3000 end
+
+            --         if PlayerUpgradeLevel < DungeonUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("DungeonShards") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Dungeon", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
@@ -2703,22 +2771,56 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local RaidUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Raid")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Raid']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and RaidUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Raid']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Raid_' .. upgrade]
-                    local UpgradePrice = RaidUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Raid"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if UpgradePrice > 3000 and upgrade ~= "GachaSpins" then UpgradePrice = 3000 end
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
 
-                    if PlayerUpgradeLevel < RaidUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("RaidShards") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Raid", upgrade)
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
+
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local RaidUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Raid")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and RaidUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Raid']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Raid_' .. upgrade]
+            --         local UpgradePrice = RaidUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+            --         if UpgradePrice > 3000 and upgrade ~= "GachaSpins" then UpgradePrice = 3000 end
+
+            --         if PlayerUpgradeLevel < RaidUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("RaidShards") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Raid", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
@@ -2755,28 +2857,62 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local DefenseUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Defense")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Defense']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and DefenseUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Defense']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Defense_' .. upgrade]
-                    local UpgradePrice = DefenseUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Defense"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if DefenseUpgradesData[upgrade].MaxPrice then
-                        if UpgradePrice > DefenseUpgradesData[upgrade].MaxPrice then
-                            UpgradePrice = DefenseUpgradesData[upgrade].MaxPrice
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
+
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
                         end
                     end
 
-                    if UpgradePrice > 3000 and not DefenseUpgradesData[upgrade].MaxPrice then UpgradePrice = 3000 end
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
 
-                    if PlayerUpgradeLevel < DefenseUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DefenseShards") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Defense", upgrade)
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local DefenseUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Defense")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and DefenseUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Defense']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Defense_' .. upgrade]
+            --         local UpgradePrice = DefenseUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+            --         if DefenseUpgradesData[upgrade].MaxPrice then
+            --             if UpgradePrice > DefenseUpgradesData[upgrade].MaxPrice then
+            --                 UpgradePrice = DefenseUpgradesData[upgrade].MaxPrice
+            --             end
+            --         end
+
+            --         if UpgradePrice > 3000 and not DefenseUpgradesData[upgrade].MaxPrice then UpgradePrice = 3000 end
+
+            --         if PlayerUpgradeLevel < DefenseUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("DefenseShards") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Defense", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
@@ -2813,22 +2949,56 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local DivisionUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Division")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Division']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and DivisionUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Division']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Division_' .. upgrade]
-                    local UpgradePrice = DivisionUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Division"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if UpgradePrice > 2500 then UpgradePrice = 2500 end
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
 
-                    if PlayerUpgradeLevel < DivisionUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DivisionTokens") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Division", upgrade)
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
+                        end
+                    end
+
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
+
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+            
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local DivisionUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Division")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and DivisionUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Division']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Division_' .. upgrade]
+            --         local UpgradePrice = DivisionUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+            --         if UpgradePrice > 2500 then UpgradePrice = 2500 end
+
+            --         if PlayerUpgradeLevel < DivisionUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("DivisionTokens") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Division", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
@@ -3232,28 +3402,62 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local DevilUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Devil")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Devil']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and DevilUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Devil']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Devil_' .. upgrade]
-                    local UpgradePrice = DevilUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Devil"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if DevilUpgradesData[upgrade].MaxPrice then
-                        if UpgradePrice > DevilUpgradesData[upgrade].MaxPrice then
-                            UpgradePrice = DevilUpgradesData[upgrade].MaxPrice
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
+
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
                         end
                     end
 
-                    if UpgradePrice > 5000 and not DevilUpgradesData[upgrade].MaxPrice then UpgradePrice = 5000 end
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
 
-                    if PlayerUpgradeLevel < DevilUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("DevilUpgradeTokens") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Devil", upgrade)
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local DevilUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Devil")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and DevilUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Devil']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Devil_' .. upgrade]
+            --         local UpgradePrice = DevilUpgradesData[upgrade].Price * (2 ^ PlayerUpgradeLevel)
+
+            --         if DevilUpgradesData[upgrade].MaxPrice then
+            --             if UpgradePrice > DevilUpgradesData[upgrade].MaxPrice then
+            --                 UpgradePrice = DevilUpgradesData[upgrade].MaxPrice
+            --             end
+            --         end
+
+            --         if UpgradePrice > 5000 and not DevilUpgradesData[upgrade].MaxPrice then UpgradePrice = 5000 end
+
+            --         if PlayerUpgradeLevel < DevilUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("DevilUpgradeTokens") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Devil", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
@@ -3290,28 +3494,62 @@ task.spawn(function()
             local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
             local PlayerInventory = PlayerData and PlayerData.Inventory
             local PlayerUpgrades = PlayerData and PlayerData.Upgrades
-            local EasterUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter")).Targets
+            local SelectedUpgrades = settings['AutoUpgrades']['Easter']['SelectedUpgrades']
             
-            if PlayerInventory and PlayerUpgrades and EasterUpgradesData then
-                for _, upgrade in pairs(settings['AutoUpgrades']['Easter']['SelectedUpgrades']) do
-                    local PlayerUpgradeLevel = PlayerUpgrades['Easter_' .. upgrade]
-                    local UpgradePrice = EasterUpgradesData[upgrade].Price * (1.25 ^ PlayerUpgradeLevel)
+            local UpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter"))
+            local UpgradesList = UpgradesData.Targets
+            local UpgradesMaxPrice = UpgradesData.MaxPrice
+            local UpgradesPriceScale = UpgradesData.PriceScale
+            local UpgradesCurrency = UpgradesData.Currency
+            local UpgradesName = UpgradesData.Name
+            local PlayerUpgradesPrefix = UpgradesName .. '_'
 
-                    if EasterUpgradesData[upgrade].MaxPrice then
-                        if UpgradePrice > EasterUpgradesData[upgrade].MaxPrice then
-                            UpgradePrice = EasterUpgradesData[upgrade].MaxPrice
+            if PlayerInventory and PlayerUpgrades and UpgradesList then
+                for _, upgrade in pairs(SelectedUpgrades) do
+                    local PlayerUpgradeLevel = PlayerUpgrades[PlayerUpgradesPrefix .. upgrade]
+                    local UpgradePrice = UpgradesList[upgrade].Price * (UpgradesPriceScale ^ PlayerUpgradeLevel)
+
+                    if UpgradesList[upgrade].MaxPrice then
+                        if UpgradePrice > UpgradesList[upgrade].MaxPrice then
+                            UpgradePrice = UpgradesList[upgrade].MaxPrice
                         end
                     end
 
-                    if UpgradePrice > 25000 and not EasterUpgradesData[upgrade].MaxPrice then UpgradePrice = 25000 end
+                    if UpgradePrice > UpgradesMaxPrice and not UpgradesList[upgrade].MaxPrice then UpgradePrice = UpgradesMaxPrice end
 
-                    if PlayerUpgradeLevel < EasterUpgradesData[upgrade].MaxLevel then
-                        if getItemAmount("BunnyTokens") > UpgradePrice then
-                            FireBridge("UpgradeSystem", "Buy", "Easter", upgrade)
+                    if PlayerUpgradeLevel < UpgradesList[upgrade].MaxLevel then
+                        if getItemAmount(UpgradesCurrency) > UpgradePrice then
+                            FireBridge("UpgradeSystem", "Buy", UpgradesName, upgrade)
                         end
                     end
                 end
             end
+
+            -- local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+            -- local PlayerInventory = PlayerData and PlayerData.Inventory
+            -- local PlayerUpgrades = PlayerData and PlayerData.Upgrades
+            -- local EasterUpgradesData = require(ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("UpgradeData"):WaitForChild("Easter")).Targets
+            
+            -- if PlayerInventory and PlayerUpgrades and EasterUpgradesData then
+            --     for _, upgrade in pairs(settings['AutoUpgrades']['Easter']['SelectedUpgrades']) do
+            --         local PlayerUpgradeLevel = PlayerUpgrades['Easter_' .. upgrade]
+            --         local UpgradePrice = EasterUpgradesData[upgrade].Price * (1.25 ^ PlayerUpgradeLevel)
+
+            --         if EasterUpgradesData[upgrade].MaxPrice then
+            --             if UpgradePrice > EasterUpgradesData[upgrade].MaxPrice then
+            --                 UpgradePrice = EasterUpgradesData[upgrade].MaxPrice
+            --             end
+            --         end
+
+            --         if UpgradePrice > 25000 and not EasterUpgradesData[upgrade].MaxPrice then UpgradePrice = 25000 end
+
+            --         if PlayerUpgradeLevel < EasterUpgradesData[upgrade].MaxLevel then
+            --             if getItemAmount("BunnyTokens") > UpgradePrice then
+            --                 FireBridge("UpgradeSystem", "Buy", "Easter", upgrade)
+            --             end
+            --         end
+            --     end
+            -- end
         end
     end
 end)
