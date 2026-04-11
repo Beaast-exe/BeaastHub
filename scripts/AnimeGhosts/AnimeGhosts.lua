@@ -144,7 +144,7 @@ local defaultSettings = {
             ['Enabled'] = false
         },
         ['Relics'] = {
-            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg', 'SixEyes', 'CursedFinger', 'CursedKatana', 'CursedHammer', 'CursedGlasses'},
+            ['SelectedRelics'] = {'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'CyborgCore', 'EvilBunny', 'EasterEgg', 'SixEyes', 'CursedFinger', 'CursedKatana', 'CursedHammer', 'CursedGlasses'},
             ['SmartEvolve'] = false
         },
         ['StandMastery'] = {
@@ -3653,7 +3653,7 @@ task.spawn(function()
     end
 end)
 
-local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'EvilBunny', 'EasterEgg', 'SixEyes', 'CursedFinger', 'CursedKatana', 'CursedHammer', 'CursedGlasses'}
+local RelicsList = {'None', 'WingsOfFreedom', 'CursedBalls', 'HollowMask', 'HunterDaggers', 'StrawHat', 'PillarNecklace', 'KaijuMask', 'HorseSpinner', 'Chainsaw', 'SealedCube', 'CyborgCore', 'EvilBunny', 'EasterEgg', 'SixEyes', 'CursedFinger', 'CursedKatana', 'CursedHammer', 'CursedGlasses'}
 local RelicsUpgrades = Tabs['Upgrades']:AddRightGroupbox('Relics Upgrades')
 RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
     Values = RelicsList,
