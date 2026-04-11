@@ -72,6 +72,7 @@ local defaultSettings = {
     ['EasterRaid'] = {
         ['Enable'] = false,
         ['EasterRaid'] = false,
+        ['Map'] = 'ChocolateKingdom',
         ['UseTicket'] = false,
         ['AutoLeave'] = false,
         ['LeaveWave'] = 50
@@ -314,7 +315,8 @@ local worldsNames = {
     "Kaiju City",
     "Bizarre Desert",
     "Devil Town",
-    "Cursed District"
+    "Cursed District",
+    "XYZ City"
 }
 
 local worldsTable = {
@@ -327,7 +329,8 @@ local worldsTable = {
     ["Kaiju City"] = "7",
     ["Bizarre Desert"] = "8",
     ["Devil Town"] = "9",
-    ["Cursed District"] = "10"
+    ["Cursed District"] = "10",
+    ["XYZ City"] = "11"
 }
 
 local worldsTableNumbers = {
@@ -340,7 +343,8 @@ local worldsTableNumbers = {
     ["Kaiju City"] = 7,
     ["Bizarre Desert"] = 8,
     ["Devil Town"] = 9,
-    ["Cursed District"] = 10
+    ["Cursed District"] = 10,
+    ["XYZ City"] = 11
 }
 
 local numbersToWorlds = {
@@ -353,7 +357,8 @@ local numbersToWorlds = {
     [7] = "Kaiju City",
     [8] = "Bizarre Desert",
     [9] = "Devil Town",
-    [10] = "Cursed District"
+    [10] = "Cursed District",
+    [11] = "XYZ City"
 }
 
 local scrolls = {
@@ -367,6 +372,7 @@ local scrolls = {
     'Bizarre Scroll',
     'Devil Scroll',
     'Cursed Scroll',
+    'XYZ Scroll',
     'Easter 2026 Scroll'
 }
 
@@ -1861,6 +1867,22 @@ task.spawn(function()
 end)
 
 local AutoEasterRaid = Tabs['Main']:AddRightGroupbox('Auto Easter Raid')
+
+local EasterRaidMaps = {'ChocolateKingdom', 'CarrotIsland'}
+AutoEasterRaid:AddDropdown('selectedEasterRaidMap', {
+    Values = EasterRaidMaps,
+    Default = settings['EasterRaid']['Map'], -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Selected Easter Raid Map',
+    Tooltip = 'Selected Auto Easter Raid Map', -- Information shown when you hover over the dropdown
+
+    Callback = function(value)
+        settings['EasterRaid']['Map'] = value
+        SaveConfig()
+    end
+})
+
 AutoEasterRaid:AddToggle('enableAutoEasterRaid', {
     Text = 'Auto Create Easter Raid',
     Default = settings['EasterRaid']['Enabled'],
@@ -1929,7 +1951,7 @@ local function getEasterRaidCooldown()
 end
 
 local function createEasterRaid()
-    FireBridge("GamemodeSystem", "Create", "Easter Raid", "ChocolateKingdom", "Easy")
+    FireBridge("GamemodeSystem", "Create", "Easter Raid", settings['EasterRaid']['Map'], "Easy")
     task.wait(5)
     FireBridge("GamemodeSystem", "Start", "Easter Raid", player.UserId)
 end
