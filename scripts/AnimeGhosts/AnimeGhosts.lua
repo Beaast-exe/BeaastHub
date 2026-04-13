@@ -189,6 +189,10 @@ local defaultSettings = {
                 ['SelectedPotions'] = {'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'},
                 ['Enabled'] = false
             },
+            ['Tier3'] = {
+                ['SelectedPotions'] = {'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3'},
+                ['Enabled'] = false
+            },
             ['OnlyWhenFull'] = false
         },
         ['Currency'] = {
@@ -4076,6 +4080,7 @@ end)
 
 local PotionExchangeListT1 = {'EnergyPotion1', 'DamagePotion1', 'GhostPotion1', 'LuckPotion1', 'DropPotion1'}
 local PotionExchangeListT2 = {'EnergyPotion2', 'DamagePotion2', 'GhostPotion2', 'LuckPotion2', 'DropPotion2'}
+local PotionExchangeListT3 = {'EnergyPotion3', 'DamagePotion3', 'GhostPotion3', 'LuckPotion3', 'DropPotion3'}
 local PotionExchange = Tabs['Shops']:AddRightGroupbox('Potion Exchange')
 PotionExchange:AddDropdown('selectedExchangePotionsT1', {
     Values = PotionExchangeListT1,
@@ -4105,6 +4110,20 @@ PotionExchange:AddDropdown('selectedExchangePotionsT2', {
     end
 })
 
+PotionExchange:AddDropdown('selectedExchangePotionsT3', {
+    Values = PotionExchangeListT3,
+    Default = settings['Exchange']['Potions']['Tier3']['SelectedPotions'],
+    Multi = true,
+
+    Text = 'Selected Tier 2 Potions',
+    Tooltip = 'Selected Potions to Sacrifice',
+
+    Callback = function(value)
+        settings['Exchange']['Potions']['Tier3']['SelectedPotions'] = value
+        SaveConfig()
+    end
+})
+
 PotionExchange:AddToggle('enableAutoExchangePotionsT1', {
     Text = 'Exchange Potions (Tier 1)',
     Default = settings['Exchange']['Potions']['Tier1']['Enabled'],
@@ -4121,6 +4140,16 @@ PotionExchange:AddToggle('enableAutoExchangePotionsT2', {
 
     Callback = function(value)
         settings['Exchange']['Potions']['Tier2']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+PotionExchange:AddToggle('enableAutoExchangePotionsT3', {
+    Text = 'Exchange Potions (Tier 3)',
+    Default = settings['Exchange']['Potions']['Tier3']['Enabled'],
+
+    Callback = function(value)
+        settings['Exchange']['Potions']['Tier3']['Enabled'] = value
         SaveConfig()
     end
 })
@@ -4149,38 +4178,65 @@ local PotionResults = {
         ["LuckPotion2"] = "LuckPotion3",
         ["GhostPotion2"] = "GhostPotion3",
         ["DropPotion2"] = "DropPotion3"
+    },
+    ["Tier3"] = {
+        ["EnergyPotion3"] = "EnergyPotion4",
+        ["DamagePotion3"] = "DamagePotion4",
+        ["LuckPotion3"] = "LuckPotion4",
+        ["GhostPotion3"] = "GhostPotion4",
+        ["DropPotion3"] = "DropPotion4"
     }
 }
 
 task.spawn(function()
     while task.wait(0.2) and not Library.Unloaded do
-        if settings['Exchange']['Potions']['Tier1']['Enabled'] then
-            for _, potion in pairs(settings['Exchange']['Potions']['Tier1']['SelectedPotions']) do
-                if settings['Exchange']['Potions']['OnlyWhenFull'] then
-                    if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier1'][potion]) < 99  then
-                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
-                    end
-                else
-                    if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier1'][potion]) < 99 then
-                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
-                    end
-                end
-            end
-        end
-
-        if settings['Exchange']['Potions']['Tier2']['Enabled'] then
-            for _, potion in pairs(settings['Exchange']['Potions']['Tier2']['SelectedPotions']) do
-                if settings['Exchange']['Potions']['OnlyWhenFull'] then
-                    if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier2'][potion]) < 99 then
-                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
-                    end
-                else
-                    if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier2'][potion]) < 99 then
-                        FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
+        pcall(function()
+            if settings['Exchange']['Potions']['Tier1']['Enabled'] then
+                for _, potion in pairs(settings['Exchange']['Potions']['Tier1']['SelectedPotions']) do
+                    if settings['Exchange']['Potions']['OnlyWhenFull'] then
+                        if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier1'][potion]) < 99  then
+                            FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
+                        end
+                    else
+                        if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier1'][potion]) < 99 then
+                            FireBridge("ExchangeSystem", "Make", "Potion", "Tier 1", tostring(potion), 1)
+                        end
                     end
                 end
             end
-        end
+        end)
+        
+        pcall(function()
+            if settings['Exchange']['Potions']['Tier2']['Enabled'] then
+                for _, potion in pairs(settings['Exchange']['Potions']['Tier2']['SelectedPotions']) do
+                    if settings['Exchange']['Potions']['OnlyWhenFull'] then
+                        if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier2'][potion]) < 99 then
+                            FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
+                        end
+                    else
+                        if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier2'][potion]) < 99 then
+                            FireBridge("ExchangeSystem", "Make", "Potion", "Tier 2", tostring(potion), 1)
+                        end
+                    end
+                end
+            end
+        end)
+        
+        pcall(function()
+            if settings['Exchange']['Potions']['Tier3']['Enabled'] then
+                for _, potion in pairs(settings['Exchange']['Potions']['Tier3']['SelectedPotions']) do
+                    if settings['Exchange']['Potions']['OnlyWhenFull'] then
+                        if getItemAmount(potion) >= 95 and getItemAmount(PotionResults['Tier3'][potion]) < 99 then
+                            FireBridge("ExchangeSystem", "Make", "Potion", "Tier 3", tostring(potion), 1)
+                        end
+                    else
+                        if getItemAmount(potion) >= 5 and getItemAmount(PotionResults['Tier3'][potion]) < 99 then
+                            FireBridge("ExchangeSystem", "Make", "Potion", "Tier 3", tostring(potion), 1)
+                        end
+                    end
+                end
+            end
+        end)
     end
 end)
 
