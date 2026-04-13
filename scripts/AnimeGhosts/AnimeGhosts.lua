@@ -24,6 +24,7 @@ local Tabs = {
     ['GachaSpins'] = Window:AddTab('Gacha Spins'),
     ['Shops'] = Window:AddTab('Shops'),
     ['Upgrades'] = Window:AddTab('Upgrades'),
+    ['Stats'] = Window:AddTab('Stats'),
 	['UI Settings'] = Window:AddTab('UI Settings')
 }
 
@@ -163,6 +164,20 @@ local defaultSettings = {
             ['SelectedUpgrades'] = {'Energy', 'Damage', 'Ghost', 'CritDMG'},
             ['Enabled'] = false
         },
+    },
+    ['AutoStats'] = {
+        ['Easter'] = {
+            ['Enabled'] = false,
+            ['Level'] = 10
+        },
+        ['Cursed'] = {
+            ['Enabled'] = false,
+            ['Level'] = 10
+        },
+        ['Hero'] = {
+            ['Enabled'] = false,
+            ['Level'] = 10
+        }
     },
     ['Exchange'] = {
         ['Potions'] = {
@@ -3660,8 +3675,8 @@ RelicsUpgrades:AddDropdown('selectedRelicsUpgrades', {
     Default = settings['AutoUpgrades']['Relics']['SelectedRelics'],
     Multi = true,
 
-    Text = 'Selected Upgrades to Buy',
-    Tooltip = 'Selected Upgrades to Buy from Crew Mastery Upgrades',
+    Text = 'Selected Relics to Upgrade',
+    Tooltip = 'Selected Relics to keep upgrading',
 
     Callback = function(value)
         settings['AutoUpgrades']['Relics']['SelectedRelics'] = value
@@ -4718,6 +4733,263 @@ task.spawn(function()
                 end
             end
         end)
+    end
+end)
+
+
+function getStatsCost(stat)
+    local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+    local cost = 1
+
+    for _, statData in PlayerData.Stats[stat] do
+        if statData.Locked then
+            cost = cost + 1
+        end
+    end
+
+    return 10 * cost * (PlayerData.Gamepasses.VIP and 0.7 or 1)
+end
+
+local EasterStats = Tabs['Stats']:AddLeftGroupbox('Easter Stats')
+EasterStats:AddSlider('easterStatsLevel', {
+    Text = 'Stats Level',
+    Default = settings['AutoStats']['Easter']['Level'],
+    Min = 1,
+    Max = 10,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['AutoStats']['Easter']['Level'] = value
+        SaveConfig()
+    end
+})
+
+EasterStats:AddToggle('enableAutoStatsEaster', {
+    Text = 'Enable Auto Easter Stats',
+    Default = settings['AutoStats']['Easter']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoStats']['Easter']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.2) and not Library.Unloaded do
+        if settings['AutoStats']['Easter']['Enabled'] then
+            pcall(function()
+                local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local PlayerInventory = PlayerData and PlayerData.Inventory
+                local PlayerStats = PlayerData and PlayerData.Stats and PlayerData.Stats['Easter_Normal']
+                
+                local StatsDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StatsData"):WaitForChild("Easter")
+                local StatsData = require(StatsDataPath)
+                local StatsList = StatsData.Normal and StatsData.Normal.List
+                local StatsUpgradeCurrency = StatsData.Normal and StatsData.Normal.Currency
+                local TargetLevel = settings['AutoStats']['Easter']['Level']
+                local statsBridge = {}
+
+                if PlayerInventory and PlayerStats and StatsList then
+                    for statName, statData in pairs(StatsList) do
+                        statsBridge[statName] = 10
+
+                        local playerStat = PlayerStats[statName]
+                        
+                        local statLevel = playerStat['Level']
+                        local statLocked = playerStat['Locked']
+                        
+                        if statLevel < TargetLevel then
+                            if statLocked then
+                                FireBridge('StatsSystem', 'Lock', 'Easter', 'Normal', tostring(statName))
+
+                                if settings['AutoSpin']['LogSpins'] then
+                                    print("Unlocking Easter Stat: ", statName)
+                                end
+                            end
+
+                            if getItemAmount(StatsUpgradeCurrency) > getStatsCost('Easter_Normal') then
+                                FireBridge('StatsSystem', 'Spin', 'Easter', 'Normal', statsBridge)
+
+                                if not PlayerStats[statName].Locked and PlayerStats[statName].Level >= TargetLevel then
+                                    FireBridge('StatsSystem', 'Lock', 'Cursed', 'Normal', tostring(statName))
+                                end
+                            end
+                        else
+                            if not statLocked then
+                                FireBridge('StatsSystem', 'Lock', 'Easter', 'Normal', tostring(statName))
+
+                                if settings['AutoSpin']['LogSpins'] then
+                                    print("Locking Easter Stat: ", statName)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local CursedStats = Tabs['Stats']:AddRightGroupbox('Cursed Stats')
+CursedStats:AddSlider('cursedStatsLevel', {
+    Text = 'Stats Level',
+    Default = settings['AutoStats']['Cursed']['Level'],
+    Min = 1,
+    Max = 10,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['AutoStats']['Cursed']['Level'] = value
+        SaveConfig()
+    end
+})
+
+CursedStats:AddToggle('enableAutoStatsCursed', {
+    Text = 'Enable Auto Cursed Stats',
+    Default = settings['AutoStats']['Cursed']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoStats']['Cursed']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.2) and not Library.Unloaded do
+        if settings['AutoStats']['Cursed']['Enabled'] then
+            pcall(function()
+                local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local PlayerInventory = PlayerData and PlayerData.Inventory
+                local PlayerStats = PlayerData and PlayerData.Stats and PlayerData.Stats['Cursed_Normal']
+                
+                local StatsDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StatsData"):WaitForChild("Cursed")
+                local StatsData = require(StatsDataPath)
+                local StatsList = StatsData.Normal and StatsData.Normal.List
+                local StatsUpgradeCurrency = StatsData.Normal and StatsData.Normal.Currency
+                local TargetLevel = settings['AutoStats']['Cursed']['Level']
+                local statsBridge = {}
+
+                if PlayerInventory and PlayerStats and StatsList then
+                    for statName, statData in pairs(StatsList) do
+                        statsBridge[statName] = 10
+
+                        local playerStat = PlayerStats[statName]
+                        
+                        local statLevel = playerStat['Level']
+                        local statLocked = playerStat['Locked']
+                        
+                        if statLevel < TargetLevel then
+                            if statLocked then
+                                FireBridge('StatsSystem', 'Lock', 'Cursed', 'Normal', tostring(statName))
+
+                                if settings['AutoSpin']['LogSpins'] then
+                                    print("Unlocking Cursed Stat: ", statName)
+                                end
+                            end
+
+                            if getItemAmount(StatsUpgradeCurrency) > getStatsCost('Cursed_Normal') then
+                                FireBridge('StatsSystem', 'Spin', 'Cursed', 'Normal', statsBridge)
+
+                                if not PlayerStats[statName].Locked and PlayerStats[statName].Level >= TargetLevel then
+                                    FireBridge('StatsSystem', 'Lock', 'Cursed', 'Normal', tostring(statName))
+                                end
+                            end
+                        else
+                            if not statLocked then
+                                FireBridge('StatsSystem', 'Lock', 'Cursed', 'Normal', tostring(statName))
+
+                                if settings['AutoSpin']['LogSpins'] then
+                                    print("Locking Cursed Stat: ", statName)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local HeroStats = Tabs['Stats']:AddLeftGroupbox('Hero Stats')
+HeroStats:AddSlider('heroStatsLevel', {
+    Text = 'Stats Level',
+    Default = settings['AutoStats']['Hero']['Level'],
+    Min = 1,
+    Max = 10,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(value)
+        settings['AutoStats']['Hero']['Level'] = value
+        SaveConfig()
+    end
+})
+
+HeroStats:AddToggle('enableAutoStatsHero', {
+    Text = 'Enable Auto Hero Stats',
+    Default = settings['AutoStats']['Hero']['Enabled'],
+
+    Callback = function(value)
+        settings['AutoStats']['Hero']['Enabled'] = value
+        SaveConfig()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.2) and not Library.Unloaded do
+        if settings['AutoStats']['Hero']['Enabled'] then
+            pcall(function()
+                local PlayerData = ScriptLibrary and ScriptLibrary.PlayerData
+                local PlayerInventory = PlayerData and PlayerData.Inventory
+                local PlayerStats = PlayerData and PlayerData.Stats and PlayerData.Stats['Hero_Normal']
+                
+                local StatsDataPath = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Modules"):WaitForChild("Data"):WaitForChild("StatsData"):WaitForChild("Hero")
+                local StatsData = require(StatsDataPath)
+                local StatsList = StatsData.Normal and StatsData.Normal.List
+                local StatsUpgradeCurrency = StatsData.Normal and StatsData.Normal.Currency
+                local TargetLevel = settings['AutoStats']['Hero']['Level']
+                local statsBridge = {}
+
+                if PlayerInventory and PlayerStats and StatsList then
+                    for statName, statData in pairs(StatsList) do
+                        statsBridge[statName] = 10
+
+                        local playerStat = PlayerStats[statName]
+                        
+                        local statLevel = playerStat['Level']
+                        local statLocked = playerStat['Locked']
+                        
+                        if statLevel < TargetLevel then
+                            if statLocked then
+                                FireBridge('StatsSystem', 'Lock', 'Hero', 'Normal', tostring(statName))
+
+                                if settings['AutoSpin']['LogSpins'] then
+                                    print("Unlocking Hero Stat: ", statName)
+                                end
+                            end
+
+                            if getItemAmount(StatsUpgradeCurrency) > getStatsCost('Hero_Normal') then
+                                FireBridge('StatsSystem', 'Spin', 'Hero', 'Normal', statsBridge)
+
+                                if not PlayerStats[statName].Locked and PlayerStats[statName].Level >= TargetLevel then
+                                    FireBridge('StatsSystem', 'Lock', 'Cursed', 'Normal', tostring(statName))
+                                end
+                            end
+                        else
+                            if not statLocked then
+                                FireBridge('StatsSystem', 'Lock', 'Hero', 'Normal', tostring(statName))
+
+                                if settings['AutoSpin']['LogSpins'] then
+                                    print("Locking Hero Stat: ", statName)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
     end
 end)
 
