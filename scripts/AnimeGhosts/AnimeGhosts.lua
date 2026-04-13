@@ -5030,7 +5030,7 @@ task.spawn(function()
                                 FireBridge('StatsSystem', 'Spin', 'Hero', 'Normal', statsBridge)
 
                                 if not PlayerStats[statName].Locked and PlayerStats[statName].Level >= TargetLevel then
-                                    FireBridge('StatsSystem', 'Lock', 'Cursed', 'Normal', tostring(statName))
+                                    FireBridge('StatsSystem', 'Lock', 'Hero', 'Normal', tostring(statName))
                                 end
                             end
                         else
